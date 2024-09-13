@@ -5,7 +5,7 @@
 1. Install deps
 
 ```
-npm i @mercurial-finance/dynamic-amm-sdk @project-serum/anchor @solana/web3.js @solana/spl-token @solana/spl-token-registry
+npm i @mercurial-finance/dynamic-amm-sdk @coral-xyz/anchor @solana/web3.js @solana/spl-token @solana/spl-token-registry
 ```
 
 2. Install [bun](https://bun.sh/)
