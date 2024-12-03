@@ -11,6 +11,7 @@
     "binStep": 100,
     "feeBps": 200,
     "minPrice": 0.000001,
+    "maxPrice": 0.000003,
     "activationType": "slot",
     "activationPoint": null,
     "hasAlphaVault": false

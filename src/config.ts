@@ -26,6 +26,7 @@ export interface DlmmConfig {
   binStep: number;
   feeBps: number;
   minPrice: number;
+  maxPrice: number;
   activationType: string;
   activationPoint: number | null;
   hasAlphaVault: boolean;
