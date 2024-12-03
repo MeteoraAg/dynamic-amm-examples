@@ -1,6 +1,6 @@
 {
   "rpcUrl": "https://api.mainnet-beta.solana.com",
-  "dryRun": false,
+  "dryRun": true,
   "dynamicAmm": {
     "createToken": false,
     "tokenAAddress": "5mbK36SZ7J19An8jFochhQS4of8g6BwUjbeCSxBSoWdp",
