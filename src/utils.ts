@@ -1,6 +1,7 @@
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import { Keypair } from "@solana/web3.js";
 import * as fs from "fs";
+import { parseArgs } from "util";
 
 export function safeParseJsonFromFile<T>(filePath: string): T {
     try {
@@ -23,4 +24,24 @@ export function parseKeypairFromSecretKey(secretKey: string): Keypair {
     const keypairBytes = bs58.decode(secretKey);
     const keypair = Keypair.fromSecretKey(keypairBytes);
     return keypair;
+}
+
+export interface CliArguments {
+    // Config filepath
+    config: string | undefined;
+}
+
+export function parseCliArguments(): CliArguments {
+    const { values, positionals } = parseArgs({
+    args: Bun.argv,
+    options: {
+      config: {
+        type: 'string',
+      },
+    },
+    strict: true,
+    allowPositionals: true,
+  });
+
+  return values;
 }

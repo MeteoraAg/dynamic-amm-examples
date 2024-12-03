@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey } from ".";
+import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { createMint, createProgram, deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
@@ -8,18 +8,25 @@ import { BN } from "bn.js";
 import { ActivationType } from "@meteora-ag/alpha-vault";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
 
-const CONFIG_FILE_PATH = "./meteora_config.json";
+const DEFAULT_CONFIG_FILE_PATH = "./meteora_config.json";
 
 async function main() {
   console.log("Creating Permissionless Dynamic AMM pool...");
 
-  let config: MeteoraConfig = safeParseJsonFromFile(CONFIG_FILE_PATH);
+  const cliArguments = parseCliArguments();
+  let configFilePath = DEFAULT_CONFIG_FILE_PATH;
+  if (cliArguments.config) {
+    configFilePath = cliArguments.config!;
+  }
+  console.log(`> Using config file: ${configFilePath}`);
+
+  let config: MeteoraConfig = safeParseJsonFromFile(configFilePath);
   if (!process.env.PRIVATE_KEY) {
     throw new Error("Private key not provided in environment variables");
   }
   let keypair = parseKeypairFromSecretKey(process.env.PRIVATE_KEY!); 
 
-  console.log('--- Initializing with configuration ---')
+  console.log('Initializing with configuration...')
   console.log(`- Using RPC URL ${config.rpcUrl}`);
   console.log(`- Dry run = ${config.dryRun}`);
   console.log(`- Using payer ${keypair.publicKey} to execute commands`);
