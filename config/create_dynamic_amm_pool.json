@@ -1,6 +1,6 @@
 {
   "rpcUrl": "https://api.mainnet-beta.solana.com",
-  "dryRun": false,
+  "dryRun": true,
   "createBaseToken": false,
   "mintBaseTokenAmountLamport": "5000000",
   "baseMint": "3SPs18esTsMwMckUBwssHiQ1PqLFS26De693FdaNA8KN",

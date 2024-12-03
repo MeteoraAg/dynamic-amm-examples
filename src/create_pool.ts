@@ -39,20 +39,13 @@ async function main() {
 
   if (config.createBaseToken && !config.dryRun) {
     console.log('\n> Minting base token...');
-    baseMint = await createMint(connection, wallet.payer, wallet.publicKey, null, config.baseDecimals);
-
-    const walletBaseTokenATA = await getOrCreateAssociatedTokenAccount(connection, wallet.payer, baseMint, wallet.publicKey, true);
-
     if (!config.mintBaseTokenAmountLamport) {
       throw new Error("Missing mintBaseTokenAmountLamport in configuration");
     }
     const baseMintAmount = new BN(config.mintBaseTokenAmountLamport); 
 
-    await mintTo(
-      connection, wallet.payer, baseMint, walletBaseTokenATA.address, wallet.publicKey, baseMintAmount, [], {
-        commitment: DEFAULT_COMMITMENT_LEVEL
-      }
-    )
+    baseMint = await createAndMintToken(connection, wallet, config.baseDecimals, baseMintAmount);
+
     console.log(`>> Mint ${getDecimalizedAmount(baseMintAmount, config.baseDecimals)} token to payer wallet`);
   }  
   
@@ -61,11 +54,11 @@ async function main() {
 
   /// --------------------------------------------------------------------------
   if (config.dynamicAmm) {
-    await create_permissionless_dynamic_pool(config, connection, wallet, baseMint, quoteMint);
+    await createPermissionlessDynamicPool(config, connection, wallet, baseMint, quoteMint);
   }
 }
 
-async function create_permissionless_dynamic_pool(config: MeteoraConfig, connection: Connection, wallet: Wallet, baseMint: PublicKey, quoteMint: PublicKey) {
+async function createPermissionlessDynamicPool(config: MeteoraConfig, connection: Connection, wallet: Wallet, baseMint: PublicKey, quoteMint: PublicKey) {
   if (!config.dynamicAmm) {
     throw new Error("Missing dynamic amm configuration");
   }
@@ -125,5 +118,18 @@ async function create_permissionless_dynamic_pool(config: MeteoraConfig, connect
     console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
   }
 }
+
+async function createAndMintToken(connection: Connection, wallet: Wallet, mintDecimals: number, mintAmountLamport: BN): Promise<PublicKey> {
+  const mint = await createMint(connection, wallet.payer, wallet.publicKey, null, mintDecimals);
+
+  const walletTokenATA = await getOrCreateAssociatedTokenAccount(connection, wallet.payer, mint, wallet.publicKey, true);
+  await mintTo(
+    connection, wallet.payer, mint, walletTokenATA.address, wallet.publicKey, mintAmountLamport, [], {
+      commitment: DEFAULT_COMMITMENT_LEVEL
+    }
+  )
+
+  return mint;
+} 
 
 main();
