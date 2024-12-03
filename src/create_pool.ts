@@ -1,5 +1,5 @@
-import { Connection, PublicKey } from "@solana/web3.js";
-import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, getDecimalizedAmount, getAmountInLamports } from ".";
+import { Connection, PublicKey, sendAndConfirmTransaction } from "@solana/web3.js";
+import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, getDecimalizedAmount, getAmountInLamports} from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { createProgram, deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
@@ -7,11 +7,11 @@ import { NATIVE_MINT, createMint, getOrCreateAssociatedTokenAccount, mintTo } fr
 import { BN } from "bn.js";
 import { ActivationType } from "@meteora-ag/alpha-vault";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
-import DLMM from "@meteora-ag/dlmm";
+import DLMM, { LBCLMM_PROGRAM_IDS, deriveCustomizablePermissionlessLbPair } from "@meteora-ag/dlmm";
+import{ ActivationType as DlmmActivationType} from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
 
 async function main() {
-
   const cliArguments = parseCliArguments();
   if (!cliArguments.config) {
     throw new Error("Please provide a config file path to --config flag");
@@ -57,7 +57,7 @@ async function main() {
   /// --------------------------------------------------------------------------
   if (config.dynamicAmm && !config.dlmm) {
     await createPermissionlessDynamicPool(config, connection, wallet, baseMint, quoteMint);
-  } else if (config.dlmm && config.dynamicAmm) {
+  } else if (config.dlmm && !config.dynamicAmm) {
     await createPermissionlessDlmmPool(config, connection, wallet, baseMint, quoteMint);
   } else if (config.dynamicAmm && config.dlmm) {
     throw new Error("Either provide only Dynamic AMM or DLMM configuration");
@@ -99,7 +99,7 @@ async function createPermissionlessDynamicPool(config: MeteoraConfig, connection
   console.log(`- Using activationPoint = ${customizeParam.activationPoint}`);
   console.log(`- Using hasAlphaVault = ${customizeParam.hasAlphaVault}`);
 
-  const initalizeTx = await AmmImpl.createCustomizablePermissionlessConstantProductPool(
+  const rawTx = await AmmImpl.createCustomizablePermissionlessConstantProductPool(
     connection,
     wallet.publicKey,
     baseMint,
@@ -117,12 +117,13 @@ async function createPermissionlessDynamicPool(config: MeteoraConfig, connection
   console.log(`\n> Pool address: ${poolKey}`);
 
   if (!config.dryRun) {
-    initalizeTx.sign(wallet.payer);
-
     console.log(`>> Sending transaction...`);
-    const txHash = await connection.sendRawTransaction(initalizeTx.serialize());
-    await connection.confirmTransaction(txHash, DEFAULT_COMMITMENT_LEVEL);
-
+    const txHash = await sendAndConfirmTransaction(connection, rawTx, [
+      wallet.payer,
+    ]).catch(err => {
+      console.error(err);
+      throw err;
+    });
     console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
   }
 }
@@ -132,9 +133,29 @@ async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: C
     throw new Error("Missing DLMM configuration");
   }
   console.log("\n> Initializing Permissionless DLMM pool...");
-  const binStep = config.dlmm.binStep;
-  const toLamportMultiplier = new Decimal(10 ** (config.baseDecimals - config.quoteDecimals));
 
+  const binStep = config.dlmm.binStep;
+  const feeBps = config.dlmm.feeBps;
+  const hasAlphaVault = config.dlmm.hasAlphaVault;
+  const activationPoint = config.dlmm.activationPoint;
+
+  let activationType = DlmmActivationType.Timestamp;
+  if (config.dlmm.activationType == "timestamp") {
+    activationType = DlmmActivationType.Timestamp;
+  } else if (config.dlmm.activationType == "slot") {
+    activationType = DlmmActivationType.Slot;
+  } else {
+    throw new Error(`Invalid activation type ${config.dlmm.activationType}`);
+  }
+
+  console.log(`- Using binStep = ${binStep}`);
+  console.log(`- Using feeBps = ${feeBps}`);
+  console.log(`- Using minPrice = ${config.dlmm.minPrice}`);
+  console.log(`- Using activationType = ${config.dlmm.activationType}`);
+  console.log(`- Using activationPoint = ${config.dlmm.activationPoint}`);
+  console.log(`- Using hasAlphaVault = ${config.dlmm.hasAlphaVault}`);
+
+  const toLamportMultiplier = new Decimal(10 ** (config.baseDecimals - config.quoteDecimals));
 
   const minBinId = DLMM.getBinIdFromPrice(
     new Decimal(config.dlmm.minPrice).mul(toLamportMultiplier),
@@ -142,9 +163,27 @@ async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: C
     false
   );
 
-  // DLMM.createCustomizablePermissionlessLbPair(
-  //   connection, binStep, baseMint, quoteMint, new BN(minBinId.toString())
-  // )
+  const rawTx = await DLMM.createCustomizablePermissionlessLbPair(
+    connection, new BN(binStep), baseMint, quoteMint, new BN(minBinId.toString()), new BN(feeBps), activationType, hasAlphaVault, wallet.publicKey, activationPoint, {
+      cluster: "mainnet-beta"
+    } 
+  )
+
+  let pairKey: PublicKey;
+  [pairKey] = deriveCustomizablePermissionlessLbPair(baseMint, quoteMint, new PublicKey(LBCLMM_PROGRAM_IDS["mainnet-beta"]));
+  
+  console.log(`\n> Pool address: ${pairKey}`);
+
+  if (!config.dryRun) {
+    console.log(`>> Sending transaction...`);
+    let txHash = await sendAndConfirmTransaction(connection, rawTx, [
+      wallet.payer,
+    ]).catch((e) => {
+      console.error(e);
+      throw e;
+    });
+    console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
+  }
 }
 
 async function createAndMintToken(connection: Connection, wallet: Wallet, mintDecimals: number, mintAmountLamport: BN): Promise<PublicKey> {
