@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments } from ".";
+import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, DEFAULT_CONFIG_FILE_PATH } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { createMint, createProgram, deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
@@ -8,10 +8,7 @@ import { BN } from "bn.js";
 import { ActivationType } from "@meteora-ag/alpha-vault";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
 
-const DEFAULT_CONFIG_FILE_PATH = "./meteora_config.json";
-
 async function main() {
-  console.log("Creating Permissionless Dynamic AMM pool...");
 
   const cliArguments = parseCliArguments();
   let configFilePath = DEFAULT_CONFIG_FILE_PATH;
@@ -26,7 +23,7 @@ async function main() {
   }
   let keypair = parseKeypairFromSecretKey(process.env.PRIVATE_KEY!); 
 
-  console.log('Initializing with configuration...')
+  console.log('\n> Initializing with general configuration...')
   console.log(`- Using RPC URL ${config.rpcUrl}`);
   console.log(`- Dry run = ${config.dryRun}`);
   console.log(`- Using payer ${keypair.publicKey} to execute commands`);
@@ -37,6 +34,8 @@ async function main() {
     commitment: connection.commitment
   });
 
+  /// --------------------------------------------------------------------------
+  console.log("\n> Initializing Permissionless Dynamic AMM pool...");
   if (!config.dynamicAmm) {
     throw new Error("Missing dynamic_amm configuration");
   }
@@ -96,7 +95,7 @@ async function main() {
     createProgram(connection).ammProgram.programId,
   );
 
-  console.log(`> Pool address: ${poolKey}`);
+  console.log(`\n> Pool address: ${poolKey}`);
 
   if (!config.dryRun) {
     initalizeTx.sign(wallet.payer);
