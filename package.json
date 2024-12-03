@@ -3,16 +3,23 @@
   "version": "1.1.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-dynamic-amm-pool": "bun run src/create_permissionless_dynamic_amm_pool.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
-    "@mercurial-finance/dynamic-amm-sdk": "^1.1.18",
+    "@mercurial-finance/dynamic-amm-sdk": "^1.1.19",
+    "@meteora-ag/alpha-vault": "^1.1.4",
+    "@meteora-ag/dlmm": "^1.2.3",
     "@solana/spl-token": "^0.4.8",
     "@solana/spl-token-registry": "^0.2.4574",
-    "@solana/web3.js": "^1.95.3"
+    "@solana/web3.js": "^1.95.3",
+    "bn.js": "^5.2.1"
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@types/bun": "^1.1.14"
+  }
 }

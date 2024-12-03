@@ -1,0 +1,15 @@
+{
+  "rpcUrl": "https://api.mainnet-beta.solana.com",
+  "dryRun": false,
+  "dynamicAmm": {
+    "createToken": false,
+    "tokenAAddress": "5mbK36SZ7J19An8jFochhQS4of8g6BwUjbeCSxBSoWdp",
+    "tokenADecimals": 6,
+    "tokenAAmount": "5000000",
+    "tokenBAmount": "10000000",
+    "tradeFeeNumerator": 2500,
+    "activationType": "timestamp",
+    "activationPoint": null,
+    "hasAlphaVault": false
+  }
+}
