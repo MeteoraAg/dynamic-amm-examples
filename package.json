@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "create-dynamic-amm-pool": "bun run src/create_permissionless_dynamic_amm_pool.ts",
-    "create-permissionless-dlmm-pool": "bun run src/create_permissionless_dlmm_pool.ts"
+    "create-dynamic-amm-pool": "bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool.json"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",

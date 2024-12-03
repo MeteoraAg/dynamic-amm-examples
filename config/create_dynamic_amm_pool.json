@@ -1,0 +1,18 @@
+{
+  "rpcUrl": "https://api.mainnet-beta.solana.com",
+  "dryRun": false,
+  "createBaseToken": false,
+  "mintBaseTokenAmountLamport": "5000000",
+  "baseMint": "3SPs18esTsMwMckUBwssHiQ1PqLFS26De693FdaNA8KN",
+  "quoteMint": "So11111111111111111111111111111111111111112",
+  "baseDecimals": 6,
+  "quoteDecimals": 9,
+  "dynamicAmm": {
+    "baseAmountLamport": "4000000",
+    "quoteAmountLamport": "1000000",
+    "tradeFeeNumerator": 2500,
+    "activationType": "timestamp",
+    "activationPoint": null,
+    "hasAlphaVault": false
+  }
+}

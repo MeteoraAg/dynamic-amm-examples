@@ -2,6 +2,7 @@ import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import { Keypair } from "@solana/web3.js";
 import * as fs from "fs";
 import { parseArgs } from "util";
+import {BN } from "bn.js";
 
 export function safeParseJsonFromFile<T>(filePath: string): T {
     try {
@@ -24,6 +25,14 @@ export function parseKeypairFromSecretKey(secretKey: string): Keypair {
     const keypairBytes = bs58.decode(secretKey);
     const keypair = Keypair.fromSecretKey(keypairBytes);
     return keypair;
+}
+
+export function getAmountInLamports(amount: string, decimals: number): BN {
+    return new BN(amount) * new BN(10 ** decimals)
+}
+
+export function getDecimalizedAmount(amountLamport: BN, decimals: number): BN {
+    return amountLamport / new BN(10 ** decimals)
 }
 
 export interface CliArguments {

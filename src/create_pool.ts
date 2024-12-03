@@ -1,9 +1,9 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, DEFAULT_CONFIG_FILE_PATH } from ".";
+import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, getDecimalizedAmount } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
-import { createMint, createProgram, deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
-import { NATIVE_MINT } from "@solana/spl-token";
+import { createProgram, deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
+import { NATIVE_MINT, createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
 import { BN } from "bn.js";
 import { ActivationType } from "@meteora-ag/alpha-vault";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
@@ -11,10 +11,10 @@ import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/t
 async function main() {
 
   const cliArguments = parseCliArguments();
-  let configFilePath = DEFAULT_CONFIG_FILE_PATH;
-  if (cliArguments.config) {
-    configFilePath = cliArguments.config!;
+  if (!cliArguments.config) {
+    throw new Error("Please provide a config file path to --config flag");
   }
+  const configFilePath = cliArguments.config!;
   console.log(`> Using config file: ${configFilePath}`);
 
   let config: MeteoraConfig = safeParseJsonFromFile(configFilePath);
@@ -34,30 +34,48 @@ async function main() {
     commitment: connection.commitment
   });
 
-  /// --------------------------------------------------------------------------
-  console.log("\n> Initializing Permissionless Dynamic AMM pool...");
-  if (!config.dynamicAmm) {
-    throw new Error("Missing dynamic_amm configuration");
-  }
- 
-  let tokenA: PublicKey;
-  if (config.dynamicAmm.createToken == true) {
-    throw new Error("Minting new token not supported");
-  } else {
-    if (!config.dynamicAmm.tokenAAddress == null) {
-      throw new Error("Token address not provided in configuration file");
+  let baseMint = new PublicKey(config.baseMint);
+  let quoteMint = new PublicKey(config.quoteMint);
+
+  if (config.createBaseToken && !config.dryRun) {
+    console.log('\n> Minting base token...');
+    baseMint = await createMint(connection, wallet.payer, wallet.publicKey, null, config.baseDecimals);
+
+    const walletBaseTokenATA = await getOrCreateAssociatedTokenAccount(connection, wallet.payer, baseMint, wallet.publicKey, true);
+
+    if (!config.mintBaseTokenAmountLamport) {
+      throw new Error("Missing mintBaseTokenAmountLamport in configuration");
     }
-    tokenA = new PublicKey(config.dynamicAmm.tokenAAddress!);
+    const baseMintAmount = new BN(config.mintBaseTokenAmountLamport); 
+
+    await mintTo(
+      connection, wallet.payer, baseMint, walletBaseTokenATA.address, wallet.publicKey, baseMintAmount, [], {
+        commitment: DEFAULT_COMMITMENT_LEVEL
+      }
+    )
+    console.log(`>> Mint ${getDecimalizedAmount(baseMintAmount, config.baseDecimals)} token to payer wallet`);
+  }  
+  
+  console.log(`- Using base token mint ${baseMint.toString()}`);
+  console.log(`- Using quote token mint ${quoteMint.toString()}`);
+
+  /// --------------------------------------------------------------------------
+  if (config.dynamicAmm) {
+    await create_permissionless_dynamic_pool(config, connection, wallet, baseMint, quoteMint);
   }
+}
 
-  console.log(`- Using token A address ${tokenA.toString()}`);
-  console.log(`- Using token B address ${NATIVE_MINT.toString()}`);
+async function create_permissionless_dynamic_pool(config: MeteoraConfig, connection: Connection, wallet: Wallet, baseMint: PublicKey, quoteMint: PublicKey) {
+  if (!config.dynamicAmm) {
+    throw new Error("Missing dynamic amm configuration");
+  }
+  console.log("\n> Initializing Permissionless Dynamic AMM pool...");
 
-  const tokenAAmount = new BN(config.dynamicAmm.tokenAAmount);
-  const tokenBAmount = new BN(config.dynamicAmm.tokenBAmount);
+  const baseAmount = new BN(config.dynamicAmm.baseAmountLamport);
+  const quoteAmount = new BN(config.dynamicAmm.quoteAmountLamport);
 
-  console.log(`- Using token A amount ${tokenAAmount.toString()}`);
-  console.log(`- Using token B amount ${tokenBAmount.toString()}`);
+  console.log(`- Using token A amount ${getDecimalizedAmount(baseAmount, config.baseDecimals)}`);
+  console.log(`- Using token B amount ${getDecimalizedAmount(quoteAmount, config.quoteDecimals)}`);
 
   let activationType = ActivationType.TIMESTAMP;
   if (config.dynamicAmm.activationType == "timestamp") {
@@ -83,15 +101,15 @@ async function main() {
   const initalizeTx = await AmmImpl.createCustomizablePermissionlessConstantProductPool(
     connection,
     wallet.publicKey,
-    tokenA,
-    NATIVE_MINT,
-    tokenAAmount,
-    tokenBAmount,
+    baseMint,
+    quoteMint,
+    baseAmount,
+    quoteAmount,
     customizeParam
   );
   const poolKey = deriveCustomizablePermissionlessConstantProductPoolAddress(
-    tokenA,
-    NATIVE_MINT,
+    baseMint,
+    quoteMint,
     createProgram(connection).ammProgram.programId,
   );
 
@@ -102,11 +120,10 @@ async function main() {
 
     console.log(`>> Sending transaction...`);
     const txHash = await connection.sendRawTransaction(initalizeTx.serialize());
-    await connection.confirmTransaction(txHash, "finalized");
+    await connection.confirmTransaction(txHash, DEFAULT_COMMITMENT_LEVEL);
 
     console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
   }
-
 }
 
 main();
