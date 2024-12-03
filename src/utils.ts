@@ -3,6 +3,7 @@ import { Keypair } from "@solana/web3.js";
 import * as fs from "fs";
 import { parseArgs } from "util";
 import {BN } from "bn.js";
+import Decimal from "decimal.js";
 
 export function safeParseJsonFromFile<T>(filePath: string): T {
     try {
@@ -27,8 +28,10 @@ export function parseKeypairFromSecretKey(secretKey: string): Keypair {
     return keypair;
 }
 
-export function getAmountInLamports(amount: string, decimals: number): BN {
-    return new BN(amount) * new BN(10 ** decimals)
+export function getAmountInLamports(amount: number | string, decimals: number): BN {
+    const amountD = new Decimal(amount);
+    const amountLamports = amountD.mul(new Decimal(10 ** decimals));
+    return new BN(amountLamports.toString());
 }
 
 export function getDecimalizedAmount(amountLamport: BN, decimals: number): BN {

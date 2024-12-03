@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, getDecimalizedAmount } from ".";
+import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, getDecimalizedAmount, getAmountInLamports } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { createProgram, deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
@@ -7,6 +7,8 @@ import { NATIVE_MINT, createMint, getOrCreateAssociatedTokenAccount, mintTo } fr
 import { BN } from "bn.js";
 import { ActivationType } from "@meteora-ag/alpha-vault";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
+import DLMM from "@meteora-ag/dlmm";
+import Decimal from "decimal.js";
 
 async function main() {
 
@@ -39,22 +41,28 @@ async function main() {
 
   if (config.createBaseToken && !config.dryRun) {
     console.log('\n> Minting base token...');
-    if (!config.mintBaseTokenAmountLamport) {
-      throw new Error("Missing mintBaseTokenAmountLamport in configuration");
+    if (!config.mintBaseTokenAmount) {
+      throw new Error("Missing mintBaseTokenAmount in configuration");
     }
-    const baseMintAmount = new BN(config.mintBaseTokenAmountLamport); 
+    const baseMintAmount = getAmountInLamports(config.mintBaseTokenAmount, config.baseDecimals); 
 
     baseMint = await createAndMintToken(connection, wallet, config.baseDecimals, baseMintAmount);
 
-    console.log(`>> Mint ${getDecimalizedAmount(baseMintAmount, config.baseDecimals)} token to payer wallet`);
+    console.log(`>> Mint ${config.mintBaseTokenAmount} token to payer wallet`);
   }  
   
   console.log(`- Using base token mint ${baseMint.toString()}`);
   console.log(`- Using quote token mint ${quoteMint.toString()}`);
 
   /// --------------------------------------------------------------------------
-  if (config.dynamicAmm) {
+  if (config.dynamicAmm && !config.dlmm) {
     await createPermissionlessDynamicPool(config, connection, wallet, baseMint, quoteMint);
+  } else if (config.dlmm && config.dynamicAmm) {
+    await createPermissionlessDlmmPool(config, connection, wallet, baseMint, quoteMint);
+  } else if (config.dynamicAmm && config.dlmm) {
+    throw new Error("Either provide only Dynamic AMM or DLMM configuration");
+  } else {
+    throw new Error("Must provide Dynamic AMM or DLMM configuration");
   }
 }
 
@@ -64,11 +72,11 @@ async function createPermissionlessDynamicPool(config: MeteoraConfig, connection
   }
   console.log("\n> Initializing Permissionless Dynamic AMM pool...");
 
-  const baseAmount = new BN(config.dynamicAmm.baseAmountLamport);
-  const quoteAmount = new BN(config.dynamicAmm.quoteAmountLamport);
+  const baseAmount = getAmountInLamports(config.dynamicAmm.baseAmount, config.baseDecimals);
+  const quoteAmount = getAmountInLamports(config.dynamicAmm.quoteAmount, config.quoteDecimals);
 
-  console.log(`- Using token A amount ${getDecimalizedAmount(baseAmount, config.baseDecimals)}`);
-  console.log(`- Using token B amount ${getDecimalizedAmount(quoteAmount, config.quoteDecimals)}`);
+  console.log(`- Using token A amount ${config.dynamicAmm.baseAmount}, in lamports = ${baseAmount}`);
+  console.log(`- Using token B amount ${config.dynamicAmm.quoteAmount}, in lamports = ${quoteAmount}`);
 
   let activationType = ActivationType.TIMESTAMP;
   if (config.dynamicAmm.activationType == "timestamp") {
@@ -117,6 +125,26 @@ async function createPermissionlessDynamicPool(config: MeteoraConfig, connection
 
     console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
   }
+}
+
+async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: Connection, wallet: Wallet, baseMint: PublicKey, quoteMint: PublicKey) {
+  if (!config.dlmm) {
+    throw new Error("Missing DLMM configuration");
+  }
+  console.log("\n> Initializing Permissionless DLMM pool...");
+  const binStep = config.dlmm.binStep;
+  const toLamportMultiplier = new Decimal(10 ** (config.baseDecimals - config.quoteDecimals));
+
+
+  const minBinId = DLMM.getBinIdFromPrice(
+    new Decimal(config.dlmm.minPrice).mul(toLamportMultiplier),
+    binStep,
+    false
+  );
+
+  // DLMM.createCustomizablePermissionlessLbPair(
+  //   connection, binStep, baseMint, quoteMint, new BN(minBinId.toString())
+  // )
 }
 
 async function createAndMintToken(connection: Connection, wallet: Wallet, mintDecimals: number, mintAmountLamport: BN): Promise<PublicKey> {

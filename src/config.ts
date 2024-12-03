@@ -4,7 +4,7 @@ export interface MeteoraConfig {
   rpcUrl: string;
   dryRun: boolean;
   createBaseToken: boolean;
-  mintBaseTokenAmountLamport: number | string | null;
+  mintBaseTokenAmount: number | string | null;
   baseMint: string;
   quoteMint: string;
   baseDecimals: number;
@@ -14,8 +14,8 @@ export interface MeteoraConfig {
 }
 
 export interface DynamicAmmConfig {
-  baseAmountLamport: number | string;
-  quoteAmountLamport: number | string;
+  baseAmount: number | string;
+  quoteAmount: number | string;
   tradeFeeNumerator: number;
   activationType: string;
   activationPoint: number | null;
@@ -23,5 +23,7 @@ export interface DynamicAmmConfig {
 }
 
 export interface DlmmConfig {
-
+  binStep: number;
+  feeBps: number;
+  minPrice: number;
 }
