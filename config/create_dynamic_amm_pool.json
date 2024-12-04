@@ -1,6 +1,7 @@
 {
   "rpcUrl": "https://api.mainnet-beta.solana.com",
   "dryRun": true,
+  "keypairFilePath": "keypair.json",
   "createBaseToken": false,
   "mintBaseTokenAmount": "5",
   "baseMint": "3SPs18esTsMwMckUBwssHiQ1PqLFS26De693FdaNA8KN",

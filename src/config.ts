@@ -3,6 +3,7 @@
 export interface MeteoraConfig {
   rpcUrl: string;
   dryRun: boolean;
+  keypairFilePath: string;
   createBaseToken: boolean;
   mintBaseTokenAmount: number | string | null;
   baseMint: string;

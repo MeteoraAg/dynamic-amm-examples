@@ -8,7 +8,7 @@ Then install the dependencies by running the command `bun install`
 
 ## Configuration
 There are a various of config file that can be found at `config` directory that we need to carefully take a look first. It contains all the configurations required to run the scripts.
-Also we need to provide the private key for the payer wallet through environment variable `PRIVATE_KEY` in `.env` file. 
+Also we need to provide the keypair for the payer wallet in `keypair.json` file. 
 
 ### General configuration
 - `rpcUrl`: Solana Mainnet RPC URL to get data and send transactions.
