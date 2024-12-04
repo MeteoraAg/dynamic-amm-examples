@@ -92,7 +92,7 @@ async function createPermissionlessDynamicPool(config: MeteoraConfig, connection
     tradeFeeNumerator: config.dynamicAmm.tradeFeeNumerator,
     activationType: activationType,
     activationPoint: config.dynamicAmm.activationPoint,
-    hasAlphaVault: config.dynamicAmm.hasAlphaVault,
+    hasAlphaVault: config.hasAlphaVault,
     padding: Array(90).fill(0)
   };
   console.log(`- Using tradeFeeNumerator = ${customizeParam.tradeFeeNumerator}`);
@@ -140,7 +140,7 @@ async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: C
 
   const binStep = config.dlmm.binStep;
   const feeBps = config.dlmm.feeBps;
-  const hasAlphaVault = config.dlmm.hasAlphaVault;
+  const hasAlphaVault = config.hasAlphaVault;
   const activationPoint = config.dlmm.activationPoint;
 
   let activationType = DlmmActivationType.Timestamp;
@@ -157,7 +157,7 @@ async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: C
   console.log(`- Using minPrice = ${config.dlmm.minPrice}`);
   console.log(`- Using activationType = ${config.dlmm.activationType}`);
   console.log(`- Using activationPoint = ${config.dlmm.activationPoint}`);
-  console.log(`- Using hasAlphaVault = ${config.dlmm.hasAlphaVault}`);
+  console.log(`- Using hasAlphaVault = ${hasAlphaVault}`);
 
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
   const toLamportMultiplier = new Decimal(10 ** (config.baseDecimals - quoteDecimals));
@@ -188,6 +188,7 @@ async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: C
       throw e;
     });
     console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
+
   } else {
     console.log(`> Simulating init pool tx...`);
     await runSimulateTransaction(connection, wallet, [rawTx]);

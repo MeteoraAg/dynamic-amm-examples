@@ -7,13 +7,12 @@
   "baseMint": "3B5wuUrMEi5yATD7on46hKfej3pfmd7t1RKgrsN3pump",
   "quoteSymbol": "SOL",
   "baseDecimals": 6,
-  "hasAlphaVault": false,
-  "dlmm": {
-    "binStep": 20,
-    "feeBps": 200,
-    "minPrice": 0.0000017,
-    "maxPrice": 0.000003,
-    "activationType": "slot",
+  "hasAlphaVault": true,
+  "dynamicAmm": {
+    "baseAmount": "5",
+    "quoteAmount": "0.001",
+    "tradeFeeNumerator": 2500,
+    "activationType": "timestamp",
     "activationPoint": null
   }
 }

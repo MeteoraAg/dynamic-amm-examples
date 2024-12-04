@@ -9,6 +9,7 @@ export interface MeteoraConfig {
   baseMint: string;
   quoteSymbol: string;
   baseDecimals: number;
+  hasAlphaVault: boolean;
   dynamicAmm: DynamicAmmConfig | null;
   dlmm: DlmmConfig | null;
 }
@@ -19,7 +20,6 @@ export interface DynamicAmmConfig {
   tradeFeeNumerator: number;
   activationType: string;
   activationPoint: number | null;
-  hasAlphaVault: boolean;
 }
 
 export interface DlmmConfig {
@@ -29,5 +29,4 @@ export interface DlmmConfig {
   maxPrice: number;
   activationType: string;
   activationPoint: number | null;
-  hasAlphaVault: boolean;
 }
