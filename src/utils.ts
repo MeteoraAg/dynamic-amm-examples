@@ -1,10 +1,12 @@
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import * as fs from "fs";
 import { parseArgs } from "util";
 import { BN } from "bn.js";
 import Decimal from "decimal.js";
 import { SOL_TOKEN_DECIMALS, SOL_TOKEN_MINT, USDC_TOKEN_DECIMALS, USDC_TOKEN_MINT } from "./constants";
+import { Wallet } from "@coral-xyz/anchor";
+import { simulateTransaction } from "@coral-xyz/anchor/dist/cjs/utils/rpc";
 
 export function safeParseJsonFromFile<T>(filePath: string): T {
     try {
@@ -57,6 +59,29 @@ export function getQuoteDecimals(quoteSymbol: string): number {
     } else {
         throw new Error(`Unsupported quote symbol: ${quoteSymbol}`);
     }
+}
+
+export async function runSimulateTransaction(
+    connection: Connection,
+    wallet: Wallet,
+    txs: Array<Transaction>
+) {
+    const { blockhash, lastValidBlockHeight } =
+    await connection.getLatestBlockhash();
+
+    const transaction = new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: wallet.publicKey,
+    }).add(...txs);
+
+    let simulateResp = await simulateTransaction(connection, transaction, [wallet.payer]);
+    if (simulateResp.value.err) {
+      console.error(">>> Simulate transaction failed:", simulateResp.value.err);
+      throw simulateResp.value.err;
+    }
+
+    console.log(">>> Simulated transaction successfully");
 }
 
 export interface CliArguments {

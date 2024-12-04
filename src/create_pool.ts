@@ -1,9 +1,9 @@
 import { Connection, PublicKey, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, getDecimalizedAmount, getAmountInLamports, getQuoteMint, getQuoteDecimals, safeParseKeypairFromFile } from ".";
+import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseCliArguments, getAmountInLamports, getQuoteMint, getQuoteDecimals, safeParseKeypairFromFile, runSimulateTransaction } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { createProgram, deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
-import { NATIVE_MINT, createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
+import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
 import { BN } from "bn.js";
 import { ActivationType } from "@meteora-ag/alpha-vault";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
@@ -127,22 +127,8 @@ async function createPermissionlessDynamicPool(config: MeteoraConfig, connection
     });
     console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
   } else {
-    const { blockhash, lastValidBlockHeight } =
-    await connection.getLatestBlockhash();
-
-    const transaction = new Transaction({
-      blockhash,
-      lastValidBlockHeight,
-      feePayer: wallet.publicKey,
-    }).add(rawTx);
-
-    let simulateResp = await simulateTransaction(connection, transaction, [wallet.payer]);
-    if (simulateResp.value.err) {
-      console.error("Simulate transaction failed:", simulateResp.value.err);
-      throw simulateResp.value.err;
-    }
-
-    console.log(">>> Simulating init pool transaction succeeded");
+    console.log(`> Simulating init pool tx...`);
+    await runSimulateTransaction(connection, wallet, [rawTx]);
   }
 }
 
@@ -203,26 +189,12 @@ async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: C
     });
     console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
   } else {
-    const { blockhash, lastValidBlockHeight } =
-    await connection.getLatestBlockhash();
-
-    const transaction = new Transaction({
-      blockhash,
-      lastValidBlockHeight,
-      feePayer: wallet.publicKey,
-    }).add(rawTx);
-
-    let simulateResp = await simulateTransaction(connection, transaction, [wallet.payer]);
-    console.log(simulateResp);
-    if (simulateResp.value.err) {
-      console.error("Simulate transaction failed:", simulateResp.value.err);
-      throw simulateResp.value.err;
-    }
-    console.log(">>> Simulating init pool transaction succeeded");
+    console.log(`> Simulating init pool tx...`);
+    await runSimulateTransaction(connection, wallet, [rawTx]);
   }
 }
 
-// async function seedLiquidity
+// async function seedLiquidityDlmm(connection: Connection, wallet: Wallet, )
 
 async function createAndMintToken(connection: Connection, wallet: Wallet, mintDecimals: number, mintAmountLamport: BN): Promise<PublicKey> {
   const mint = await createMint(connection, wallet.payer, wallet.publicKey, null, mintDecimals);
