@@ -4,7 +4,7 @@
   "keypairFilePath": "keypair.json",
   "createBaseToken": false,
   "mintBaseTokenAmount": "5",
-  "baseMint": "3SPs18esTsMwMckUBwssHiQ1PqLFS26De693FdaNA8KN",
+  "baseMint": "3B5wuUrMEi5yATD7on46hKfej3pfmd7t1RKgrsN3pump",
   "quoteSymbol": "SOL",
   "baseDecimals": 6,
   "dynamicAmm": {

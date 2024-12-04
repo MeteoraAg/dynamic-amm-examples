@@ -1,4 +1,4 @@
-import { Connection, PublicKey, sendAndConfirmTransaction } from "@solana/web3.js";
+import { Connection, PublicKey, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
 import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, getDecimalizedAmount, getAmountInLamports, getQuoteMint, getQuoteDecimals, safeParseKeypairFromFile } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
@@ -10,6 +10,7 @@ import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/t
 import DLMM, { LBCLMM_PROGRAM_IDS, deriveCustomizablePermissionlessLbPair } from "@meteora-ag/dlmm";
 import { ActivationType as DlmmActivationType } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
+import { simulateTransaction } from "@coral-xyz/anchor/dist/cjs/utils/rpc";
 
 async function main() {
   const cliArguments = parseCliArguments();
@@ -125,6 +126,23 @@ async function createPermissionlessDynamicPool(config: MeteoraConfig, connection
       throw err;
     });
     console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
+  } else {
+    const { blockhash, lastValidBlockHeight } =
+    await connection.getLatestBlockhash();
+
+    const transaction = new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: wallet.publicKey,
+    }).add(rawTx);
+
+    let simulateResp = await simulateTransaction(connection, transaction, [wallet.payer]);
+    if (simulateResp.value.err) {
+      console.error("Simulate transaction failed:", simulateResp.value.err);
+      throw simulateResp.value.err;
+    }
+
+    console.log(">>> Simulating init pool transaction succeeded");
   }
 }
 
@@ -184,8 +202,27 @@ async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: C
       throw e;
     });
     console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
+  } else {
+    const { blockhash, lastValidBlockHeight } =
+    await connection.getLatestBlockhash();
+
+    const transaction = new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: wallet.publicKey,
+    }).add(rawTx);
+
+    let simulateResp = await simulateTransaction(connection, transaction, [wallet.payer]);
+    console.log(simulateResp);
+    if (simulateResp.value.err) {
+      console.error("Simulate transaction failed:", simulateResp.value.err);
+      throw simulateResp.value.err;
+    }
+    console.log(">>> Simulating init pool transaction succeeded");
   }
 }
+
+// async function seedLiquidity
 
 async function createAndMintToken(connection: Connection, wallet: Wallet, mintDecimals: number, mintAmountLamport: BN): Promise<PublicKey> {
   const mint = await createMint(connection, wallet.payer, wallet.publicKey, null, mintDecimals);

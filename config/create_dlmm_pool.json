@@ -8,7 +8,7 @@
   "quoteSymbol": "SOL",
   "baseDecimals": 6,
   "dlmm": {
-    "binStep": 80,
+    "binStep": 20,
     "feeBps": 200,
     "minPrice": 0.0000017,
     "maxPrice": 0.000003,
