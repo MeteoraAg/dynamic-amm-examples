@@ -1,5 +1,5 @@
 import { Connection, PublicKey, sendAndConfirmTransaction } from "@solana/web3.js";
-import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, getDecimalizedAmount, getAmountInLamports} from ".";
+import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseKeypairFromSecretKey, parseCliArguments, getDecimalizedAmount, getAmountInLamports, getQuoteMint, getQuoteDecimals } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { createProgram, deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
@@ -8,7 +8,7 @@ import { BN } from "bn.js";
 import { ActivationType } from "@meteora-ag/alpha-vault";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
 import DLMM, { LBCLMM_PROGRAM_IDS, deriveCustomizablePermissionlessLbPair } from "@meteora-ag/dlmm";
-import{ ActivationType as DlmmActivationType} from "@meteora-ag/dlmm";
+import { ActivationType as DlmmActivationType } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
 
 async function main() {
@@ -23,7 +23,7 @@ async function main() {
   if (!process.env.PRIVATE_KEY) {
     throw new Error("Private key not provided in environment variables");
   }
-  let keypair = parseKeypairFromSecretKey(process.env.PRIVATE_KEY!); 
+  let keypair = parseKeypairFromSecretKey(process.env.PRIVATE_KEY!);
 
   console.log('\n> Initializing with general configuration...')
   console.log(`- Using RPC URL ${config.rpcUrl}`);
@@ -37,20 +37,20 @@ async function main() {
   });
 
   let baseMint = new PublicKey(config.baseMint);
-  let quoteMint = new PublicKey(config.quoteMint);
+  let quoteMint = getQuoteMint(config.quoteSymbol);
 
   if (config.createBaseToken && !config.dryRun) {
     console.log('\n> Minting base token...');
     if (!config.mintBaseTokenAmount) {
       throw new Error("Missing mintBaseTokenAmount in configuration");
     }
-    const baseMintAmount = getAmountInLamports(config.mintBaseTokenAmount, config.baseDecimals); 
+    const baseMintAmount = getAmountInLamports(config.mintBaseTokenAmount, config.baseDecimals);
 
     baseMint = await createAndMintToken(connection, wallet, config.baseDecimals, baseMintAmount);
 
     console.log(`>> Mint ${config.mintBaseTokenAmount} token to payer wallet`);
-  }  
-  
+  }
+
   console.log(`- Using base token mint ${baseMint.toString()}`);
   console.log(`- Using quote token mint ${quoteMint.toString()}`);
 
@@ -72,8 +72,9 @@ async function createPermissionlessDynamicPool(config: MeteoraConfig, connection
   }
   console.log("\n> Initializing Permissionless Dynamic AMM pool...");
 
+  const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
   const baseAmount = getAmountInLamports(config.dynamicAmm.baseAmount, config.baseDecimals);
-  const quoteAmount = getAmountInLamports(config.dynamicAmm.quoteAmount, config.quoteDecimals);
+  const quoteAmount = getAmountInLamports(config.dynamicAmm.quoteAmount, quoteDecimals);
 
   console.log(`- Using token A amount ${config.dynamicAmm.baseAmount}, in lamports = ${baseAmount}`);
   console.log(`- Using token B amount ${config.dynamicAmm.quoteAmount}, in lamports = ${quoteAmount}`);
@@ -155,7 +156,8 @@ async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: C
   console.log(`- Using activationPoint = ${config.dlmm.activationPoint}`);
   console.log(`- Using hasAlphaVault = ${config.dlmm.hasAlphaVault}`);
 
-  const toLamportMultiplier = new Decimal(10 ** (config.baseDecimals - config.quoteDecimals));
+  const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
+  const toLamportMultiplier = new Decimal(10 ** (config.baseDecimals - quoteDecimals));
 
   const minBinId = DLMM.getBinIdFromPrice(
     new Decimal(config.dlmm.minPrice).mul(toLamportMultiplier),
@@ -165,13 +167,13 @@ async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: C
 
   const rawTx = await DLMM.createCustomizablePermissionlessLbPair(
     connection, new BN(binStep), baseMint, quoteMint, new BN(minBinId.toString()), new BN(feeBps), activationType, hasAlphaVault, wallet.publicKey, activationPoint, {
-      cluster: "mainnet-beta"
-    } 
+    cluster: "mainnet-beta"
+  }
   )
 
   let pairKey: PublicKey;
   [pairKey] = deriveCustomizablePermissionlessLbPair(baseMint, quoteMint, new PublicKey(LBCLMM_PROGRAM_IDS["mainnet-beta"]));
-  
+
   console.log(`\n> Pool address: ${pairKey}`);
 
   if (!config.dryRun) {
@@ -192,11 +194,11 @@ async function createAndMintToken(connection: Connection, wallet: Wallet, mintDe
   const walletTokenATA = await getOrCreateAssociatedTokenAccount(connection, wallet.payer, mint, wallet.publicKey, true);
   await mintTo(
     connection, wallet.payer, mint, walletTokenATA.address, wallet.publicKey, mintAmountLamport, [], {
-      commitment: DEFAULT_COMMITMENT_LEVEL
-    }
+    commitment: DEFAULT_COMMITMENT_LEVEL
+  }
   )
 
   return mint;
-} 
+}
 
 main();

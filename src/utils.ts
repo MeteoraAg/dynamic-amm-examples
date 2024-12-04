@@ -1,9 +1,10 @@
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
-import { Keypair } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import * as fs from "fs";
 import { parseArgs } from "util";
-import {BN } from "bn.js";
+import { BN } from "bn.js";
 import Decimal from "decimal.js";
+import { SOL_TOKEN_DECIMALS, SOL_TOKEN_MINT, USDC_TOKEN_DECIMALS, USDC_TOKEN_MINT } from "./constants";
 
 export function safeParseJsonFromFile<T>(filePath: string): T {
     try {
@@ -11,7 +12,7 @@ export function safeParseJsonFromFile<T>(filePath: string): T {
         return JSON.parse(rawData);
     } catch (error) {
         console.error('Error reading or parsing JSON file:', error);
-        throw new Error(`failed to parse file ${filePath}`); 
+        throw new Error(`failed to parse file ${filePath}`);
     }
 }
 
@@ -19,7 +20,7 @@ export function safeParseKeypairFromFile(filePath: string): Keypair {
     let keypairJson: Array<number> = safeParseJsonFromFile(filePath);
     let keypairBytes = Uint8Array.from(keypairJson);
     let keypair = Keypair.fromSecretKey(keypairBytes);
-    return keypair; 
+    return keypair;
 }
 
 export function parseKeypairFromSecretKey(secretKey: string): Keypair {
@@ -38,6 +39,26 @@ export function getDecimalizedAmount(amountLamport: BN, decimals: number): BN {
     return amountLamport / new BN(10 ** decimals)
 }
 
+export function getQuoteMint(quoteSymbol: string): PublicKey {
+    if (quoteSymbol.toLowerCase() == "sol") {
+        return new PublicKey(SOL_TOKEN_MINT);
+    } else if (quoteSymbol.toLowerCase() == "usdc") {
+        return new PublicKey(USDC_TOKEN_MINT);
+    } else {
+        throw new Error(`Unsupported quote symbol: ${quoteSymbol}`);
+    }
+}
+
+export function getQuoteDecimals(quoteSymbol: string): number {
+    if (quoteSymbol.toLowerCase() == "sol") {
+        return SOL_TOKEN_DECIMALS;
+    } else if (quoteSymbol.toLowerCase() == "usdc") {
+        return USDC_TOKEN_DECIMALS;
+    } else {
+        throw new Error(`Unsupported quote symbol: ${quoteSymbol}`);
+    }
+}
+
 export interface CliArguments {
     // Config filepath
     config: string | undefined;
@@ -45,15 +66,15 @@ export interface CliArguments {
 
 export function parseCliArguments(): CliArguments {
     const { values, positionals } = parseArgs({
-    args: Bun.argv,
-    options: {
-      config: {
-        type: 'string',
-      },
-    },
-    strict: true,
-    allowPositionals: true,
-  });
+        args: Bun.argv,
+        options: {
+            config: {
+                type: 'string',
+            },
+        },
+        strict: true,
+        allowPositionals: true,
+    });
 
-  return values;
+    return values;
 }

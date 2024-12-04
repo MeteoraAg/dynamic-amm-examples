@@ -6,9 +6,8 @@ export interface MeteoraConfig {
   createBaseToken: boolean;
   mintBaseTokenAmount: number | string | null;
   baseMint: string;
-  quoteMint: string;
+  quoteSymbol: string;
   baseDecimals: number;
-  quoteDecimals: number;
   dynamicAmm: DynamicAmmConfig | null;
   dlmm: DlmmConfig | null;
 }

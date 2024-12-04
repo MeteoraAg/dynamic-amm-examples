@@ -4,9 +4,8 @@
   "createBaseToken": false,
   "mintBaseTokenAmount": "5",
   "baseMint": "3SPs18esTsMwMckUBwssHiQ1PqLFS26De693FdaNA8KN",
-  "quoteMint": "So11111111111111111111111111111111111111112",
+  "quoteSymbol": "SOL",
   "baseDecimals": 6,
-  "quoteDecimals": 9,
   "dynamicAmm": {
     "baseAmount": "5",
     "quoteAmount": "0.001",

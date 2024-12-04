@@ -4,9 +4,8 @@
   "createBaseToken": false,
   "mintBaseTokenAmount": "5",
   "baseMint": "3B5wuUrMEi5yATD7on46hKfej3pfmd7t1RKgrsN3pump",
-  "quoteMint": "So11111111111111111111111111111111111111112",
+  "quoteSymbol": "SOL",
   "baseDecimals": 6,
-  "quoteDecimals": 9,
   "dlmm": {
     "binStep": 80,
     "feeBps": 200,
