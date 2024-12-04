@@ -14,5 +14,8 @@
     "tradeFeeNumerator": 2500,
     "activationType": "timestamp",
     "activationPoint": null
+  },
+  "prorataAlphaVault": {
+    "poolType": "dynamic"
   }
 }

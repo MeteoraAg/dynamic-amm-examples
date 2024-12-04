@@ -12,6 +12,8 @@ export interface MeteoraConfig {
   hasAlphaVault: boolean;
   dynamicAmm: DynamicAmmConfig | null;
   dlmm: DlmmConfig | null;
+  fcfsAlphaVault: FcfsAlphaVaultConfig | null; 
+  prorataAlphaVault: ProrataAlphaVaultConfig | null;
 }
 
 export interface DynamicAmmConfig {
@@ -30,3 +32,7 @@ export interface DlmmConfig {
   activationType: string;
   activationPoint: number | null;
 }
+
+export interface FcfsAlphaVaultConfig {}
+
+export interface ProrataAlphaVaultConfig {}

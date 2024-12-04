@@ -1,0 +1,21 @@
+{
+  "rpcUrl": "https://api.mainnet-beta.solana.com",
+  "dryRun": true,
+  "keypairFilePath": "keypair.json",
+  "createBaseToken": false,
+  "mintBaseTokenAmount": "5",
+  "baseMint": "3B5wuUrMEi5yATD7on46hKfej3pfmd7t1RKgrsN3pump",
+  "quoteSymbol": "SOL",
+  "baseDecimals": 6,
+  "hasAlphaVault": true,
+  "dynamicAmm": {
+    "baseAmount": "5",
+    "quoteAmount": "0.001",
+    "tradeFeeNumerator": 2500,
+    "activationType": "timestamp",
+    "activationPoint": null
+  },
+  "fcfsAlphaVault": {
+    "poolType": "dynamic"
+  }
+}

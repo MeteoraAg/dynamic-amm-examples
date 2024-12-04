@@ -1,5 +1,5 @@
 import { Connection, PublicKey, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseCliArguments, getAmountInLamports, getQuoteMint, getQuoteDecimals, safeParseKeypairFromFile, runSimulateTransaction } from ".";
+import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, safeParseJsonFromFile, parseCliArguments, getAmountInLamports, getQuoteMint, getQuoteDecimals, safeParseKeypairFromFile, runSimulateTransaction, getDynamicAmmActivationType, getDlmmActivationType } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { createProgram, deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
@@ -79,14 +79,7 @@ async function createPermissionlessDynamicPool(config: MeteoraConfig, connection
   console.log(`- Using token A amount ${config.dynamicAmm.baseAmount}, in lamports = ${baseAmount}`);
   console.log(`- Using token B amount ${config.dynamicAmm.quoteAmount}, in lamports = ${quoteAmount}`);
 
-  let activationType = ActivationType.TIMESTAMP;
-  if (config.dynamicAmm.activationType == "timestamp") {
-    activationType = ActivationType.TIMESTAMP;
-  } else if (config.dynamicAmm.activationType == "slot") {
-    activationType = ActivationType.SLOT;
-  } else {
-    throw new Error(`Invalid activation type ${config.dynamicAmm.activationType}`);
-  }
+  const activationType = getDynamicAmmActivationType(config.dynamicAmm.activationType);
 
   const customizeParam: CustomizableParams = {
     tradeFeeNumerator: config.dynamicAmm.tradeFeeNumerator,
@@ -126,6 +119,10 @@ async function createPermissionlessDynamicPool(config: MeteoraConfig, connection
       throw err;
     });
     console.log(`>>> Pool initialized successfully with tx hash: ${txHash}`);
+
+    if (config.hasAlphaVault) {
+      // createAlphaVault(connection, wallet, )
+    }
   } else {
     console.log(`> Simulating init pool tx...`);
     await runSimulateTransaction(connection, wallet, [rawTx]);
@@ -143,14 +140,7 @@ async function createPermissionlessDlmmPool(config: MeteoraConfig, connection: C
   const hasAlphaVault = config.hasAlphaVault;
   const activationPoint = config.dlmm.activationPoint;
 
-  let activationType = DlmmActivationType.Timestamp;
-  if (config.dlmm.activationType == "timestamp") {
-    activationType = DlmmActivationType.Timestamp;
-  } else if (config.dlmm.activationType == "slot") {
-    activationType = DlmmActivationType.Slot;
-  } else {
-    throw new Error(`Invalid activation type ${config.dlmm.activationType}`);
-  }
+  const activationType = getDlmmActivationType(config.dlmm.activationType);
 
   console.log(`- Using binStep = ${binStep}`);
   console.log(`- Using feeBps = ${feeBps}`);

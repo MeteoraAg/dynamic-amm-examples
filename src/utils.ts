@@ -7,6 +7,8 @@ import Decimal from "decimal.js";
 import { SOL_TOKEN_DECIMALS, SOL_TOKEN_MINT, USDC_TOKEN_DECIMALS, USDC_TOKEN_MINT } from "./constants";
 import { Wallet } from "@coral-xyz/anchor";
 import { simulateTransaction } from "@coral-xyz/anchor/dist/cjs/utils/rpc";
+import { ActivationType as DynamicAmmActivationType } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
+import { ActivationType as DlmmActivationType } from "@meteora-ag/dlmm";
 
 export function safeParseJsonFromFile<T>(filePath: string): T {
     try {
@@ -82,6 +84,28 @@ export async function runSimulateTransaction(
     }
 
     console.log(">>> Simulated transaction successfully");
+}
+
+export function getDynamicAmmActivationType(activationType: string): DynamicAmmActivationType {
+    switch (activationType.toLowerCase()) {
+        case "timestamp":
+            return DynamicAmmActivationType.Timestamp;
+        case "slot":
+            return DynamicAmmActivationType.Slot;
+        default:
+            throw new Error(`Unsupported Dynamic AMM activation type: ${activationType}`);
+    }
+}
+
+export function getDlmmActivationType(activationType: string): DlmmActivationType {
+    switch (activationType.toLowerCase()) {
+        case "timestamp":
+            return DlmmActivationType.Timestamp;
+        case "slot":
+            return DlmmActivationType.Slot;
+        default:
+            throw new Error(`Unsupported DLMM activation type: ${activationType}`);
+    }
 }
 
 export interface CliArguments {
