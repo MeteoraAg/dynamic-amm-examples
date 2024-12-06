@@ -69,3 +69,8 @@ Run the script with config file specified in the CLI, for example:
 ```bash
 bun run src/create_pool --config ./config/create_dynamic_amm_pool.json
 ```
+
+## After deployment
+To view pool on the UI, access the links below
+- For Dynamic AMM pool: `https://app.meteora.ag/pools/<POOL_ADDRESS>`
+- For DLMM pool: `https://app.meteora.ag/dlmm/<POOL_ADDRESS>`
