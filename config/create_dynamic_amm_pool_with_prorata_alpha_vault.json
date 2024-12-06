@@ -7,7 +7,7 @@
   "baseMint": "3B5wuUrMEi5yATD7on46hKfej3pfmd7t1RKgrsN3pump",
   "quoteSymbol": "SOL",
   "baseDecimals": 6,
-  "hasAlphaVault": true,
+  "alphaVaultType": "prorata",
   "dynamicAmm": {
     "baseAmount": "5",
     "quoteAmount": "0.001",

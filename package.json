@@ -3,6 +3,7 @@
   "version": "1.1.0",
   "main": "index.js",
   "scripts": {
+    "format": "bun prettier ./src --write",
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-dynamic-amm-pool": "bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool.json",
     "create-dlmm-pool": "bun run src/create_pool.ts --config ./config/create_dlmm_pool.json"
@@ -22,6 +23,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@types/bun": "^1.1.14"
+    "@types/bun": "^1.1.14",
+    "prettier": "3.4.2"
   }
 }
