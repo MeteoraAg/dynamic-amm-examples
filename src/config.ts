@@ -8,6 +8,8 @@ export interface MeteoraConfig {
   quoteSymbol: string;
   baseDecimals: number;
   alphaVaultType: string | null; // fcfs or prorata
+  // If we want to skip the create pool transaction / simulation, set it to true
+  skipCreatePool: boolean;
   dynamicAmm: DynamicAmmConfig | null;
   dlmm: DlmmConfig | null;
   fcfsAlphaVault: FcfsAlphaVaultConfig | null;
@@ -44,6 +46,8 @@ export interface FcfsAlphaVaultConfig {
   individualDepositingCap: number;
   // fee to create stake escrow account
   escrowFee: number;
+  // whitelist mode: permissionless / permission_with_merkle_proof / permission_with_authority
+  whitelistMode: string;
 }
 
 export interface ProrataAlphaVaultConfig {
@@ -57,4 +61,6 @@ export interface ProrataAlphaVaultConfig {
   maxBuyingCap: number;
   // fee to create stake escrow account
   escrowFee: number;
+  // whitelist mode: permissionless / permission_with_merkle_proof / permission_with_authority
+  whitelistMode: string;
 }

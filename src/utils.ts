@@ -14,7 +14,13 @@ import { Wallet } from "@coral-xyz/anchor";
 import { simulateTransaction } from "@coral-xyz/anchor/dist/cjs/utils/rpc";
 import { ActivationType as DynamicAmmActivationType } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
 import { ActivationType as DlmmActivationType } from "@meteora-ag/dlmm";
-import { PoolType } from "@meteora-ag/alpha-vault";
+import {
+  PermissionWithAuthority,
+  PermissionWithMerkleProof,
+  Permissionless,
+  PoolType,
+  WhitelistMode,
+} from "@meteora-ag/alpha-vault";
 
 export function safeParseJsonFromFile<T>(filePath: string): T {
   try {
@@ -91,6 +97,7 @@ export async function runSimulateTransaction(
   ]);
   if (simulateResp.value.err) {
     console.error(">>> Simulate transaction failed:", simulateResp.value.err);
+    console.log(`Logs ${simulateResp.value.logs}`);
     throw simulateResp.value.err;
   }
 
@@ -133,6 +140,19 @@ export function getAlphaVaultPoolType(poolType: string): PoolType {
       return PoolType.DLMM;
     default:
       throw new Error(`Unsupported alpha vault pool type: ${poolType}`);
+  }
+}
+
+export function getAlphaVaultWhitelistMode(mode: string): WhitelistMode {
+  switch (mode.toLowerCase()) {
+    case "permissionless":
+      return Permissionless;
+    case "permission_with_merkle_proof":
+      return PermissionWithMerkleProof;
+    case "permission_with_authority":
+      return PermissionWithAuthority;
+    default:
+      throw new Error(`Unsupported alpha vaultWhitelist mode: ${mode}`);
   }
 }
 

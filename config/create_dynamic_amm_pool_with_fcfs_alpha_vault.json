@@ -19,8 +19,9 @@
     "depositingPoint": 1733547099,
     "startVestingPoint": 1733548099,
     "endVestingPoint": 1733549099,
-    "maxBuyingCap": 100,
+    "maxDepositCap": 100,
     "individualDepositingCap": 1,
-    "escrowFee": 0
+    "escrowFee": 0,
+    "whitelistMode": "permissionless"
   }
 }
