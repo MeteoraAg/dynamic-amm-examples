@@ -72,6 +72,7 @@ async function main() {
   let baseMint = new PublicKey(config.baseMint);
   let quoteMint = getQuoteMint(config.quoteSymbol);
 
+  // If we want to create a new token mint
   if (config.createBaseToken && !config.dryRun) {
     console.log("\n> Minting base token...");
     if (!config.mintBaseTokenAmount) {
@@ -263,7 +264,7 @@ async function createPermissionlessDlmmPool(
   const binStep = config.dlmm.binStep;
   const feeBps = config.dlmm.feeBps;
   const hasAlphaVault = config.alphaVaultType != null;
-  const activationPoint = config.dlmm.activationPoint;
+  const activationPoint = new BN(config.dlmm.activationPoint);
 
   const activationType = getDlmmActivationType(config.dlmm.activationType);
 
@@ -271,7 +272,7 @@ async function createPermissionlessDlmmPool(
   console.log(`- Using feeBps = ${feeBps}`);
   console.log(`- Using minPrice = ${config.dlmm.minPrice}`);
   console.log(`- Using activationType = ${config.dlmm.activationType}`);
-  console.log(`- Using activationPoint = ${config.dlmm.activationPoint}`);
+  console.log(`- Using activationPoint = ${activationPoint}`);
   console.log(`- Using hasAlphaVault = ${hasAlphaVault}`);
 
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
@@ -318,7 +319,7 @@ async function createPermissionlessDlmmPool(
     initAlphaVaultTx = await createFcfsAlphaVault(
       connection,
       wallet,
-      PoolType.DYNAMIC,
+      PoolType.DLMM,
       poolKey,
       baseMint,
       quoteMint,
@@ -331,7 +332,7 @@ async function createPermissionlessDlmmPool(
     initAlphaVaultTx = await createProrataAlphaVault(
       connection,
       wallet,
-      PoolType.DYNAMIC,
+      PoolType.DLMM,
       poolKey,
       baseMint,
       quoteMint,
@@ -352,11 +353,25 @@ async function createPermissionlessDlmmPool(
     console.log(
       `>>> Pool initialized successfully with tx hash: ${initPoolTxHash}`,
     );
+
+    console.log(`>> Sending init alpha vault transaction...`);
+    const initAlphaVaulTxHash = await sendAndConfirmTransaction(
+      connection,
+      initAlphaVaultTx,
+      [wallet.payer],
+    ).catch((err) => {
+      console.error(err);
+      throw err;
+    });
+    console.log(
+      `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
+    );
   } else {
-    console.log(`> Simulating init pool tx...`);
+    console.log(`\n> Simulating init pool tx...`);
     await runSimulateTransaction(connection, wallet, [initPoolTx]);
 
-    // console.log()
+    console.log(`\n> Simulating init alpha vault tx...`);
+    await runSimulateTransaction(connection, wallet, [initAlphaVaultTx]);
   }
 }
 
