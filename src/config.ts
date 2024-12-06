@@ -16,7 +16,7 @@ export interface MeteoraConfig {
 }
 
 export interface CreateBaseMintConfig {
-  mintBaseTokenAmount: number | string | null;
+  mintBaseTokenAmount: number | string;
 }
 
 export interface DynamicAmmConfig {

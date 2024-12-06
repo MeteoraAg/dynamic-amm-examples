@@ -21,6 +21,21 @@ import {
   PoolType,
   WhitelistMode,
 } from "@meteora-ag/alpha-vault";
+import { MeteoraConfig } from ".";
+
+export function validate_config(config: MeteoraConfig) {
+  if (config.createBaseToken && config.baseMint) {
+    throw new Error("Both createBaseToken and baseMint cannot be set simultaneously.");
+  }
+
+  if (config.dynamicAmm && config.dlmm) {
+    throw new Error("Both Dynamic AMM and DLMM configuration cannot be set simultaneously.");
+  }
+
+  if (config.fcfsAlphaVault && config.prorataAlphaVault) {
+    throw new Error("Both FCFS and prorata Alpha Vault cannot be set simultaneously.");
+  }
+}
 
 export function safeParseJsonFromFile<T>(filePath: string): T {
   try {

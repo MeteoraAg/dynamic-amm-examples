@@ -19,6 +19,7 @@ import {
   FcfsAlphaVaultConfig,
   ProrataAlphaVaultConfig,
   getAlphaVaultWhitelistMode,
+  validate_config,
 } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
@@ -72,6 +73,8 @@ async function main() {
 
   let baseMint: PublicKey;
   let quoteMint = getQuoteMint(config.quoteSymbol);
+
+  validate_config(config);
 
   // If we want to create a new token mint
   if (config.createBaseToken && !config.dryRun) {
