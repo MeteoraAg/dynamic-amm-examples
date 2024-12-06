@@ -2,11 +2,13 @@
   "rpcUrl": "https://api.mainnet-beta.solana.com",
   "dryRun": true,
   "keypairFilePath": "keypair.json",
-  "baseMint": "3B5wuUrMEi5yATD7on46hKfej3pfmd7t1RKgrsN3pump",
+  "createBaseToken": {
+    "mintBaseTokenAmount": 10000000
+  },
   "quoteSymbol": "SOL",
   "baseDecimals": 6,
   "dynamicAmm": {
-    "baseAmount": "5",
+    "baseAmount": "100000",
     "quoteAmount": "0.001",
     "tradeFeeNumerator": 2500,
     "activationType": "timestamp",

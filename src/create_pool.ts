@@ -70,17 +70,17 @@ async function main() {
     commitment: connection.commitment,
   });
 
-  let baseMint = new PublicKey(config.baseMint);
+  let baseMint: PublicKey;
   let quoteMint = getQuoteMint(config.quoteSymbol);
 
   // If we want to create a new token mint
   if (config.createBaseToken && !config.dryRun) {
     console.log("\n> Minting base token...");
-    if (!config.mintBaseTokenAmount) {
+    if (!config.createBaseToken.mintBaseTokenAmount) {
       throw new Error("Missing mintBaseTokenAmount in configuration");
     }
     const baseMintAmount = getAmountInLamports(
-      config.mintBaseTokenAmount,
+      config.createBaseToken.mintBaseTokenAmount,
       config.baseDecimals,
     );
 
@@ -91,7 +91,16 @@ async function main() {
       baseMintAmount,
     );
 
-    console.log(`>> Mint ${config.mintBaseTokenAmount} token to payer wallet`);
+    console.log(
+      `>> Mint ${config.createBaseToken.mintBaseTokenAmount} token to payer wallet. In lamport ${baseMintAmount}`,
+    );
+  } else if (config.createBaseToken && config.dryRun) {
+    throw new Error("cannot create base token mint when in dry run mode");
+  } else {
+    if (!config.baseMint) {
+      throw new Error("Missing baseMint in configuration");
+    }
+    baseMint = new PublicKey(config.baseMint);
   }
 
   console.log(`- Using base token mint ${baseMint.toString()}`);
@@ -186,7 +195,7 @@ async function createPermissionlessDynamicPool(
 
   console.log(`\n> Pool address: ${poolKey}`);
 
-  let initAlphaVaultTx: Transaction;
+  let initAlphaVaultTx: Transaction | null = null;
   if (config.alphaVaultType == "fcfs") {
     if (!config.fcfsAlphaVault) {
       throw new Error("Missing FCFS alpha vault configuration");
@@ -233,26 +242,30 @@ async function createPermissionlessDynamicPool(
       );
     }
 
-    console.log(`>> Sending init alpha vault transaction...`);
-    const initAlphaVaulTxHash = await sendAndConfirmTransaction(
-      connection,
-      initAlphaVaultTx,
-      [wallet.payer],
-    ).catch((err) => {
-      console.error(err);
-      throw err;
-    });
-    console.log(
-      `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
-    );
+    if (initAlphaVaultTx) {
+      console.log(`>> Sending init alpha vault transaction...`);
+      const initAlphaVaulTxHash = await sendAndConfirmTransaction(
+        connection,
+        initAlphaVaultTx,
+        [wallet.payer],
+      ).catch((err) => {
+        console.error(err);
+        throw err;
+      });
+      console.log(
+        `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
+      );
+    }
   } else {
     if (!config.skipCreatePool) {
       console.log(`> Simulating init pool tx...`);
       await runSimulateTransaction(connection, wallet, [initPoolTx]);
     }
 
-    console.log(`> Simulating init alpha vault tx...`);
-    await runSimulateTransaction(connection, wallet, [initAlphaVaultTx]);
+    if (initAlphaVaultTx) {
+      console.log(`> Simulating init alpha vault tx...`);
+      await runSimulateTransaction(connection, wallet, [initAlphaVaultTx]);
+    }
   }
 }
 
@@ -318,7 +331,7 @@ async function createPermissionlessDlmmPool(
 
   console.log(`\n> Pool address: ${poolKey}`);
 
-  let initAlphaVaultTx: Transaction;
+  let initAlphaVaultTx: Transaction | null = null;
   if (config.alphaVaultType == "fcfs") {
     if (!config.fcfsAlphaVault) {
       throw new Error("Missing FCFS alpha vault configuration");
@@ -365,26 +378,30 @@ async function createPermissionlessDlmmPool(
       );
     }
 
-    console.log(`>> Sending init alpha vault transaction...`);
-    const initAlphaVaulTxHash = await sendAndConfirmTransaction(
-      connection,
-      initAlphaVaultTx,
-      [wallet.payer],
-    ).catch((err) => {
-      console.error(err);
-      throw err;
-    });
-    console.log(
-      `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
-    );
+    if (initAlphaVaultTx) {
+      console.log(`>> Sending init alpha vault transaction...`);
+      const initAlphaVaulTxHash = await sendAndConfirmTransaction(
+        connection,
+        initAlphaVaultTx,
+        [wallet.payer],
+      ).catch((err) => {
+        console.error(err);
+        throw err;
+      });
+      console.log(
+        `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
+      );
+    }
   } else {
     if (!config.skipCreatePool) {
       console.log(`\n> Simulating init pool tx...`);
       await runSimulateTransaction(connection, wallet, [initPoolTx]);
     }
 
-    console.log(`\n> Simulating init alpha vault tx...`);
-    await runSimulateTransaction(connection, wallet, [initAlphaVaultTx]);
+    if (initAlphaVaultTx) {
+      console.log(`\n> Simulating init alpha vault tx...`);
+      await runSimulateTransaction(connection, wallet, [initAlphaVaultTx]);
+    }
   }
 }
 

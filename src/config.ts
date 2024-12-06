@@ -2,9 +2,8 @@ export interface MeteoraConfig {
   rpcUrl: string;
   dryRun: boolean;
   keypairFilePath: string;
-  createBaseToken: boolean;
-  mintBaseTokenAmount: number | string | null;
-  baseMint: string;
+  createBaseToken: CreateBaseMintConfig | null;
+  baseMint: string | null;
   quoteSymbol: string;
   baseDecimals: number;
   alphaVaultType: string | null; // fcfs or prorata
@@ -14,6 +13,10 @@ export interface MeteoraConfig {
   dlmm: DlmmConfig | null;
   fcfsAlphaVault: FcfsAlphaVaultConfig | null;
   prorataAlphaVault: ProrataAlphaVaultConfig | null;
+}
+
+export interface CreateBaseMintConfig {
+  mintBaseTokenAmount: number | string | null;
 }
 
 export interface DynamicAmmConfig {
