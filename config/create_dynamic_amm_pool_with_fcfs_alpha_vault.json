@@ -5,7 +5,6 @@
   "baseMint": "3B5wuUrMEi5yATD7on46hKfej3pfmd7t1RKgrsN3pump",
   "quoteSymbol": "SOL",
   "baseDecimals": 6,
-  "alphaVaultType": "fcfs",
   "dynamicAmm": {
     "baseAmount": "100",
     "quoteAmount": "0.001",
@@ -13,7 +12,8 @@
     "activationType": "timestamp",
     "activationPoint": null
   },
-  "fcfsAlphaVault": {
+  "alphaVault": {
+    "alphaVaultType": "fcfs",
     "depositingPoint": 1733547099,
     "startVestingPoint": 1733548099,
     "endVestingPoint": 1733549099,

@@ -11,7 +11,8 @@ There are a various of config file that can be found at `config` directory that 
 Also we need to provide the keypair for the payer wallet in `keypair.json` file. 
 
 ### General configuration
-- `rpcUrl`: Solana Mainnet RPC URL to get data and send transactions.
+- `rpcUrl`: Solana RPC URL to get data and send transactions.
+- `keypairFilePath`: Keypair file path to send transactions.
 - `dryRun`: Set to true to send transactions.
 - `createBaseToken`: Configuration to create base token.
 - `baseMint`: Base token address if the `createBaseToken` field is not set. 
@@ -21,13 +22,11 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `skipCreatePool`: Set to true to skip sending / simulating transaction to create pool.
 - `dynamicAmm`: Dynamic AMM pool configuration.
 - `dlmm`: DLMM pool configuration.
-- `fcfsAlphaVault`: Fcfs Alpha Vault configuration.
-- `prorataAlphaVault`: Prorata Alpha Vault configuration.
+- `alphaVault`: Fcfs or Prorata Alpha Vault configuration.
 
 **Some configuration constraints**:
 - `createBaseToken` and `baseMint` cannot be used together.
 - `dynamicAmm` and `dlmm` cannot be used together.
-- `fcfsAlphaVault` and `prorataAlphaVault` cannot be used together.
 
 ### Create Base Token configuration
 - `mintBaseTokenAmount`: Base token amount to be minted.
@@ -47,7 +46,8 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `activationType`: To activate pool trading base on `slot` or `timestamp`.
 - `activationPoint`: To activate pool trading at a point, either slot valut or timestamp value base on `activationType`.
 
-### FCFS Alpha Vault configuration
+### Alpha Vault configuration
+- `alphaVaultType`: Alpha Vault type, could be `fcfs` or `prorata`
 - `depositingPoint`: Absolute value that, the slot or timestamp that allows deposit depend on the pool activation type.
 - `startVestingPoint`: Absolute value, the slot or timestamp that start vesting depend on the pool activation type. 
 - `endVestingPoint`: Absolute value, the slot or timestamp that end vesting depend on the pool activation type.  
