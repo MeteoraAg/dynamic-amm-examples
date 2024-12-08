@@ -34,8 +34,6 @@ import {
 } from "@solana/spl-token";
 import { BN } from "bn.js";
 import AlphaVault, {
-  ActivationType,
-  Permissionless,
   PoolType,
 } from "@meteora-ag/alpha-vault";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
@@ -43,9 +41,7 @@ import DLMM, {
   LBCLMM_PROGRAM_IDS,
   deriveCustomizablePermissionlessLbPair,
 } from "@meteora-ag/dlmm";
-import { ActivationType as DlmmActivationType } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
-import { simulateTransaction } from "@coral-xyz/anchor/dist/cjs/utils/rpc";
 
 async function main() {
   const cliArguments = parseCliArguments();
@@ -56,6 +52,7 @@ async function main() {
   console.log(`> Using config file: ${configFilePath}`);
 
   let config: MeteoraConfig = safeParseJsonFromFile(configFilePath);
+  validate_config(config);
 
   console.log(`> Using keypair file path ${config.keypairFilePath}`);
   let keypair = safeParseKeypairFromFile(config.keypairFilePath);
@@ -74,7 +71,6 @@ async function main() {
   let baseMint: PublicKey;
   let quoteMint = getQuoteMint(config.quoteSymbol);
 
-  validate_config(config);
 
   // If we want to create a new token mint
   if (config.createBaseToken && !config.dryRun) {

@@ -24,6 +24,13 @@ import {
 import { MeteoraConfig } from ".";
 
 export function validate_config(config: MeteoraConfig) {
+  if (!config.keypairFilePath) {
+    throw new Error("Missing keypairFilePath in config file.");
+  }
+  if (!config.rpcUrl) {
+    throw new Error("Missing rpcUrl in config file.");
+  }
+
   if (config.createBaseToken && config.baseMint) {
     throw new Error(
       "Both createBaseToken and baseMint cannot be set simultaneously.",
