@@ -266,294 +266,294 @@ async function createPermissionlessDynamicPool(
       }
     }
   }
+}
 
-  async function createPermissionlessDlmmPool(
-    config: MeteoraConfig,
-    connection: Connection,
-    wallet: Wallet,
-    baseMint: PublicKey,
-    quoteMint: PublicKey,
-  ) {
-    if (!config.dlmm) {
-      throw new Error("Missing DLMM configuration");
-    }
-    console.log("\n> Initializing Permissionless DLMM pool...");
-
-    const binStep = config.dlmm.binStep;
-    const feeBps = config.dlmm.feeBps;
-    const hasAlphaVault = config.alphaVaultType != null;
-    const activationPoint = new BN(config.dlmm.activationPoint);
-
-    const activationType = getDlmmActivationType(config.dlmm.activationType);
-
-    console.log(`- Using binStep = ${binStep}`);
-    console.log(`- Using feeBps = ${feeBps}`);
-    console.log(`- Using initialPrice = ${config.dlmm.initialPrice}`);
-    console.log(`- Using activationType = ${config.dlmm.activationType}`);
-    console.log(`- Using activationPoint = ${activationPoint}`);
-    console.log(`- Using hasAlphaVault = ${hasAlphaVault}`);
-
-    const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
-    const toLamportMultiplier = new Decimal(
-      10 ** (config.baseDecimals - quoteDecimals),
-    );
-
-    const activateBinId = DLMM.getBinIdFromPrice(
-      new Decimal(config.dlmm.initialPrice).mul(toLamportMultiplier),
-      binStep,
-      false,
-    );
-
-    const initPoolTx = await DLMM.createCustomizablePermissionlessLbPair(
-      connection,
-      new BN(binStep),
-      baseMint,
-      quoteMint,
-      new BN(activateBinId.toString()),
-      new BN(feeBps),
-      activationType,
-      hasAlphaVault,
-      wallet.publicKey,
-      activationPoint,
-      {
-        cluster: "mainnet-beta",
-      },
-    );
-
-    let poolKey: PublicKey;
-    [poolKey] = deriveCustomizablePermissionlessLbPair(
-      baseMint,
-      quoteMint,
-      new PublicKey(LBCLMM_PROGRAM_IDS["mainnet-beta"]),
-    );
-
-    console.log(`\n> Pool address: ${poolKey}`);
-
-    let initAlphaVaultTx: Transaction | null = null;
-    if (config.alphaVault) {
-      if (config.alphaVault.alphaVaultType == "fcfs") {
-        initAlphaVaultTx = await createFcfsAlphaVault(
-          connection,
-          wallet,
-          PoolType.DLMM,
-          poolKey,
-          baseMint,
-          quoteMint,
-          quoteDecimals,
-          config.alphaVault as FcfsAlphaVaultConfig,
-        );
-      } else if (config.alphaVault.alphaVaultType == "prorata") {
-        initAlphaVaultTx = await createProrataAlphaVault(
-          connection,
-          wallet,
-          PoolType.DLMM,
-          poolKey,
-          baseMint,
-          quoteMint,
-          quoteDecimals,
-          config.alphaVault as ProrataAlphaVaultConfig,
-        );
-      }
-    }
-
-    if (!config.dryRun) {
-      if (!config.skipCreatePool) {
-        console.log(`>> Sending init pool transaction...`);
-        let initPoolTxHash = await sendAndConfirmTransaction(
-          connection,
-          initPoolTx,
-          [wallet.payer],
-        ).catch((e) => {
-          console.error(e);
-          throw e;
-        });
-        console.log(
-          `>>> Pool initialized successfully with tx hash: ${initPoolTxHash}`,
-        );
-      }
-
-      if (initAlphaVaultTx) {
-        console.log(`>> Sending init alpha vault transaction...`);
-        const initAlphaVaulTxHash = await sendAndConfirmTransaction(
-          connection,
-          initAlphaVaultTx,
-          [wallet.payer],
-        ).catch((err) => {
-          console.error(err);
-          throw err;
-        });
-        console.log(
-          `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
-        );
-      }
-    } else {
-      if (!config.skipCreatePool) {
-        console.log(`\n> Simulating init pool tx...`);
-        await runSimulateTransaction(connection, wallet, [initPoolTx]);
-      }
-
-      if (initAlphaVaultTx) {
-        console.log(`\n> Simulating init alpha vault tx...`);
-        await runSimulateTransaction(connection, wallet, [initAlphaVaultTx]);
-      }
-    }
+async function createPermissionlessDlmmPool(
+  config: MeteoraConfig,
+  connection: Connection,
+  wallet: Wallet,
+  baseMint: PublicKey,
+  quoteMint: PublicKey,
+) {
+  if (!config.dlmm) {
+    throw new Error("Missing DLMM configuration");
   }
+  console.log("\n> Initializing Permissionless DLMM pool...");
 
-  async function createAndMintToken(
-    connection: Connection,
-    wallet: Wallet,
-    mintDecimals: number,
-    mintAmountLamport: BN,
-  ): Promise<PublicKey> {
-    const mint = await createMint(
-      connection,
-      wallet.payer,
-      wallet.publicKey,
-      null,
-      mintDecimals,
-    );
+  const binStep = config.dlmm.binStep;
+  const feeBps = config.dlmm.feeBps;
+  const hasAlphaVault = config.alphaVaultType != null;
+  const activationPoint = new BN(config.dlmm.activationPoint);
 
-    const walletTokenATA = await getOrCreateAssociatedTokenAccount(
-      connection,
-      wallet.payer,
-      mint,
-      wallet.publicKey,
-      true,
-    );
-    await mintTo(
-      connection,
-      wallet.payer,
-      mint,
-      walletTokenATA.address,
-      wallet.publicKey,
-      mintAmountLamport,
-      [],
-      {
-        commitment: DEFAULT_COMMITMENT_LEVEL,
-      },
-    );
+  const activationType = getDlmmActivationType(config.dlmm.activationType);
 
-    return mint;
-  }
+  console.log(`- Using binStep = ${binStep}`);
+  console.log(`- Using feeBps = ${feeBps}`);
+  console.log(`- Using initialPrice = ${config.dlmm.initialPrice}`);
+  console.log(`- Using activationType = ${config.dlmm.activationType}`);
+  console.log(`- Using activationPoint = ${activationPoint}`);
+  console.log(`- Using hasAlphaVault = ${hasAlphaVault}`);
 
-  async function createFcfsAlphaVault(
-    connection: Connection,
-    wallet: Wallet,
-    poolType: PoolType,
-    poolAddress: PublicKey,
-    baseMint: PublicKey,
-    quoteMint: PublicKey,
-    quoteDecimals: number,
-    params: FcfsAlphaVaultConfig,
-  ): Promise<Transaction> {
-    let maxDepositingCap = getAmountInLamports(
-      params.maxDepositCap,
-      quoteDecimals,
-    );
-    let individualDepositingCap = getAmountInLamports(
-      params.individualDepositingCap,
-      quoteDecimals,
-    );
-    let escrowFee = getAmountInLamports(params.escrowFee, quoteDecimals);
-    let whitelistMode = getAlphaVaultWhitelistMode(params.whitelistMode);
+  const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
+  const toLamportMultiplier = new Decimal(
+    10 ** (config.baseDecimals - quoteDecimals),
+  );
 
-    console.log(`\n> Initializing FcfsAlphaVault...`);
-    console.log(`- Using poolType: ${poolType}`);
-    console.log(`- Using poolMint ${poolAddress}`);
-    console.log(`- Using baseMint ${baseMint}`);
-    console.log(`- Using quoteMint ${quoteMint}`);
-    console.log(`- Using depositingPoint ${params.depositingPoint}`);
-    console.log(`- Using startVestingPoint ${params.startVestingPoint}`);
-    console.log(`- Using endVestingPoint ${params.endVestingPoint}`);
-    console.log(
-      `- Using maxDepositingCap ${params.maxDepositCap}. In lamports ${maxDepositingCap}`,
-    );
-    console.log(
-      `- Using individualDepositingCap ${params.individualDepositingCap}. In lamports ${individualDepositingCap}`,
-    );
-    console.log(
-      `- Using escrowFee ${params.escrowFee}. In lamports ${escrowFee}`,
-    );
-    console.log(
-      `- Using whitelistMode ${params.whitelistMode}. In value ${whitelistMode}`,
-    );
+  const activateBinId = DLMM.getBinIdFromPrice(
+    new Decimal(config.dlmm.initialPrice).mul(toLamportMultiplier),
+    binStep,
+    false,
+  );
 
-    const tx = await AlphaVault.createCustomizableFcfsVault(
-      connection,
-      {
-        quoteMint,
+  const initPoolTx = await DLMM.createCustomizablePermissionlessLbPair(
+    connection,
+    new BN(binStep),
+    baseMint,
+    quoteMint,
+    new BN(activateBinId.toString()),
+    new BN(feeBps),
+    activationType,
+    hasAlphaVault,
+    wallet.publicKey,
+    activationPoint,
+    {
+      cluster: "mainnet-beta",
+    },
+  );
+
+  let poolKey: PublicKey;
+  [poolKey] = deriveCustomizablePermissionlessLbPair(
+    baseMint,
+    quoteMint,
+    new PublicKey(LBCLMM_PROGRAM_IDS["mainnet-beta"]),
+  );
+
+  console.log(`\n> Pool address: ${poolKey}`);
+
+  let initAlphaVaultTx: Transaction | null = null;
+  if (config.alphaVault) {
+    if (config.alphaVault.alphaVaultType == "fcfs") {
+      initAlphaVaultTx = await createFcfsAlphaVault(
+        connection,
+        wallet,
+        PoolType.DLMM,
+        poolKey,
         baseMint,
-        poolAddress,
-        poolType,
-        depositingPoint: new BN(params.depositingPoint),
-        startVestingPoint: new BN(params.startVestingPoint),
-        endVestingPoint: new BN(params.endVestingPoint),
-        maxDepositingCap,
-        individualDepositingCap,
-        escrowFee,
-        whitelistMode,
-      },
-      wallet.publicKey,
-      {
-        cluster: "mainnet-beta",
-      },
-    );
-    return tx;
-  }
-
-  async function createProrataAlphaVault(
-    connection: Connection,
-    wallet: Wallet,
-    poolType: PoolType,
-    poolAddress: PublicKey,
-    baseMint: PublicKey,
-    quoteMint: PublicKey,
-    quoteDecimals: number,
-    params: ProrataAlphaVaultConfig,
-  ): Promise<Transaction> {
-    let maxBuyingCap = getAmountInLamports(params.maxBuyingCap, quoteDecimals);
-    let escrowFee = getAmountInLamports(params.escrowFee, quoteDecimals);
-    let whitelistMode = getAlphaVaultWhitelistMode(params.whitelistMode);
-
-    console.log(`\n> Initializing ProrataAlphaVault...`);
-    console.log(`- Using poolType: ${poolType}`);
-    console.log(`- Using poolMint ${poolAddress}`);
-    console.log(`- Using baseMint ${baseMint}`);
-    console.log(`- Using quoteMint ${quoteMint}`);
-    console.log(`- Using depositingPoint ${params.depositingPoint}`);
-    console.log(`- Using startVestingPoint ${params.startVestingPoint}`);
-    console.log(`- Using endVestingPoint ${params.endVestingPoint}`);
-    console.log(
-      `- Using maxBuyingCap ${params.maxBuyingCap}. In lamports ${maxBuyingCap}`,
-    );
-    console.log(
-      `- Using escrowFee ${params.escrowFee}. In lamports ${escrowFee}`,
-    );
-    console.log(
-      `- Using whitelistMode ${params.whitelistMode}. In value ${whitelistMode}`,
-    );
-
-    const tx = await AlphaVault.createCustomizableProrataVault(
-      connection,
-      {
         quoteMint,
+        quoteDecimals,
+        config.alphaVault as FcfsAlphaVaultConfig,
+      );
+    } else if (config.alphaVault.alphaVaultType == "prorata") {
+      initAlphaVaultTx = await createProrataAlphaVault(
+        connection,
+        wallet,
+        PoolType.DLMM,
+        poolKey,
         baseMint,
-        poolAddress,
-        poolType,
-        depositingPoint: new BN(params.depositingPoint),
-        startVestingPoint: new BN(params.startVestingPoint),
-        endVestingPoint: new BN(params.endVestingPoint),
-        maxBuyingCap,
-        escrowFee,
-        whitelistMode,
-      },
-      wallet.publicKey,
-      {
-        cluster: "mainnet-beta",
-      },
-    );
-    return tx;
+        quoteMint,
+        quoteDecimals,
+        config.alphaVault as ProrataAlphaVaultConfig,
+      );
+    }
   }
+
+  if (!config.dryRun) {
+    if (!config.skipCreatePool) {
+      console.log(`>> Sending init pool transaction...`);
+      let initPoolTxHash = await sendAndConfirmTransaction(
+        connection,
+        initPoolTx,
+        [wallet.payer],
+      ).catch((e) => {
+        console.error(e);
+        throw e;
+      });
+      console.log(
+        `>>> Pool initialized successfully with tx hash: ${initPoolTxHash}`,
+      );
+    }
+
+    if (initAlphaVaultTx) {
+      console.log(`>> Sending init alpha vault transaction...`);
+      const initAlphaVaulTxHash = await sendAndConfirmTransaction(
+        connection,
+        initAlphaVaultTx,
+        [wallet.payer],
+      ).catch((err) => {
+        console.error(err);
+        throw err;
+      });
+      console.log(
+        `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
+      );
+    }
+  } else {
+    if (!config.skipCreatePool) {
+      console.log(`\n> Simulating init pool tx...`);
+      await runSimulateTransaction(connection, wallet, [initPoolTx]);
+    }
+
+    if (initAlphaVaultTx) {
+      console.log(`\n> Simulating init alpha vault tx...`);
+      await runSimulateTransaction(connection, wallet, [initAlphaVaultTx]);
+    }
+  }
+}
+
+async function createAndMintToken(
+  connection: Connection,
+  wallet: Wallet,
+  mintDecimals: number,
+  mintAmountLamport: BN,
+): Promise<PublicKey> {
+  const mint = await createMint(
+    connection,
+    wallet.payer,
+    wallet.publicKey,
+    null,
+    mintDecimals,
+  );
+
+  const walletTokenATA = await getOrCreateAssociatedTokenAccount(
+    connection,
+    wallet.payer,
+    mint,
+    wallet.publicKey,
+    true,
+  );
+  await mintTo(
+    connection,
+    wallet.payer,
+    mint,
+    walletTokenATA.address,
+    wallet.publicKey,
+    mintAmountLamport,
+    [],
+    {
+      commitment: DEFAULT_COMMITMENT_LEVEL,
+    },
+  );
+
+  return mint;
+}
+
+async function createFcfsAlphaVault(
+  connection: Connection,
+  wallet: Wallet,
+  poolType: PoolType,
+  poolAddress: PublicKey,
+  baseMint: PublicKey,
+  quoteMint: PublicKey,
+  quoteDecimals: number,
+  params: FcfsAlphaVaultConfig,
+): Promise<Transaction> {
+  let maxDepositingCap = getAmountInLamports(
+    params.maxDepositCap,
+    quoteDecimals,
+  );
+  let individualDepositingCap = getAmountInLamports(
+    params.individualDepositingCap,
+    quoteDecimals,
+  );
+  let escrowFee = getAmountInLamports(params.escrowFee, quoteDecimals);
+  let whitelistMode = getAlphaVaultWhitelistMode(params.whitelistMode);
+
+  console.log(`\n> Initializing FcfsAlphaVault...`);
+  console.log(`- Using poolType: ${poolType}`);
+  console.log(`- Using poolMint ${poolAddress}`);
+  console.log(`- Using baseMint ${baseMint}`);
+  console.log(`- Using quoteMint ${quoteMint}`);
+  console.log(`- Using depositingPoint ${params.depositingPoint}`);
+  console.log(`- Using startVestingPoint ${params.startVestingPoint}`);
+  console.log(`- Using endVestingPoint ${params.endVestingPoint}`);
+  console.log(
+    `- Using maxDepositingCap ${params.maxDepositCap}. In lamports ${maxDepositingCap}`,
+  );
+  console.log(
+    `- Using individualDepositingCap ${params.individualDepositingCap}. In lamports ${individualDepositingCap}`,
+  );
+  console.log(
+    `- Using escrowFee ${params.escrowFee}. In lamports ${escrowFee}`,
+  );
+  console.log(
+    `- Using whitelistMode ${params.whitelistMode}. In value ${whitelistMode}`,
+  );
+
+  const tx = await AlphaVault.createCustomizableFcfsVault(
+    connection,
+    {
+      quoteMint,
+      baseMint,
+      poolAddress,
+      poolType,
+      depositingPoint: new BN(params.depositingPoint),
+      startVestingPoint: new BN(params.startVestingPoint),
+      endVestingPoint: new BN(params.endVestingPoint),
+      maxDepositingCap,
+      individualDepositingCap,
+      escrowFee,
+      whitelistMode,
+    },
+    wallet.publicKey,
+    {
+      cluster: "mainnet-beta",
+    },
+  );
+  return tx;
+}
+
+async function createProrataAlphaVault(
+  connection: Connection,
+  wallet: Wallet,
+  poolType: PoolType,
+  poolAddress: PublicKey,
+  baseMint: PublicKey,
+  quoteMint: PublicKey,
+  quoteDecimals: number,
+  params: ProrataAlphaVaultConfig,
+): Promise<Transaction> {
+  let maxBuyingCap = getAmountInLamports(params.maxBuyingCap, quoteDecimals);
+  let escrowFee = getAmountInLamports(params.escrowFee, quoteDecimals);
+  let whitelistMode = getAlphaVaultWhitelistMode(params.whitelistMode);
+
+  console.log(`\n> Initializing ProrataAlphaVault...`);
+  console.log(`- Using poolType: ${poolType}`);
+  console.log(`- Using poolMint ${poolAddress}`);
+  console.log(`- Using baseMint ${baseMint}`);
+  console.log(`- Using quoteMint ${quoteMint}`);
+  console.log(`- Using depositingPoint ${params.depositingPoint}`);
+  console.log(`- Using startVestingPoint ${params.startVestingPoint}`);
+  console.log(`- Using endVestingPoint ${params.endVestingPoint}`);
+  console.log(
+    `- Using maxBuyingCap ${params.maxBuyingCap}. In lamports ${maxBuyingCap}`,
+  );
+  console.log(
+    `- Using escrowFee ${params.escrowFee}. In lamports ${escrowFee}`,
+  );
+  console.log(
+    `- Using whitelistMode ${params.whitelistMode}. In value ${whitelistMode}`,
+  );
+
+  const tx = await AlphaVault.createCustomizableProrataVault(
+    connection,
+    {
+      quoteMint,
+      baseMint,
+      poolAddress,
+      poolType,
+      depositingPoint: new BN(params.depositingPoint),
+      startVestingPoint: new BN(params.startVestingPoint),
+      endVestingPoint: new BN(params.endVestingPoint),
+      maxBuyingCap,
+      escrowFee,
+      whitelistMode,
+    },
+    wallet.publicKey,
+    {
+      cluster: "mainnet-beta",
+    },
+  );
+  return tx;
 }
 
 main();
