@@ -8,8 +8,7 @@
   "dlmm": {
     "binStep": 20,
     "feeBps": 200,
-    "minPrice": 0.0000017,
-    "maxPrice": 0.000003,
+    "initialPrice": 0.0000017,
     "activationType": "slot",
     "activationPoint": null
   }

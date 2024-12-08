@@ -288,7 +288,7 @@ async function createPermissionlessDynamicPool(
 
     console.log(`- Using binStep = ${binStep}`);
     console.log(`- Using feeBps = ${feeBps}`);
-    console.log(`- Using minPrice = ${config.dlmm.minPrice}`);
+    console.log(`- Using initialPrice = ${config.dlmm.initialPrice}`);
     console.log(`- Using activationType = ${config.dlmm.activationType}`);
     console.log(`- Using activationPoint = ${activationPoint}`);
     console.log(`- Using hasAlphaVault = ${hasAlphaVault}`);
@@ -298,8 +298,8 @@ async function createPermissionlessDynamicPool(
       10 ** (config.baseDecimals - quoteDecimals),
     );
 
-    const minBinId = DLMM.getBinIdFromPrice(
-      new Decimal(config.dlmm.minPrice).mul(toLamportMultiplier),
+    const activateBinId = DLMM.getBinIdFromPrice(
+      new Decimal(config.dlmm.initialPrice).mul(toLamportMultiplier),
       binStep,
       false,
     );
@@ -309,7 +309,7 @@ async function createPermissionlessDynamicPool(
       new BN(binStep),
       baseMint,
       quoteMint,
-      new BN(minBinId.toString()),
+      new BN(activateBinId.toString()),
       new BN(feeBps),
       activationType,
       hasAlphaVault,

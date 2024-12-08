@@ -41,8 +41,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 ### DLMM configuration
 - `binStep`: DLMM pool bin step.
 - `feeBps`: Fee bps for DLMM pool.
-- `minPrice`: Min pool price.
-- `maxPrice`: Max pool price.
+- `initialPrice`: Initial pool price.
 - `activationType`: To activate pool trading base on `slot` or `timestamp`.
 - `activationPoint`: To activate pool trading at a point, either slot valut or timestamp value base on `activationType`.
 

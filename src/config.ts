@@ -28,8 +28,7 @@ export interface DynamicAmmConfig {
 export interface DlmmConfig {
   binStep: number;
   feeBps: number;
-  minPrice: number;
-  maxPrice: number;
+  initialPrice: number;
   activationType: string;
   activationPoint: number | null;
 }

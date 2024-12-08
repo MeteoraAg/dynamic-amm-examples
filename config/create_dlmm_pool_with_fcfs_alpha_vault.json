@@ -9,8 +9,7 @@
   "dlmm": {
     "binStep": 100,
     "feeBps": 100,
-    "minPrice": 0.003393,
-    "maxPrice": 0.0035,
+    "initialPrice": 0.003393,
     "activationType": "timestamp",
     "activationPoint": 1733633490
   },
