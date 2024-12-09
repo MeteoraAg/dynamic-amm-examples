@@ -20,6 +20,7 @@ import {
   ProrataAlphaVaultConfig,
   getAlphaVaultWhitelistMode,
   validate_config,
+  parseConfigFromCli,
 } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
@@ -33,9 +34,7 @@ import {
   mintTo,
 } from "@solana/spl-token";
 import { BN } from "bn.js";
-import AlphaVault, {
-  PoolType,
-} from "@meteora-ag/alpha-vault";
+import AlphaVault, { PoolType } from "@meteora-ag/alpha-vault";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
 import DLMM, {
   LBCLMM_PROGRAM_IDS,
@@ -44,15 +43,7 @@ import DLMM, {
 import Decimal from "decimal.js";
 
 async function main() {
-  const cliArguments = parseCliArguments();
-  if (!cliArguments.config) {
-    throw new Error("Please provide a config file path to --config flag");
-  }
-  const configFilePath = cliArguments.config!;
-  console.log(`> Using config file: ${configFilePath}`);
-
-  let config: MeteoraConfig = safeParseJsonFromFile(configFilePath);
-  validate_config(config);
+  let config: MeteoraConfig = parseConfigFromCli();
 
   console.log(`> Using keypair file path ${config.keypairFilePath}`);
   let keypair = safeParseKeypairFromFile(config.keypairFilePath);
@@ -70,7 +61,6 @@ async function main() {
 
   let baseMint: PublicKey;
   let quoteMint = getQuoteMint(config.quoteSymbol);
-
 
   // If we want to create a new token mint
   if (config.createBaseToken && !config.dryRun) {

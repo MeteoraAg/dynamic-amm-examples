@@ -1,3 +1,9 @@
+import {
+  parseCliArguments,
+  safeParseJsonFromFile,
+  validate_config,
+} from "./utils";
+
 export interface MeteoraConfig {
   rpcUrl: string;
   dryRun: boolean;
@@ -65,4 +71,19 @@ export interface ProrataAlphaVaultConfig {
   escrowFee: number;
   // whitelist mode: permissionless / permission_with_merkle_proof / permission_with_authority
   whitelistMode: string;
+}
+
+/// Parse and validate config from CLI
+export function parseConfigFromCli(): MeteoraConfig {
+  const cliArguments = parseCliArguments();
+  if (!cliArguments.config) {
+    throw new Error("Please provide a config file path to --config flag");
+  }
+  const configFilePath = cliArguments.config!;
+  console.log(`> Using config file: ${configFilePath}`);
+
+  let config: MeteoraConfig = safeParseJsonFromFile(configFilePath);
+  validate_config(config);
+
+  return config;
 }
