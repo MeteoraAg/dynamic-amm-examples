@@ -19,11 +19,6 @@ import {
   getAssociatedTokenAccount,
 } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
 import { BN } from "bn.js";
-import AlphaVault, { PoolType } from "@meteora-ag/alpha-vault";
-import {
-  LBCLMM_PROGRAM_IDS,
-  deriveCustomizablePermissionlessLbPair,
-} from "@meteora-ag/dlmm";
 import AmmImpl from "@mercurial-finance/dynamic-amm-sdk";
 import { SEEDS } from "@mercurial-finance/dynamic-amm-sdk/src/amm/constants";
 

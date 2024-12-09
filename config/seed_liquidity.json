@@ -1,0 +1,15 @@
+{
+  "rpcUrl": "https://api.mainnet-beta.solana.com",
+  "dryRun": true,
+  "keypairFilePath": "keypair.json",
+  "baseMint": "TNSRxcUxoT9xBG3de7PiJyTDYu7kskLqcpddxnEJAS6",
+  "quoteSymbol": "SOL",
+  "baseDecimals": 9,
+  "dlmmSeedLiquidity": {
+    "minPrice": 0.003393,
+    "maxPrice": 0.004393,
+    "binStep": 100,
+    "curvature": 0.6,
+    "seedAmount": "1"
+  }
+}

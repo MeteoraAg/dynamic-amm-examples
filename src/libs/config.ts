@@ -16,6 +16,7 @@ export interface MeteoraConfig {
   dlmm: DlmmConfig | null;
   alphaVault: FcfsAlphaVaultConfig | ProrataAlphaVaultConfig | null;
   lockLiquidity: LockLiquidityConfig | null;
+  dlmmSeedLiquidity: DlmmSeedLiquidityConfig | null;
 }
 
 export interface CreateBaseMintConfig {
@@ -81,6 +82,14 @@ export interface LockLiquidityConfig {
 export interface LockLiquidityAllocation {
   percentage: number;
   address: string;
+}
+
+export interface DlmmSeedLiquidityConfig {
+  minPrice: number;
+  maxPrice: number;
+  binStep: number;
+  curvature: number;
+  seedAmount: string;
 }
 
 /// Parse and validate config from CLI
