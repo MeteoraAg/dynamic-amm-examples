@@ -41,6 +41,7 @@ import DLMM, {
   deriveCustomizablePermissionlessLbPair,
 } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
+import { createTokenMint } from "./create_token_mint";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -63,28 +64,18 @@ async function main() {
   let quoteMint = getQuoteMint(config.quoteSymbol);
 
   // If we want to create a new token mint
-  if (config.createBaseToken && !config.dryRun) {
-    console.log("\n> Minting base token...");
+  if (config.createBaseToken) {
     if (!config.createBaseToken.mintBaseTokenAmount) {
       throw new Error("Missing mintBaseTokenAmount in configuration");
     }
-    const baseMintAmount = getAmountInLamports(
-      config.createBaseToken.mintBaseTokenAmount,
-      config.baseDecimals,
-    );
-
-    baseMint = await createAndMintToken(
-      connection,
-      wallet,
-      config.baseDecimals,
-      baseMintAmount,
-    );
-
-    console.log(
-      `>> Mint ${config.createBaseToken.mintBaseTokenAmount} token to payer wallet. In lamport ${baseMintAmount}`,
-    );
-  } else if (config.createBaseToken && config.dryRun) {
-    throw new Error("cannot create base token mint when in dry run mode");
+    if (!config.baseDecimals) {
+      throw new Error("Missing baseDecimals in configuration");
+    }
+    baseMint = await createTokenMint(connection, wallet, {
+      dryRun: config.dryRun,
+      mintTokenAmount: config.createBaseToken.mintBaseTokenAmount,
+      decimals: config.baseDecimals
+    });
   } else {
     if (!config.baseMint) {
       throw new Error("Missing baseMint in configuration");
