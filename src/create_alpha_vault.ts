@@ -48,29 +48,12 @@ async function main() {
     commitment: connection.commitment,
   });
 
-  let baseMint: PublicKey;
+  if (!config.baseMint) {
+    throw new Error("Missing baseMint in configuration");
+  }
+  const baseMint = new PublicKey(config.baseMint);
   let quoteMint = getQuoteMint(config.quoteSymbol);
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
-
-  // If we want to create a new token mint
-  if (config.createBaseToken) {
-    if (!config.createBaseToken.mintBaseTokenAmount) {
-      throw new Error("Missing mintBaseTokenAmount in configuration");
-    }
-    if (!config.baseDecimals) {
-      throw new Error("Missing baseDecimals in configuration");
-    }
-    baseMint = await createTokenMint(connection, wallet, {
-      dryRun: config.dryRun,
-      mintTokenAmount: config.createBaseToken.mintBaseTokenAmount,
-      decimals: config.baseDecimals,
-    });
-  } else {
-    if (!config.baseMint) {
-      throw new Error("Missing baseMint in configuration");
-    }
-    baseMint = new PublicKey(config.baseMint);
-  }
 
   console.log(`- Using base token mint ${baseMint.toString()}`);
   console.log(`- Using quote token mint ${quoteMint.toString()}`);
