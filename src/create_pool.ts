@@ -1,14 +1,11 @@
 import {
   Connection,
   PublicKey,
-  Transaction,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import {
   DEFAULT_COMMITMENT_LEVEL,
   MeteoraConfig,
-  safeParseJsonFromFile,
-  parseCliArguments,
   getAmountInLamports,
   getQuoteMint,
   getQuoteDecimals,
@@ -16,10 +13,6 @@ import {
   runSimulateTransaction,
   getDynamicAmmActivationType,
   getDlmmActivationType,
-  FcfsAlphaVaultConfig,
-  ProrataAlphaVaultConfig,
-  getAlphaVaultWhitelistMode,
-  validate_config,
   parseConfigFromCli,
 } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
@@ -28,20 +21,14 @@ import {
   createProgram,
   deriveCustomizablePermissionlessConstantProductPoolAddress,
 } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
-import {
-  createMint,
-  getOrCreateAssociatedTokenAccount,
-  mintTo,
-} from "@solana/spl-token";
 import { BN } from "bn.js";
-import AlphaVault, { PoolType } from "@meteora-ag/alpha-vault";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
 import DLMM, {
   LBCLMM_PROGRAM_IDS,
   deriveCustomizablePermissionlessLbPair,
 } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
-import { createTokenMint } from "./create_token_mint";
+import { createTokenMint } from "./libs/create_token_mint";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();

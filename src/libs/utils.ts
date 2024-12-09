@@ -21,7 +21,7 @@ import {
   PoolType,
   WhitelistMode,
 } from "@meteora-ag/alpha-vault";
-import { MeteoraConfig } from ".";
+import { MeteoraConfig } from "..";
 
 export function validate_config(config: MeteoraConfig) {
   if (!config.keypairFilePath) {

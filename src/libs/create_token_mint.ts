@@ -1,6 +1,6 @@
 import { Wallet } from "@coral-xyz/anchor";
 import { Connection, PublicKey } from "@solana/web3.js";
-import { DEFAULT_COMMITMENT_LEVEL, getAmountInLamports } from ".";
+import { DEFAULT_COMMITMENT_LEVEL, getAmountInLamports } from "..";
 import { BN } from "bn.js";
 import {
   createMint,
