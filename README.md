@@ -89,6 +89,11 @@ Then run
 bun run src/create_alpha_vault.ts --config ./config/create_dlmm_pool_with_fcfs_alpha_vault.json
 ```
 
+** Lock liquidity for Dynamic AMM pool**
+```bash
+bun run src/lock_liquidity.ts --config ./config/lock_liquidity.json
+```
+
 ## After deployment
 To view pool on the UI, access the links below
 - For Dynamic AMM pool: `https://app.meteora.ag/pools/<POOL_ADDRESS>`
