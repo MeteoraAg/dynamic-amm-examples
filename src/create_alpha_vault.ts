@@ -7,42 +7,29 @@ import {
 import {
   DEFAULT_COMMITMENT_LEVEL,
   MeteoraConfig,
-  safeParseJsonFromFile,
-  parseCliArguments,
   getAmountInLamports,
   getQuoteMint,
   getQuoteDecimals,
   safeParseKeypairFromFile,
   runSimulateTransaction,
-  getDynamicAmmActivationType,
-  getDlmmActivationType,
   FcfsAlphaVaultConfig,
   ProrataAlphaVaultConfig,
   getAlphaVaultWhitelistMode,
-  validate_config,
   parseConfigFromCli,
   getAlphaVaultPoolType,
 } from ".";
-import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import {
   createProgram,
   deriveCustomizablePermissionlessConstantProductPoolAddress,
 } from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
-import {
-  createMint,
-  getOrCreateAssociatedTokenAccount,
-  mintTo,
-} from "@solana/spl-token";
 import { BN } from "bn.js";
 import AlphaVault, { PoolType } from "@meteora-ag/alpha-vault";
-import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
-import DLMM, {
+import {
   LBCLMM_PROGRAM_IDS,
   deriveCustomizablePermissionlessLbPair,
 } from "@meteora-ag/dlmm";
-import Decimal from "decimal.js";
-import { createTokenMint } from "./create_token_mint";
+import { createTokenMint } from "./";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
