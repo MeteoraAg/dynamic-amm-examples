@@ -2,7 +2,11 @@ import { Wallet } from "@coral-xyz/anchor";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { DEFAULT_COMMITMENT_LEVEL, getAmountInLamports } from ".";
 import { BN } from "bn.js";
-import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
+import {
+  createMint,
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
+} from "@solana/spl-token";
 
 export interface CreateTokenMintOptions {
   dryRun: boolean;
@@ -10,8 +14,12 @@ export interface CreateTokenMintOptions {
   decimals: number;
 }
 
-export async function createTokenMint(connection: Connection, wallet: Wallet, options: CreateTokenMintOptions): Promise<PublicKey> {
-  if (!options.dryRun) {
+export async function createTokenMint(
+  connection: Connection,
+  wallet: Wallet,
+  options: CreateTokenMintOptions,
+): Promise<PublicKey> {
+  if (options.dryRun) {
     throw new Error("cannot create token mint when in dry run mode");
   }
 

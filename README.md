@@ -18,8 +18,6 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `baseMint`: Base token address if the `createBaseToken` field is not set. 
 - `quoteSymbol`: Quote token symbol, only `SOL` or `USDC` is supported.
 - `baseDecimals`: Base token decimal.
-- `alphaVaultType`: Alpha vault configuration is we want to deploy alpha vault after pool creation.
-- `skipCreatePool`: Set to true to skip sending / simulating transaction to create pool.
 - `dynamicAmm`: Dynamic AMM pool configuration.
 - `dlmm`: DLMM pool configuration.
 - `alphaVault`: Fcfs or Prorata Alpha Vault configuration.
@@ -46,6 +44,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `activationPoint`: To activate pool trading at a point, either slot valut or timestamp value base on `activationType`.
 
 ### Alpha Vault configuration
+- `poolType`: `dynamic` or `dlmm` pool type.
 - `alphaVaultType`: Alpha Vault type, could be `fcfs` or `prorata`
 - `depositingPoint`: Absolute value that, the slot or timestamp that allows deposit depend on the pool activation type.
 - `startVestingPoint`: Absolute value, the slot or timestamp that start vesting depend on the pool activation type. 
@@ -64,9 +63,30 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `whitelistMode`: `permissionless` or `permission_with_merkle_proof` or `permission_with_authority`.
 
 ## Run the scripts
-Run the script with config file specified in the CLI, for example:
+Run the script with config file specified in the CLI, some examples:
+
+** Create dynamic AMM pool**
 ```bash
-bun run src/create_pool --config ./config/create_dynamic_amm_pool.json
+bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool.json
+```
+
+** Create dynamic AMM pool with new token mint**
+```bash
+bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool_with_new_token.json
+```
+
+** Create new DLMM pool**
+```bash
+bun run src/create_pool.ts --config ./config/create_dlmm_pool.json
+```
+
+** Create new DLMM pool with alpha vault**
+```bash
+bun run src/create_pool.ts --config ./config/create_dlmm_pool_with_fcfs_alpha_vault.json
+```
+Then run
+```bash
+bun run src/create_alpha_vault.ts --config ./config/create_dlmm_pool_with_fcfs_alpha_vault.json
 ```
 
 ## After deployment

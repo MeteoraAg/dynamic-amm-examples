@@ -52,6 +52,15 @@ export function validate_config(config: MeteoraConfig) {
         `Alpha vault type ${config.alphaVault.alphaVaultType} isn't supported.`,
       );
     }
+
+    if (
+      config.alphaVault.poolType != "dynamic" &&
+      config.alphaVault.poolType != "dlmm"
+    ) {
+      throw new Error(
+        `Alpha vault pool tyep ${config.alphaVault.poolType} isn't supported.`,
+      );
+    }
   }
 }
 

@@ -13,6 +13,7 @@
     "activationPoint": null
   },
   "alphaVault": {
+    "poolType": "dynamic",
     "alphaVaultType": "fcfs",
     "depositingPoint": 1733547099,
     "startVestingPoint": 1733548099,

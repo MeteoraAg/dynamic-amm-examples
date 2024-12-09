@@ -12,8 +12,6 @@ export interface MeteoraConfig {
   baseMint: string | null;
   quoteSymbol: string;
   baseDecimals: number;
-  // If we want to skip the create pool transaction / simulation, set it to true
-  skipCreatePool: boolean;
   dynamicAmm: DynamicAmmConfig | null;
   dlmm: DlmmConfig | null;
   alphaVault: FcfsAlphaVaultConfig | ProrataAlphaVaultConfig | null;
@@ -40,6 +38,7 @@ export interface DlmmConfig {
 }
 
 export interface FcfsAlphaVaultConfig {
+  poolType: string;
   alphaVaultType: string;
   // absolute value, depend on the pool activation type it will be the timestamp in secs or the slot number
   depositingPoint: number;
@@ -58,6 +57,7 @@ export interface FcfsAlphaVaultConfig {
 }
 
 export interface ProrataAlphaVaultConfig {
+  poolType: string;
   alphaVaultType: string;
   // absolute value, depend on the pool activation type it will be the timestamp in secs or the slot number
   depositingPoint: number;
