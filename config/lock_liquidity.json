@@ -1,0 +1,20 @@
+{
+  "rpcUrl": "https://api.mainnet-beta.solana.com",
+  "dryRun": true,
+  "keypairFilePath": "keypair.json",
+  "baseMint": "5mbK36SZ7J19An8jFochhQS4of8g6BwUjbeCSxBSoWdp",
+  "quoteSymbol": "SOL",
+  "baseDecimals": 6,
+  "lockLiquidity": {
+    "allocations": [
+      {
+        "percentage": 80,
+        "address": "ETp2wTykSe3iGYzPCn6upP8NVB7a1pe6WTZidGNJH7KC"
+      },
+      {
+        "percentage": 20,
+        "address": "5V4VoBrFZRzaPqrxKu5yGApLgQhEfE64NnZN1kGzZYpz"
+      }
+    ]
+  }
+}

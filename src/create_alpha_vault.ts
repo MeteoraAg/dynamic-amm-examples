@@ -29,7 +29,6 @@ import {
   LBCLMM_PROGRAM_IDS,
   deriveCustomizablePermissionlessLbPair,
 } from "@meteora-ag/dlmm";
-import { createTokenMint } from "./";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();

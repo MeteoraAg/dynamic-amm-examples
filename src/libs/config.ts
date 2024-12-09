@@ -15,6 +15,7 @@ export interface MeteoraConfig {
   dynamicAmm: DynamicAmmConfig | null;
   dlmm: DlmmConfig | null;
   alphaVault: FcfsAlphaVaultConfig | ProrataAlphaVaultConfig | null;
+  lockLiquidity: LockLiquidityConfig | null;
 }
 
 export interface CreateBaseMintConfig {
@@ -71,6 +72,15 @@ export interface ProrataAlphaVaultConfig {
   escrowFee: number;
   // whitelist mode: permissionless / permission_with_merkle_proof / permission_with_authority
   whitelistMode: string;
+}
+
+export interface LockLiquidityConfig {
+  allocations: LockLiquidityAllocation[];
+}
+
+export interface LockLiquidityAllocation {
+  percentage: number;
+  address: string;
 }
 
 /// Parse and validate config from CLI
