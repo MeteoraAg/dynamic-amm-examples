@@ -110,7 +110,12 @@ async function main() {
 
       const signers = [keypair, baseKeypair];
 
-      transactions.push(sendAndConfirmTransaction(connection, tx, signers));
+      if (config.dryRun) {
+        console.log(`\n> Simulating initializeBinArraysAndPositionIxs tx...`);
+        await runSimulateTransaction(connection, wallet, [tx]);
+      } else {
+        transactions.push(sendAndConfirmTransaction(connection, tx, signers));
+      }
     }
 
     await Promise.all(transactions)
@@ -143,7 +148,12 @@ async function main() {
 
       const signers = [keypair];
 
-      transactions.push(sendAndConfirmTransaction(connection, tx, signers));
+      if (config.dryRun) {
+        console.log(`\n> Simulating addLiquidityIxs tx...`);
+        await runSimulateTransaction(connection, wallet, [tx]);
+      } else {
+        transactions.push(sendAndConfirmTransaction(connection, tx, signers));
+      }
     }
 
     await Promise.all(transactions)
