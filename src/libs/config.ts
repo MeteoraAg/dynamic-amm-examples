@@ -162,6 +162,24 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         "basePositionKeypairFilepath",
       ],
     },
+    singleBinSeedLiquidity: {
+      type: "object",
+      nullable: true,
+      properties: {
+        price: { type: "number" },
+        selectiveRounding: { type: "string" },
+        seedAmount: { type: "string" },
+        basePositionKey: { type: "string" },
+        basePositionKeypairFilepath: { type: "string" },
+      },
+      required: [
+        "price",
+        "selectiveRounding",
+        "seedAmount",
+        "basePositionKey",
+        "basePositionKeypairFilepath",
+      ],
+    },
   },
   required: ["rpcUrl", "dryRun", "keypairFilePath"],
   additionalProperties: true,
@@ -180,6 +198,7 @@ export interface MeteoraConfig {
   alphaVault: FcfsAlphaVaultConfig | ProrataAlphaVaultConfig | null;
   lockLiquidity: LockLiquidityConfig | null;
   lfgSeedLiquidity: LfgSeedLiquidityConfig | null;
+  singleBinSeedLiquidity: SingleBinSeedLiquidityConfig | null;
 }
 
 export interface CreateBaseMintConfig {
@@ -257,7 +276,13 @@ export interface LfgSeedLiquidityConfig {
   basePositionKeypairFilepath: string;
 }
 
-export interface SingleBinSeedLiquidityConfig {}
+export interface SingleBinSeedLiquidityConfig {
+  price: number;
+  selectiveRounding: string;
+  seedAmount: string;
+  basePositionKey: string;
+  basePositionKeypairFilepath: string;
+}
 
 /// Parse and validate config from CLI
 export function parseConfigFromCli(): MeteoraConfig {

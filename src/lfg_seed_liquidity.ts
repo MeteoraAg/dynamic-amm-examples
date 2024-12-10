@@ -58,12 +58,10 @@ async function main() {
     quoteMint,
     new PublicKey(LBCLMM_PROGRAM_IDS["mainnet-beta"]),
   );
+  console.log(`- Using pool key ${poolKey.toString()}`);
 
   if (!config.lfgSeedLiquidity) {
     throw new Error(`Missing DLMM LFG seed liquidity in configuration`);
-  }
-  if (!config.lfgSeedLiquidity.basePositionKeypairFilepath) {
-    throw new Error(`Missing basePositionKeypairFilepath in configuration`);
   }
 
   const pair = await DLMM.create(connection, poolKey, {
@@ -79,6 +77,9 @@ async function main() {
   const maxPrice = config.lfgSeedLiquidity.maxPrice;
   const basePositionKey = new PublicKey(
     config.lfgSeedLiquidity.basePositionKey,
+  );
+  const baseKeypair = safeParseKeypairFromFile(
+    config.lfgSeedLiquidity.basePositionKeypairFilepath,
   );
 
   const { initializeBinArraysAndPositionIxs, addLiquidityIxs } =
