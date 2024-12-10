@@ -16,6 +16,7 @@
     "@solana/spl-token": "^0.4.9",
     "@solana/spl-token-registry": "^0.2.4574",
     "@solana/web3.js": "^1.95.8",
+    "ajv": "^8.17.1",
     "bn.js": "^5.2.1",
     "decimal.js": "^10.4.3"
   },

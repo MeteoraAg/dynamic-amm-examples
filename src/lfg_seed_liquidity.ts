@@ -13,18 +13,10 @@ import {
   getQuoteDecimals,
   safeParseKeypairFromFile,
   runSimulateTransaction,
-  getDynamicAmmActivationType,
-  getDlmmActivationType,
   parseConfigFromCli,
 } from ".";
-import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
-import {
-  createProgram,
-  deriveCustomizablePermissionlessConstantProductPoolAddress,
-} from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
 import { BN } from "bn.js";
-import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
 import DLMM, {
   LBCLMM_PROGRAM_IDS,
   deriveCustomizablePermissionlessLbPair,
@@ -32,7 +24,6 @@ import DLMM, {
   getPriceOfBinByBinId,
 } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
-import { createTokenMint } from "./libs/create_token_mint";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -68,8 +59,11 @@ async function main() {
     new PublicKey(LBCLMM_PROGRAM_IDS["mainnet-beta"]),
   );
 
-  if (!config.dlmmSeedLiquidity) {
-    throw new Error(`Missing DLMM seed liquidity in configuration`);
+  if (!config.lfgSeedLiquidity) {
+    throw new Error(`Missing DLMM LFG seed liquidity in configuration`);
+  }
+  if (!config.lfgSeedLiquidity.basePositionKeypairFilepath) {
+    throw new Error(`Missing basePositionKeypairFilepath in configuration`);
   }
 
   const pair = await DLMM.create(connection, poolKey, {
@@ -77,22 +71,24 @@ async function main() {
   });
 
   const seedAmount = getAmountInLamports(
-    config.dlmmSeedLiquidity.seedAmount,
+    config.lfgSeedLiquidity.seedAmount,
     config.baseDecimals,
   );
-  const curvature = config.dlmmSeedLiquidity.curvature;
-  const minPrice = config.dlmmSeedLiquidity.minPrice;
-  const maxPrice = config.dlmmSeedLiquidity.maxPrice;
-  const baseKeypair = Keypair.generate();
+  const curvature = config.lfgSeedLiquidity.curvature;
+  const minPrice = config.lfgSeedLiquidity.minPrice;
+  const maxPrice = config.lfgSeedLiquidity.maxPrice;
+  const basePositionKey = new PublicKey(
+    config.lfgSeedLiquidity.basePositionKey,
+  );
 
   const { initializeBinArraysAndPositionIxs, addLiquidityIxs } =
     await pair.seedLiquidity(
-      keypair.publicKey,
+      wallet.publicKey,
       seedAmount,
       curvature,
       minPrice,
       maxPrice,
-      baseKeypair.publicKey,
+      basePositionKey,
     );
 
   // Initialize all bin array and position, transaction order can be in sequence or not

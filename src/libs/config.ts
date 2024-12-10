@@ -3,6 +3,169 @@ import {
   safeParseJsonFromFile,
   validate_config,
 } from "./utils";
+import Ajv, { JSONSchemaType } from "ajv";
+
+const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
+  type: "object",
+  properties: {
+    rpcUrl: {
+      type: "string",
+    },
+    dryRun: {
+      type: "boolean",
+    },
+    keypairFilePath: {
+      type: "string",
+    },
+    createBaseToken: {
+      type: "object",
+      nullable: true,
+      properties: {
+        mintBaseTokenAmount: {
+          anyOf: [{ type: "number" }, { type: "string" }],
+        },
+      },
+      required: ["mintBaseTokenAmount"],
+      additionalProperties: false,
+    },
+    baseMint: {
+      type: "string",
+      nullable: true,
+    },
+    quoteSymbol: {
+      type: "string",
+    },
+    baseDecimals: {
+      type: "number",
+    },
+    dynamicAmm: {
+      type: "object",
+      nullable: true,
+      properties: {
+        baseAmount: {
+          anyOf: [{ type: "number" }, { type: "string" }],
+        },
+        quoteAmount: {
+          anyOf: [{ type: "number" }, { type: "string" }],
+        },
+        tradeFeeNumerator: {
+          type: "number",
+        },
+        activationType: {
+          type: "string",
+        },
+        activationPoint: {
+          type: "number",
+          nullable: true,
+        },
+      },
+      required: [
+        "baseAmount",
+        "quoteAmount",
+        "tradeFeeNumerator",
+        "activationType",
+      ],
+      additionalProperties: false,
+    },
+    dlmm: {
+      type: "object",
+      nullable: true,
+      properties: {
+        binStep: {
+          type: "number",
+        },
+        feeBps: {
+          type: "number",
+        },
+        initialPrice: {
+          type: "number",
+        },
+        activationType: {
+          type: "string",
+        },
+        activationPoint: {
+          type: "number",
+          nullable: true,
+        },
+      },
+      required: ["binStep", "feeBps", "initialPrice", "activationType"],
+      additionalProperties: false,
+    },
+    alphaVault: {
+      type: "object",
+      nullable: true,
+      properties: {
+        poolType: { type: "string" },
+        alphaVaultType: { type: "string" },
+        depositingPoint: { type: "number" },
+        startVestingPoint: { type: "number" },
+        endVestingPoint: { type: "number" },
+        maxDepositCap: { type: "number", nullable: true },
+        individualDepositingCap: { type: "number", nullable: true },
+        maxBuyingCap: { type: "number", nullable: true },
+        escrowFee: { type: "number" },
+        whitelistMode: { type: "string" },
+      },
+      required: [
+        "poolType",
+        "alphaVaultType",
+        "depositingPoint",
+        "startVestingPoint",
+        "endVestingPoint",
+        "escrowFee",
+        "whitelistMode",
+      ],
+    },
+    lockLiquidity: {
+      type: "object",
+      nullable: true,
+      properties: {
+        alllocations: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              percentage: {
+                type: "number",
+              },
+              address: {
+                type: "string",
+              },
+            },
+            required: ["percentage", "address"],
+          },
+        },
+      },
+      required: ["allocations"],
+    },
+    lfgSeedLiquidity: {
+      type: "object",
+      nullable: true,
+      properties: {
+        minPrice: {
+          type: "number",
+        },
+        maxPrice: { type: "number" },
+        binStep: { type: "number" },
+        curvature: { type: "number" },
+        seedAmount: { type: "string" },
+        basePositionKey: { type: "string" },
+        basePositionKeypairFilepath: { type: "string" },
+      },
+      required: [
+        "minPrice",
+        "maxPrice",
+        "binStep",
+        "curvature",
+        "seedAmount",
+        "basePositionKey",
+        "basePositionKeypairFilepath",
+      ],
+    },
+  },
+  required: ["rpcUrl", "dryRun", "keypairFilePath"],
+  additionalProperties: true,
+};
 
 export interface MeteoraConfig {
   rpcUrl: string;
@@ -16,7 +179,7 @@ export interface MeteoraConfig {
   dlmm: DlmmConfig | null;
   alphaVault: FcfsAlphaVaultConfig | ProrataAlphaVaultConfig | null;
   lockLiquidity: LockLiquidityConfig | null;
-  dlmmSeedLiquidity: DlmmSeedLiquidityConfig | null;
+  lfgSeedLiquidity: LfgSeedLiquidityConfig | null;
 }
 
 export interface CreateBaseMintConfig {
@@ -84,16 +247,21 @@ export interface LockLiquidityAllocation {
   address: string;
 }
 
-export interface DlmmSeedLiquidityConfig {
+export interface LfgSeedLiquidityConfig {
   minPrice: number;
   maxPrice: number;
   binStep: number;
   curvature: number;
   seedAmount: string;
+  basePositionKey: string;
+  basePositionKeypairFilepath: string;
 }
+
+export interface SingleBinSeedLiquidityConfig {}
 
 /// Parse and validate config from CLI
 export function parseConfigFromCli(): MeteoraConfig {
+  const ajv = new Ajv();
   const cliArguments = parseCliArguments();
   if (!cliArguments.config) {
     throw new Error("Please provide a config file path to --config flag");
@@ -101,7 +269,16 @@ export function parseConfigFromCli(): MeteoraConfig {
   const configFilePath = cliArguments.config!;
   console.log(`> Using config file: ${configFilePath}`);
 
+  const validate = ajv.compile(CONFIG_SCHEMA);
+
   let config: MeteoraConfig = safeParseJsonFromFile(configFilePath);
+
+  const isValid = validate(config);
+  if (!isValid) {
+    console.error(validate.errors);
+    throw new Error("Config file is invalid");
+  }
+
   validate_config(config);
 
   return config;
