@@ -17,18 +17,15 @@ import {
 } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
-import {
-  createProgram,
-  deriveCustomizablePermissionlessConstantProductPoolAddress,
-} from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
 import { BN } from "bn.js";
-import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
 import DLMM, {
   LBCLMM_PROGRAM_IDS,
   deriveCustomizablePermissionlessLbPair,
 } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
 import { createTokenMint } from "./libs/create_token_mint";
+import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/types";
+import { deriveCustomizablePermissionlessConstantProductPoolAddress, createProgram } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
