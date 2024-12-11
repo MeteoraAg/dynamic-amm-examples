@@ -17,4 +17,8 @@ commands
 
 # Keypair
 keypair.json
+keypair.*.json
 .env
+
+prod_config
+prod_config/**

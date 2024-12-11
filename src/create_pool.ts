@@ -195,7 +195,7 @@ async function createPermissionlessDlmmPool(
 
   const binStep = config.dlmm.binStep;
   const feeBps = config.dlmm.feeBps;
-  const hasAlphaVault = config.alphaVaultType != null;
+  const hasAlphaVault = config.alphaVault != null;
   const activationPoint = new BN(config.dlmm.activationPoint);
 
   const activationType = getDlmmActivationType(config.dlmm.activationType);
@@ -208,14 +208,21 @@ async function createPermissionlessDlmmPool(
   console.log(`- Using hasAlphaVault = ${hasAlphaVault}`);
 
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
-  const toLamportMultiplier = new Decimal(
-    10 ** (config.baseDecimals - quoteDecimals),
-  );
+
+  const initPrice = DLMM.getPricePerLamport(config.baseDecimals, quoteDecimals, config.dlmm.initialPrice);
+  let selectiveRounding = false;
+  if (config.dlmm.priceRounding == "up") {
+    selectiveRounding = false;
+  } else if (config.dlmm.priceRounding == "down") {
+    selectiveRounding = true;
+  } else {
+    throw new Error(`Unknown price rounding: ${config.dlmm.priceRounding}. Should be 'up' or 'down'`);
+  }
 
   const activateBinId = DLMM.getBinIdFromPrice(
-    new Decimal(config.dlmm.initialPrice).mul(toLamportMultiplier),
+    initPrice,
     binStep,
-    false,
+    selectiveRounding,
   );
 
   const initPoolTx = await DLMM.createCustomizablePermissionlessLbPair(

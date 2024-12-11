@@ -10,7 +10,8 @@
     "feeBps": 100,
     "initialPrice": 0.003393,
     "activationType": "timestamp",
-    "activationPoint": 1733633490
+    "activationPoint": 1733633490,
+    "priceRounding": "up"
   },
   "alphaVault": {
     "poolType": "dlmm",

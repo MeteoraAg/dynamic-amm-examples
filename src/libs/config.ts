@@ -87,8 +87,11 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
           type: "number",
           nullable: true,
         },
+        priceRounding: {
+          type: "string"
+        }
       },
-      required: ["binStep", "feeBps", "initialPrice", "activationType"],
+      required: ["binStep", "feeBps", "initialPrice", "activationType", "priceRounding"],
       additionalProperties: false,
     },
     alphaVault: {
@@ -219,6 +222,7 @@ export interface DlmmConfig {
   initialPrice: number;
   activationType: string;
   activationPoint: number | null;
+  priceRounding: string;
 }
 
 export interface FcfsAlphaVaultConfig {
