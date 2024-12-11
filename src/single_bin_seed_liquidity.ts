@@ -19,9 +19,15 @@ import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { BN } from "bn.js";
 import DLMM, {
   LBCLMM_PROGRAM_IDS,
+  binIdToBinArrayIndex,
+  computeBudgetIx,
+  deriveBinArray,
+  deriveBinArrayBitmapExtension,
   deriveCustomizablePermissionlessLbPair,
+  derivePosition,
   getBinArrayLowerUpperBinId,
   getPriceOfBinByBinId,
+  isOverflowDefaultBinArrayBitmap,
 } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
 
@@ -41,6 +47,7 @@ async function main() {
   const provider = new AnchorProvider(connection, wallet, {
     commitment: connection.commitment,
   });
+  const DLMM_PROGRAM_ID = new PublicKey(LBCLMM_PROGRAM_IDS["mainnet-beta"]);
 
   if (!config.baseMint) {
     throw new Error("Missing baseMint in configuration");
@@ -56,7 +63,7 @@ async function main() {
   [poolKey] = deriveCustomizablePermissionlessLbPair(
     baseMint,
     quoteMint,
-    new PublicKey(LBCLMM_PROGRAM_IDS["mainnet-beta"]),
+    DLMM_PROGRAM_ID,
   );
   console.log(`- Using pool key ${poolKey.toString()}`);
 
@@ -72,15 +79,13 @@ async function main() {
     config.singleBinSeedLiquidity.seedAmount,
     config.baseDecimals,
   );
-  const price = config.singleBinSeedLiquidity.price;
   const selectiveRounding = config.singleBinSeedLiquidity.selectiveRounding;
   if (
     selectiveRounding != "up" &&
-    selectiveRounding != "down" &&
-    selectiveRounding != "none"
+    selectiveRounding != "down"
   ) {
     throw new Error(
-      "Invalid selective rounding value. Must be 'up' or 'down' or 'none'",
+      "Invalid selective rounding value. Must be 'up' or 'down'",
     );
   }
   const basePositionKey = new PublicKey(
@@ -90,4 +95,15 @@ async function main() {
     config.singleBinSeedLiquidity.basePositionKeypairFilepath,
   );
 }
+
+function price_per_token_per_lamport(
+  price: number,
+  baseDecimals: number,
+  quoteDecimals: number,
+): BN {
+  const priceD = new Decimal(price);
+  const pricePerToken = priceD.mul(new Decimal(10 ** quoteDecimals)).div(new Decimal(10 ** baseDecimals));
+  return new BN(pricePerToken.toString());
+}
+
 main();
