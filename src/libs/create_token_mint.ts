@@ -1,9 +1,14 @@
 import { Wallet } from "@coral-xyz/anchor";
-import { Connection, PublicKey } from "@solana/web3.js";
-import { DEFAULT_COMMITMENT_LEVEL, getAmountInLamports } from "..";
+import { ComputeBudgetProgram, ConfirmOptions, Connection, Keypair, PublicKey, Signer, SystemProgram, Transaction, TransactionSignature, sendAndConfirmTransaction } from "@solana/web3.js";
+import { DEFAULT_COMMITMENT_LEVEL, DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORT, getAmountInLamports } from "..";
 import { BN } from "bn.js";
 import {
+  MINT_SIZE,
+  TOKEN_PROGRAM_ID,
+  createInitializeMint2Instruction,
   createMint,
+  createMintToInstruction,
+  getMinimumBalanceForRentExemptMint,
   getOrCreateAssociatedTokenAccount,
   mintTo,
 } from "@solana/spl-token";
@@ -48,7 +53,7 @@ async function createAndMintToken(
   mintDecimals: number,
   mintAmountLamport: BN,
 ): Promise<PublicKey> {
-  const mint = await createMint(
+  const mint = await createMintWithPriorityFee(
     connection,
     wallet.payer,
     wallet.publicKey,
@@ -63,7 +68,7 @@ async function createAndMintToken(
     wallet.publicKey,
     true,
   );
-  await mintTo(
+  await mintToWithPriorityFee(
     connection,
     wallet.payer,
     mint,
@@ -77,4 +82,67 @@ async function createAndMintToken(
   );
 
   return mint;
+}
+
+async function createMintWithPriorityFee(connection: Connection, payer: Signer, mintAuthority: PublicKey, freezeAuthority: PublicKey | null, decimals: number,
+  keypair = Keypair.generate(),
+  confirmOptions?: ConfirmOptions,
+  programId = TOKEN_PROGRAM_ID
+): Promise<PublicKey> {
+  const lamports = await getMinimumBalanceForRentExemptMint(connection);
+
+  const addPriorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
+    microLamports: DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORT,
+  });
+
+  const createAccountIx = SystemProgram.createAccount({
+    fromPubkey: payer.publicKey,
+    newAccountPubkey: keypair.publicKey,
+    space: MINT_SIZE,
+    lamports,
+    programId,
+  });
+
+  const createInitializeMint2Tx = createInitializeMint2Instruction(keypair.publicKey, decimals, mintAuthority, freezeAuthority, programId);
+
+  const transaction = new Transaction().add(
+    addPriorityFeeIx,
+    createAccountIx,
+    createInitializeMint2Tx,
+  );
+
+  await sendAndConfirmTransaction(connection, transaction, [payer, keypair], confirmOptions);
+
+  return keypair.publicKey;
+}
+
+async function mintToWithPriorityFee(
+  connection: Connection,
+  payer: Signer,
+  mint: PublicKey,
+  destination: PublicKey,
+  authority: Signer | PublicKey,
+  amount: number | bigint,
+  multiSigners: Signer[] = [],
+  confirmOptions?: ConfirmOptions,
+  programId = TOKEN_PROGRAM_ID
+): Promise<TransactionSignature> {
+  const [authorityPublicKey, signers] = getSigners(authority, multiSigners);
+
+  const addPriorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
+    microLamports: DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORT,
+  });
+
+  const transaction = new Transaction().add(
+    addPriorityFeeIx,
+    createMintToInstruction(mint, destination, authorityPublicKey, amount, multiSigners, programId)
+  );
+
+  return await sendAndConfirmTransaction(connection, transaction, [payer, ...signers], confirmOptions);
+}
+
+function getSigners(signerOrMultisig: Signer | PublicKey, multiSigners: Signer[]): [PublicKey, Signer[]] {
+  return signerOrMultisig instanceof PublicKey
+    ? [signerOrMultisig, multiSigners]
+    : [signerOrMultisig.publicKey, [signerOrMultisig]];
 }
