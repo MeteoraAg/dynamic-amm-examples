@@ -96,6 +96,9 @@ bun run src/create_alpha_vault.ts --config ./config/create_dlmm_pool_with_fcfs_a
 bun run src/lock_liquidity.ts --config ./config/lock_liquidity.json
 ```
 
+**NOTICE**
+The seed liquidity scripts are still WIP, do not use them.
+
 ## After deployment
 To view pool on the UI, access the links below
 - For Dynamic AMM pool: `https://app.meteora.ag/pools/<POOL_ADDRESS>`
