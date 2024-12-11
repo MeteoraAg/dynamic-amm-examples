@@ -19,16 +19,14 @@ import {
   getAlphaVaultPoolType,
 } from ".";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
-import {
-  createProgram,
-  deriveCustomizablePermissionlessConstantProductPoolAddress,
-} from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
+
 import { BN } from "bn.js";
 import AlphaVault, { PoolType } from "@meteora-ag/alpha-vault";
 import {
   LBCLMM_PROGRAM_IDS,
   deriveCustomizablePermissionlessLbPair,
 } from "@meteora-ag/dlmm";
+import { deriveCustomizablePermissionlessConstantProductPoolAddress, createProgram } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();

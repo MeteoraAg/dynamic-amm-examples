@@ -12,7 +12,7 @@ import {
 } from "./constants";
 import { Wallet } from "@coral-xyz/anchor";
 import { simulateTransaction } from "@coral-xyz/anchor/dist/cjs/utils/rpc";
-import { ActivationType as DynamicAmmActivationType } from "@mercurial-finance/dynamic-amm-sdk/src/amm/types";
+import { ActivationType as DynamicAmmActivationType } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/types";
 import { ActivationType as DlmmActivationType } from "@meteora-ag/dlmm";
 import {
   PermissionWithAuthority,
