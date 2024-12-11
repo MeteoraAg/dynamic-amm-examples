@@ -58,12 +58,16 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
           type: "number",
           nullable: true,
         },
+        hasAlphaVault: {
+          type: "boolean",
+        }
       },
       required: [
         "baseAmount",
         "quoteAmount",
         "tradeFeeNumerator",
         "activationType",
+        "hasAlphaVault"
       ],
       additionalProperties: false,
     },
@@ -89,9 +93,12 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         },
         priceRounding: {
           type: "string"
+        },
+        hasAlphaVault: {
+          type: "boolean",
         }
       },
-      required: ["binStep", "feeBps", "initialPrice", "activationType", "priceRounding"],
+      required: ["binStep", "feeBps", "initialPrice", "activationType", "priceRounding", "hasAlphaVault"],
       additionalProperties: false,
     },
     alphaVault: {
@@ -214,6 +221,7 @@ export interface DynamicAmmConfig {
   tradeFeeNumerator: number;
   activationType: string;
   activationPoint: number | null;
+  hasAlphaVault: boolean;
 }
 
 export interface DlmmConfig {
@@ -223,6 +231,7 @@ export interface DlmmConfig {
   activationType: string;
   activationPoint: number | null;
   priceRounding: string;
+  hasAlphaVault: boolean;
 }
 
 export interface FcfsAlphaVaultConfig {

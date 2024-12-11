@@ -35,6 +35,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `tradeFeeNumerator`: Trade fee numerator, with fee denominator is set to 100_000.
 - `activationType`: To activate pool trading base on `slot` or `timestamp`.
 - `activationPoint`: To activate pool trading at a point, either slot valut or timestamp value base on `activationType`.
+- `hasAlphaVault`: Whether alpha vault is enabled or not for this pool.
 
 ### DLMM configuration
 - `binStep`: DLMM pool bin step.
@@ -42,6 +43,8 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `initialPrice`: Initial pool price.
 - `activationType`: To activate pool trading base on `slot` or `timestamp`.
 - `activationPoint`: To activate pool trading at a point, either slot valut or timestamp value base on `activationType`.
+- `priceRounding`: Should be `up` or `down`.
+- `hasAlphaVault`: Whether alpha vault is enabled or not for this pool.
 
 **NOTICE**: There is only one DLMM pool that can be created with the same base and quote tokens, using the instruction `initializeCustomizablePermissionlessLbPair`. So if users are using that instruction to create a new DLMM pool with the same base and quote tokens, but with different parameters, then the transaction will be failed.
 
