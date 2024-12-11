@@ -80,13 +80,8 @@ async function main() {
     config.baseDecimals,
   );
   const selectiveRounding = config.singleBinSeedLiquidity.selectiveRounding;
-  if (
-    selectiveRounding != "up" &&
-    selectiveRounding != "down"
-  ) {
-    throw new Error(
-      "Invalid selective rounding value. Must be 'up' or 'down'",
-    );
+  if (selectiveRounding != "up" && selectiveRounding != "down") {
+    throw new Error("Invalid selective rounding value. Must be 'up' or 'down'");
   }
   const basePositionKey = new PublicKey(
     config.singleBinSeedLiquidity.basePositionKey,
@@ -102,7 +97,9 @@ function price_per_token_per_lamport(
   quoteDecimals: number,
 ): BN {
   const priceD = new Decimal(price);
-  const pricePerToken = priceD.mul(new Decimal(10 ** quoteDecimals)).div(new Decimal(10 ** baseDecimals));
+  const pricePerToken = priceD
+    .mul(new Decimal(10 ** quoteDecimals))
+    .div(new Decimal(10 ** baseDecimals));
   return new BN(pricePerToken.toString());
 }
 

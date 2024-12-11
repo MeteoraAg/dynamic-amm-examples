@@ -60,14 +60,14 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         },
         hasAlphaVault: {
           type: "boolean",
-        }
+        },
       },
       required: [
         "baseAmount",
         "quoteAmount",
         "tradeFeeNumerator",
         "activationType",
-        "hasAlphaVault"
+        "hasAlphaVault",
       ],
       additionalProperties: false,
     },
@@ -92,13 +92,20 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
           nullable: true,
         },
         priceRounding: {
-          type: "string"
+          type: "string",
         },
         hasAlphaVault: {
           type: "boolean",
-        }
+        },
       },
-      required: ["binStep", "feeBps", "initialPrice", "activationType", "priceRounding", "hasAlphaVault"],
+      required: [
+        "binStep",
+        "feeBps",
+        "initialPrice",
+        "activationType",
+        "priceRounding",
+        "hasAlphaVault",
+      ],
       additionalProperties: false,
     },
     alphaVault: {
