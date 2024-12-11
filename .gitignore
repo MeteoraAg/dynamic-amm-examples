@@ -14,3 +14,7 @@ ts-client/package-lock.json
 ts-client/.env
 
 commands
+
+# Keypair
+keypair.json
+.env

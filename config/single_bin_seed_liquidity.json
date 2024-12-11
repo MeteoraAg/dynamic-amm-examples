@@ -1,0 +1,15 @@
+{
+  "rpcUrl": "https://api.mainnet-beta.solana.com",
+  "dryRun": true,
+  "keypairFilePath": "keypair.json",
+  "baseMint": "TNSRxcUxoT9xBG3de7PiJyTDYu7kskLqcpddxnEJAS6",
+  "quoteSymbol": "SOL",
+  "baseDecimals": 9,
+  "singleBinSeedLiquidity": {
+    "price": 0.003393,
+    "selectiveRounding": "up",
+    "seedAmount": "2",
+    "basePositionKey": "ETp2wTykSe3iGYzPCn6upP8NVB7a1pe6WTZidGNJH7KC",
+    "basePositionKeypairFilepath": "keypair.json"
+  }
+}
