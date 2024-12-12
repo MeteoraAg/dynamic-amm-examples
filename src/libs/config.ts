@@ -17,6 +17,9 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
     keypairFilePath: {
       type: "string",
     },
+    computeUnitPriceMicroLamports: {
+      type: "number",
+    },
     createBaseToken: {
       type: "object",
       nullable: true,
@@ -198,7 +201,12 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
       ],
     },
   },
-  required: ["rpcUrl", "dryRun", "keypairFilePath"],
+  required: [
+    "rpcUrl",
+    "dryRun",
+    "keypairFilePath",
+    "computeUnitPriceMicroLamports",
+  ],
   additionalProperties: true,
 };
 
@@ -206,6 +214,7 @@ export interface MeteoraConfig {
   rpcUrl: string;
   dryRun: boolean;
   keypairFilePath: string;
+  computeUnitPriceMicroLamports: number;
   createBaseToken: CreateBaseMintConfig | null;
   baseMint: string | null;
   quoteSymbol: string;

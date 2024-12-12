@@ -62,6 +62,7 @@ async function main() {
       dryRun: config.dryRun,
       mintTokenAmount: config.createBaseToken.mintBaseTokenAmount,
       decimals: config.baseDecimals,
+      computeUnitPriceMicroLamports: config.computeUnitPriceMicroLamports,
     });
   } else {
     if (!config.baseMint) {

@@ -2,6 +2,7 @@
   "rpcUrl": "https://api.mainnet-beta.solana.com",
   "dryRun": true,
   "keypairFilePath": "keypair.json",
+  "computeUnitPriceMicroLamports": 100000,
   "baseMint": "TNSRxcUxoT9xBG3de7PiJyTDYu7kskLqcpddxnEJAS6",
   "quoteSymbol": "SOL",
   "baseDecimals": 9,

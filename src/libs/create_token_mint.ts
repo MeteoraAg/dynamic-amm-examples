@@ -11,11 +11,7 @@ import {
   TransactionSignature,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import {
-  DEFAULT_COMMITMENT_LEVEL,
-  DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORT,
-  getAmountInLamports,
-} from "..";
+import { DEFAULT_COMMITMENT_LEVEL, getAmountInLamports } from "..";
 import { BN } from "bn.js";
 import {
   MINT_SIZE,
@@ -30,6 +26,7 @@ export interface CreateTokenMintOptions {
   dryRun: boolean;
   mintTokenAmount: string | number;
   decimals: number;
+  computeUnitPriceMicroLamports: number;
 }
 
 export async function createTokenMint(
@@ -51,6 +48,7 @@ export async function createTokenMint(
     wallet,
     options.decimals,
     mintAmount,
+    options.computeUnitPriceMicroLamports,
   );
 
   console.log(
@@ -65,6 +63,7 @@ async function createAndMintToken(
   wallet: Wallet,
   mintDecimals: number,
   mintAmountLamport: BN,
+  computeUnitPriceMicroLamports: number,
 ): Promise<PublicKey> {
   const mint = await createMintWithPriorityFee(
     connection,
@@ -72,6 +71,7 @@ async function createAndMintToken(
     wallet.publicKey,
     null,
     mintDecimals,
+    computeUnitPriceMicroLamports,
   );
 
   const walletTokenATA = await getOrCreateAssociatedTokenAccount(
@@ -89,6 +89,7 @@ async function createAndMintToken(
     wallet.publicKey,
     mintAmountLamport,
     [],
+    computeUnitPriceMicroLamports,
     {
       commitment: DEFAULT_COMMITMENT_LEVEL,
     },
@@ -103,6 +104,7 @@ async function createMintWithPriorityFee(
   mintAuthority: PublicKey,
   freezeAuthority: PublicKey | null,
   decimals: number,
+  computeUnitPriceMicroLamports: number,
   keypair = Keypair.generate(),
   confirmOptions?: ConfirmOptions,
   programId = TOKEN_PROGRAM_ID,
@@ -110,7 +112,7 @@ async function createMintWithPriorityFee(
   const lamports = await getMinimumBalanceForRentExemptMint(connection);
 
   const addPriorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
-    microLamports: DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORT,
+    microLamports: computeUnitPriceMicroLamports,
   });
 
   const createAccountIx = SystemProgram.createAccount({
@@ -153,13 +155,14 @@ async function mintToWithPriorityFee(
   authority: Signer | PublicKey,
   amount: number | bigint,
   multiSigners: Signer[] = [],
+  computeUnitPriceMicroLamports: number,
   confirmOptions?: ConfirmOptions,
   programId = TOKEN_PROGRAM_ID,
 ): Promise<TransactionSignature> {
   const [authorityPublicKey, signers] = getSigners(authority, multiSigners);
 
   const addPriorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
-    microLamports: DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORT,
+    microLamports: computeUnitPriceMicroLamports,
   });
 
   const transaction = new Transaction().add(
