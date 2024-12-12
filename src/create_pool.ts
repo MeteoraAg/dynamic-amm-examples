@@ -14,6 +14,7 @@ import {
   getDynamicAmmActivationType,
   getDlmmActivationType,
   parseConfigFromCli,
+  modifyComputeUnitPriceIx,
 } from ".";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
@@ -155,6 +156,7 @@ async function createPermissionlessDynamicPool(
       quoteAmount,
       customizeParam,
     );
+  modifyComputeUnitPriceIx(initPoolTx, config.computeUnitPriceMicroLamports);
   const poolKey = deriveCustomizablePermissionlessConstantProductPoolAddress(
     baseMint,
     quoteMint,
@@ -247,6 +249,7 @@ async function createPermissionlessDlmmPool(
       cluster: "mainnet-beta",
     },
   );
+  modifyComputeUnitPriceIx(initPoolTx, config.computeUnitPriceMicroLamports);
 
   let poolKey: PublicKey;
   [poolKey] = deriveCustomizablePermissionlessLbPair(
