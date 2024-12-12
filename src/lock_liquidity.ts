@@ -11,16 +11,13 @@ import {
   safeParseKeypairFromFile,
   parseConfigFromCli,
   LockLiquidityAllocation,
+  modifyComputeUnitPriceIx,
 } from ".";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
-import {
-  createProgram,
-  deriveCustomizablePermissionlessConstantProductPoolAddress,
-  getAssociatedTokenAccount,
-} from "@mercurial-finance/dynamic-amm-sdk/src/amm/utils";
 import { BN } from "bn.js";
 import AmmImpl from "@mercurial-finance/dynamic-amm-sdk";
-import { SEEDS } from "@mercurial-finance/dynamic-amm-sdk/src/amm/constants";
+import { SEEDS } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/constants";
+import { deriveCustomizablePermissionlessConstantProductPoolAddress, createProgram, getAssociatedTokenAccount } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -87,6 +84,7 @@ async function main() {
       allocation.amount,
       wallet.publicKey,
     );
+    modifyComputeUnitPriceIx(tx, config.computeUnitPriceMicroLamports);
 
     if (config.dryRun) {
       console.log(

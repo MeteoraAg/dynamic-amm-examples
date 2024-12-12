@@ -17,6 +17,7 @@ import {
   getAlphaVaultWhitelistMode,
   parseConfigFromCli,
   getAlphaVaultPoolType,
+  modifyComputeUnitPriceIx,
 } from ".";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 
@@ -113,6 +114,7 @@ async function main() {
       `Invalid alpha vault type ${config.alphaVault.alphaVaultType}`,
     );
   }
+  modifyComputeUnitPriceIx(initAlphaVaultTx, config.computeUnitPriceMicroLamports);
 
   if (config.dryRun) {
     console.log(`\n> Simulating init alpha vault tx...`);
