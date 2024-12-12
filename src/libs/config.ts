@@ -17,6 +17,9 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
     keypairFilePath: {
       type: "string",
     },
+    computeUnitPriceMicroLamports: {
+      type: "number",
+    },
     createBaseToken: {
       type: "object",
       nullable: true,
@@ -60,14 +63,14 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         },
         hasAlphaVault: {
           type: "boolean",
-        }
+        },
       },
       required: [
         "baseAmount",
         "quoteAmount",
         "tradeFeeNumerator",
         "activationType",
-        "hasAlphaVault"
+        "hasAlphaVault",
       ],
       additionalProperties: false,
     },
@@ -92,13 +95,20 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
           nullable: true,
         },
         priceRounding: {
-          type: "string"
+          type: "string",
         },
         hasAlphaVault: {
           type: "boolean",
-        }
+        },
       },
-      required: ["binStep", "feeBps", "initialPrice", "activationType", "priceRounding", "hasAlphaVault"],
+      required: [
+        "binStep",
+        "feeBps",
+        "initialPrice",
+        "activationType",
+        "priceRounding",
+        "hasAlphaVault",
+      ],
       additionalProperties: false,
     },
     alphaVault: {
@@ -191,7 +201,12 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
       ],
     },
   },
-  required: ["rpcUrl", "dryRun", "keypairFilePath"],
+  required: [
+    "rpcUrl",
+    "dryRun",
+    "keypairFilePath",
+    "computeUnitPriceMicroLamports",
+  ],
   additionalProperties: true,
 };
 
@@ -199,6 +214,7 @@ export interface MeteoraConfig {
   rpcUrl: string;
   dryRun: boolean;
   keypairFilePath: string;
+  computeUnitPriceMicroLamports: number;
   createBaseToken: CreateBaseMintConfig | null;
   baseMint: string | null;
   quoteSymbol: string;

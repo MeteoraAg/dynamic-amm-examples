@@ -25,7 +25,10 @@ import DLMM, {
 import Decimal from "decimal.js";
 import { createTokenMint } from "./libs/create_token_mint";
 import { CustomizableParams } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/types";
-import { deriveCustomizablePermissionlessConstantProductPoolAddress, createProgram } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import {
+  deriveCustomizablePermissionlessConstantProductPoolAddress,
+  createProgram,
+} from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -59,6 +62,7 @@ async function main() {
       dryRun: config.dryRun,
       mintTokenAmount: config.createBaseToken.mintBaseTokenAmount,
       decimals: config.baseDecimals,
+      computeUnitPriceMicroLamports: config.computeUnitPriceMicroLamports,
     });
   } else {
     if (!config.baseMint) {
@@ -206,14 +210,20 @@ async function createPermissionlessDlmmPool(
 
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
 
-  const initPrice = DLMM.getPricePerLamport(config.baseDecimals, quoteDecimals, config.dlmm.initialPrice);
+  const initPrice = DLMM.getPricePerLamport(
+    config.baseDecimals,
+    quoteDecimals,
+    config.dlmm.initialPrice,
+  );
   let selectiveRounding = false;
   if (config.dlmm.priceRounding == "up") {
     selectiveRounding = false;
   } else if (config.dlmm.priceRounding == "down") {
     selectiveRounding = true;
   } else {
-    throw new Error(`Unknown price rounding: ${config.dlmm.priceRounding}. Should be 'up' or 'down'`);
+    throw new Error(
+      `Unknown price rounding: ${config.dlmm.priceRounding}. Should be 'up' or 'down'`,
+    );
   }
 
   const activateBinId = DLMM.getBinIdFromPrice(

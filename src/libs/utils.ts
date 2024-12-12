@@ -200,7 +200,7 @@ export function getAlphaVaultWhitelistMode(mode: string): WhitelistMode {
 
 export interface CliArguments {
   // Config filepath
-  config: string | undefined;
+  config?: string | undefined;
 }
 
 export function parseCliArguments(): CliArguments {

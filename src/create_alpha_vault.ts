@@ -26,7 +26,10 @@ import {
   LBCLMM_PROGRAM_IDS,
   deriveCustomizablePermissionlessLbPair,
 } from "@meteora-ag/dlmm";
-import { deriveCustomizablePermissionlessConstantProductPoolAddress, createProgram } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import {
+  deriveCustomizablePermissionlessConstantProductPoolAddress,
+  createProgram,
+} from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
