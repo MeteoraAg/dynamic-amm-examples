@@ -13,6 +13,7 @@
     "quoteAmount": "0.001",
     "tradeFeeNumerator": 2500,
     "activationType": "timestamp",
-    "activationPoint": null
+    "activationPoint": null,
+    "hasAlphaVault": false
   }
 }

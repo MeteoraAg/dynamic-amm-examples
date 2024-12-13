@@ -93,6 +93,8 @@ async function main() {
   const baseKeypair = safeParseKeypairFromFile(
     config.singleBinSeedLiquidity.basePositionKeypairFilepath,
   );
+
+  DLMM.seed
 }
 
 function price_per_token_per_lamport(
