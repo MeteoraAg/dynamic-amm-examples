@@ -12,6 +12,7 @@
     "initialPrice": 0.0000017,
     "activationType": "slot",
     "activationPoint": null,
-    "priceRounding": "up"
+    "priceRounding": "up",
+    "hasAlphaVault": false
   }
 }
