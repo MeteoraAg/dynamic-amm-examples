@@ -3,25 +3,25 @@
   "dryRun": true,
   "keypairFilePath": "keypair.json",
   "computeUnitPriceMicroLamports": 100000,
-  "baseMint": "TNSRxcUxoT9xBG3de7PiJyTDYu7kskLqcpddxnEJAS6",
+  "baseMint": "6GCmN8XWQTgswV9eG86VfM4YBfCHVxK5TQ4MgazKQ9QH",
   "quoteSymbol": "SOL",
-  "baseDecimals": 9,
+  "baseDecimals": 6,
   "dlmm": {
     "binStep": 100,
     "feeBps": 100,
     "initialPrice": 0.003393,
     "activationType": "timestamp",
-    "activationPoint": 1733633490,
+    "activationPoint": 1734440400,
     "priceRounding": "up",
     "hasAlphaVault": true
   },
   "alphaVault": {
     "poolType": "dlmm",
     "alphaVaultType": "prorata",
-    "depositingPoint": 1733626299,
-    "startVestingPoint": 1733640699,
-    "endVestingPoint": 1733662299,
-    "maxBuyingCap": 1000,
+    "depositingPoint": 1734433200,
+    "startVestingPoint": 1734451200,
+    "endVestingPoint": 1734537600,
+    "maxBuyingCap": 100,
     "escrowFee": 0,
     "whitelistMode": "permissionless"
   }
