@@ -113,7 +113,12 @@ async function main() {
 
       if (config.dryRun) {
         console.log(`\n> Simulating initializeBinArraysAndPositionIxs tx...`);
-        await runSimulateTransaction(connection, wallet, [tx]);
+        await runSimulateTransaction(
+          connection,
+          [wallet.payer],
+          wallet.publicKey,
+          [tx],
+        );
       } else {
         transactions.push(sendAndConfirmTransaction(connection, tx, signers));
       }
@@ -151,7 +156,12 @@ async function main() {
 
       if (config.dryRun) {
         console.log(`\n> Simulating addLiquidityIxs tx...`);
-        await runSimulateTransaction(connection, wallet, [tx]);
+        await runSimulateTransaction(
+          connection,
+          [wallet.payer],
+          wallet.publicKey,
+          [tx],
+        );
       } else {
         transactions.push(sendAndConfirmTransaction(connection, tx, signers));
       }

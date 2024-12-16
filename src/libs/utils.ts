@@ -129,7 +129,8 @@ export function getQuoteDecimals(quoteSymbol: string): number {
 
 export async function runSimulateTransaction(
   connection: Connection,
-  wallet: Wallet,
+  signers: Array<Keypair>,
+  feePayer: PublicKey,
   txs: Array<Transaction>,
 ) {
   const { blockhash, lastValidBlockHeight } =
@@ -138,12 +139,14 @@ export async function runSimulateTransaction(
   const transaction = new Transaction({
     blockhash,
     lastValidBlockHeight,
-    feePayer: wallet.publicKey,
+    feePayer,
   }).add(...txs);
 
-  let simulateResp = await simulateTransaction(connection, transaction, [
-    wallet.payer,
-  ]);
+  let simulateResp = await simulateTransaction(
+    connection,
+    transaction,
+    signers,
+  );
   if (simulateResp.value.err) {
     console.error(">>> Simulate transaction failed:", simulateResp.value.err);
     console.log(`Logs ${simulateResp.value.logs}`);

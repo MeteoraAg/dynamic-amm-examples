@@ -173,7 +173,9 @@ async function createPermissionlessDynamicPool(
 
   if (config.dryRun) {
     console.log(`> Simulating init pool tx...`);
-    await runSimulateTransaction(connection, wallet, [initPoolTx]);
+    await runSimulateTransaction(connection, [wallet.payer], wallet.publicKey, [
+      initPoolTx,
+    ]);
   } else {
     console.log(`>> Sending init pool transaction...`);
     const initPoolTxHash = await sendAndConfirmTransaction(
@@ -272,7 +274,9 @@ async function createPermissionlessDlmmPool(
 
   if (config.dryRun) {
     console.log(`\n> Simulating init pool tx...`);
-    await runSimulateTransaction(connection, wallet, [initPoolTx]);
+    await runSimulateTransaction(connection, [wallet.payer], wallet.publicKey, [
+      initPoolTx,
+    ]);
   } else {
     console.log(`>> Sending init pool transaction...`);
     let initPoolTxHash = await sendAndConfirmTransaction(

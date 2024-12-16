@@ -190,17 +190,21 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
       nullable: true,
       properties: {
         price: { type: "number" },
-        selectiveRounding: { type: "string" },
+        priceRounding: { type: "string" },
         seedAmount: { type: "string" },
-        basePositionKey: { type: "string" },
         basePositionKeypairFilepath: { type: "string" },
+        operatorKeypairFilepath: { type: "string" },
+        feeOwner: { type: "string" },
+        lockReleasePoint: { type: "number" },
       },
       required: [
         "price",
-        "selectiveRounding",
+        "priceRounding",
         "seedAmount",
-        "basePositionKey",
         "basePositionKeypairFilepath",
+        "operatorKeypairFilepath",
+        "feeOwner",
+        "lockReleasePoint",
       ],
     },
   },
@@ -311,10 +315,12 @@ export interface LfgSeedLiquidityConfig {
 
 export interface SingleBinSeedLiquidityConfig {
   price: number;
-  selectiveRounding: string;
+  priceRounding: string;
   seedAmount: string;
-  basePositionKey: string;
   basePositionKeypairFilepath: string;
+  operatorKeypairFilepath: string;
+  feeOwner: string;
+  lockReleasePoint: number;
 }
 
 /// Parse and validate config from CLI
