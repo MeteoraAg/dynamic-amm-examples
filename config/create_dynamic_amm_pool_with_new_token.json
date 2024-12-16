@@ -4,10 +4,10 @@
   "keypairFilePath": "keypair.json",
   "computeUnitPriceMicroLamports": 100000,
   "createBaseToken": {
-    "mintBaseTokenAmount": 10000000
+    "mintBaseTokenAmount": 10000000,
+    "baseDecimals": 6
   },
   "quoteSymbol": "SOL",
-  "baseDecimals": 6,
   "dynamicAmm": {
     "baseAmount": "100000",
     "quoteAmount": "0.001",

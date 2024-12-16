@@ -30,6 +30,7 @@ import DLMM, {
   isOverflowDefaultBinArrayBitmap,
 } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
+import { getMint } from "@solana/spl-token";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -53,6 +54,9 @@ async function main() {
     throw new Error("Missing baseMint in configuration");
   }
   const baseMint = new PublicKey(config.baseMint);
+  const baseMintAccount = await getMint(connection, baseMint);
+  const baseDecimals = baseMintAccount.decimals;
+
   let quoteMint = getQuoteMint(config.quoteSymbol);
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
 
@@ -77,7 +81,7 @@ async function main() {
 
   const seedAmount = getAmountInLamports(
     config.singleBinSeedLiquidity.seedAmount,
-    config.baseDecimals,
+    baseDecimals,
   );
   const selectiveRounding = config.singleBinSeedLiquidity.selectiveRounding;
   if (selectiveRounding != "up" && selectiveRounding != "down") {

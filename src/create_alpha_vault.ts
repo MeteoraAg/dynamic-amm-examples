@@ -114,7 +114,10 @@ async function main() {
       `Invalid alpha vault type ${config.alphaVault.alphaVaultType}`,
     );
   }
-  modifyComputeUnitPriceIx(initAlphaVaultTx, config.computeUnitPriceMicroLamports);
+  modifyComputeUnitPriceIx(
+    initAlphaVaultTx,
+    config.computeUnitPriceMicroLamports,
+  );
 
   if (config.dryRun) {
     console.log(`\n> Simulating init alpha vault tx...`);
