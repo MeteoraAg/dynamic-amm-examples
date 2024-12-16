@@ -12,7 +12,8 @@
     "initialPrice": 0.003393,
     "activationType": "timestamp",
     "activationPoint": 1733633490,
-    "priceRounding": "up"
+    "priceRounding": "up",
+    "hasAlphaVault": true
   },
   "alphaVault": {
     "poolType": "dlmm",

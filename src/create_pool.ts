@@ -135,7 +135,7 @@ async function createPermissionlessDynamicPool(
   const customizeParam: CustomizableParams = {
     tradeFeeNumerator: config.dynamicAmm.tradeFeeNumerator,
     activationType: activationType,
-    activationPoint: config.dynamicAmm.activationPoint,
+    activationPoint: config.dynamicAmm.activationPoint ? new BN(config.dynamicAmm.activationPoint) : null,
     hasAlphaVault: config.dynamicAmm.hasAlphaVault,
     padding: Array(90).fill(0),
   };
@@ -199,7 +199,7 @@ async function createPermissionlessDlmmPool(
   const binStep = config.dlmm.binStep;
   const feeBps = config.dlmm.feeBps;
   const hasAlphaVault = config.dlmm.hasAlphaVault;
-  const activationPoint = new BN(config.dlmm.activationPoint);
+  const activationPoint = config.dlmm.activationPoint ? new BN(config.dlmm.activationPoint) : null;
 
   const activationType = getDlmmActivationType(config.dlmm.activationType);
 
