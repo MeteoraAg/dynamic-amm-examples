@@ -91,7 +91,7 @@ async function main() {
     initAlphaVaultTx = await createFcfsAlphaVault(
       connection,
       wallet,
-      PoolType.DLMM,
+      poolType,
       poolKey,
       baseMint,
       quoteMint,
@@ -102,7 +102,7 @@ async function main() {
     initAlphaVaultTx = await createProrataAlphaVault(
       connection,
       wallet,
-      PoolType.DLMM,
+      poolType,
       poolKey,
       baseMint,
       quoteMint,
@@ -114,7 +114,10 @@ async function main() {
       `Invalid alpha vault type ${config.alphaVault.alphaVaultType}`,
     );
   }
-  modifyComputeUnitPriceIx(initAlphaVaultTx, config.computeUnitPriceMicroLamports);
+  modifyComputeUnitPriceIx(
+    initAlphaVaultTx,
+    config.computeUnitPriceMicroLamports,
+  );
 
   if (config.dryRun) {
     console.log(`\n> Simulating init alpha vault tx...`);

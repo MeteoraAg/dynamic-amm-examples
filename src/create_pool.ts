@@ -30,6 +30,7 @@ import {
   deriveCustomizablePermissionlessConstantProductPoolAddress,
   createProgram,
 } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import { getMint } from "@solana/spl-token";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -56,13 +57,13 @@ async function main() {
     if (!config.createBaseToken.mintBaseTokenAmount) {
       throw new Error("Missing mintBaseTokenAmount in configuration");
     }
-    if (!config.baseDecimals) {
+    if (!config.createBaseToken.baseDecimals) {
       throw new Error("Missing baseDecimals in configuration");
     }
     baseMint = await createTokenMint(connection, wallet, {
       dryRun: config.dryRun,
       mintTokenAmount: config.createBaseToken.mintBaseTokenAmount,
-      decimals: config.baseDecimals,
+      decimals: config.createBaseToken.baseDecimals,
       computeUnitPriceMicroLamports: config.computeUnitPriceMicroLamports,
     });
   } else {
@@ -112,9 +113,12 @@ async function createPermissionlessDynamicPool(
   console.log("\n> Initializing Permissionless Dynamic AMM pool...");
 
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
+  const baseMintAccount = await getMint(connection, baseMint);
+  const baseDecimals = baseMintAccount.decimals;
+
   const baseAmount = getAmountInLamports(
     config.dynamicAmm.baseAmount,
-    config.baseDecimals,
+    baseDecimals,
   );
   const quoteAmount = getAmountInLamports(
     config.dynamicAmm.quoteAmount,
@@ -135,7 +139,9 @@ async function createPermissionlessDynamicPool(
   const customizeParam: CustomizableParams = {
     tradeFeeNumerator: config.dynamicAmm.tradeFeeNumerator,
     activationType: activationType,
-    activationPoint: config.dynamicAmm.activationPoint,
+    activationPoint: config.dynamicAmm.activationPoint
+      ? new BN(config.dynamicAmm.activationPoint)
+      : null,
     hasAlphaVault: config.dynamicAmm.hasAlphaVault,
     padding: Array(90).fill(0),
   };
@@ -199,7 +205,9 @@ async function createPermissionlessDlmmPool(
   const binStep = config.dlmm.binStep;
   const feeBps = config.dlmm.feeBps;
   const hasAlphaVault = config.dlmm.hasAlphaVault;
-  const activationPoint = new BN(config.dlmm.activationPoint);
+  const activationPoint = config.dlmm.activationPoint
+    ? new BN(config.dlmm.activationPoint)
+    : null;
 
   const activationType = getDlmmActivationType(config.dlmm.activationType);
 
@@ -211,9 +219,11 @@ async function createPermissionlessDlmmPool(
   console.log(`- Using hasAlphaVault = ${hasAlphaVault}`);
 
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
+  const baseMintAccount = await getMint(connection, baseMint);
+  const baseDecimals = baseMintAccount.decimals;
 
   const initPrice = DLMM.getPricePerLamport(
-    config.baseDecimals,
+    baseDecimals,
     quoteDecimals,
     config.dlmm.initialPrice,
   );

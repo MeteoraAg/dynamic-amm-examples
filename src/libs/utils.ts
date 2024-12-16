@@ -1,5 +1,12 @@
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
-import { ComputeBudgetProgram, Connection, Keypair, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
+import {
+  ComputeBudgetProgram,
+  Connection,
+  Keypair,
+  PublicKey,
+  Transaction,
+  VersionedTransaction,
+} from "@solana/web3.js";
 import * as fs from "fs";
 import { parseArgs } from "util";
 import { BN } from "bn.js";
@@ -204,14 +211,21 @@ export function getAlphaVaultWhitelistMode(mode: string): WhitelistMode {
  * @param newPriorityFee
  * @returns {boolean} true if priority fee was modified
  **/
-export const modifyComputeUnitPriceIx = (tx: VersionedTransaction | Transaction, newPriorityFee: number): boolean => {
-  if ('version' in tx) {
+export const modifyComputeUnitPriceIx = (
+  tx: VersionedTransaction | Transaction,
+  newPriorityFee: number,
+): boolean => {
+  if ("version" in tx) {
     for (let ix of tx.message.compiledInstructions) {
       let programId = tx.message.staticAccountKeys[ix.programIdIndex];
       if (programId && ComputeBudgetProgram.programId.equals(programId)) {
         // need check for data index
         if (ix.data[0] === 3) {
-          ix.data = Uint8Array.from(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: newPriorityFee }).data);
+          ix.data = Uint8Array.from(
+            ComputeBudgetProgram.setComputeUnitPrice({
+              microLamports: newPriorityFee,
+            }).data,
+          );
           return true;
         }
       }
@@ -222,14 +236,20 @@ export const modifyComputeUnitPriceIx = (tx: VersionedTransaction | Transaction,
       if (ComputeBudgetProgram.programId.equals(ix.programId)) {
         // need check for data index
         if (ix.data[0] === 3) {
-          ix.data = ComputeBudgetProgram.setComputeUnitPrice({ microLamports: newPriorityFee }).data;
+          ix.data = ComputeBudgetProgram.setComputeUnitPrice({
+            microLamports: newPriorityFee,
+          }).data;
           return true;
         }
       }
     }
 
     // inject if none
-    tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: newPriorityFee }));
+    tx.add(
+      ComputeBudgetProgram.setComputeUnitPrice({
+        microLamports: newPriorityFee,
+      }),
+    );
     return true;
   }
 

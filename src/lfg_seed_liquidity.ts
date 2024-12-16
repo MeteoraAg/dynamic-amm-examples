@@ -24,6 +24,7 @@ import DLMM, {
   getPriceOfBinByBinId,
 } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
+import { getMint } from "@solana/spl-token";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -46,6 +47,9 @@ async function main() {
     throw new Error("Missing baseMint in configuration");
   }
   const baseMint = new PublicKey(config.baseMint);
+  const baseMintAccount = await getMint(connection, baseMint);
+  const baseDecimals = baseMintAccount.decimals;
+
   let quoteMint = getQuoteMint(config.quoteSymbol);
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
 
@@ -70,7 +74,7 @@ async function main() {
 
   const seedAmount = getAmountInLamports(
     config.lfgSeedLiquidity.seedAmount,
-    config.baseDecimals,
+    baseDecimals,
   );
   const curvature = config.lfgSeedLiquidity.curvature;
   const minPrice = config.lfgSeedLiquidity.minPrice;
@@ -96,7 +100,7 @@ async function main() {
   {
     const { blockhash, lastValidBlockHeight } =
       await connection.getLatestBlockhash("confirmed");
-    const transactions = [];
+    const transactions: Array<Promise<string>> = [];
 
     for (const groupIx of initializeBinArraysAndPositionIxs) {
       const tx = new Transaction({
@@ -133,7 +137,7 @@ async function main() {
     const { blockhash, lastValidBlockHeight } =
       await connection.getLatestBlockhash("confirmed");
 
-    const transactions = [];
+    const transactions: Array<Promise<string>> = [];
 
     // Deposit to positions created in above step. The add liquidity order can be in sequence or not.
     for (const groupIx of addLiquidityIxs) {

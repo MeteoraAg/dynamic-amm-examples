@@ -27,8 +27,11 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         mintBaseTokenAmount: {
           anyOf: [{ type: "number" }, { type: "string" }],
         },
+        baseDecimals: {
+          type: "number",
+        },
       },
-      required: ["mintBaseTokenAmount"],
+      required: ["mintBaseTokenAmount", "baseDecimals"],
       additionalProperties: false,
     },
     baseMint: {
@@ -206,6 +209,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
     "dryRun",
     "keypairFilePath",
     "computeUnitPriceMicroLamports",
+    "quoteSymbol",
   ],
   additionalProperties: true,
 };
@@ -218,7 +222,6 @@ export interface MeteoraConfig {
   createBaseToken: CreateBaseMintConfig | null;
   baseMint: string | null;
   quoteSymbol: string;
-  baseDecimals: number;
   dynamicAmm: DynamicAmmConfig | null;
   dlmm: DlmmConfig | null;
   alphaVault: FcfsAlphaVaultConfig | ProrataAlphaVaultConfig | null;
@@ -229,6 +232,7 @@ export interface MeteoraConfig {
 
 export interface CreateBaseMintConfig {
   mintBaseTokenAmount: number | string;
+  baseDecimals: number;
 }
 
 export interface DynamicAmmConfig {
