@@ -5,7 +5,6 @@
   "computeUnitPriceMicroLamports": 100000,
   "baseMint": "5mbK36SZ7J19An8jFochhQS4of8g6BwUjbeCSxBSoWdp",
   "quoteSymbol": "SOL",
-  "baseDecimals": 6,
   "lockLiquidity": {
     "allocations": [
       {
