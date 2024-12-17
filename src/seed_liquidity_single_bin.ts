@@ -22,7 +22,7 @@ import DLMM, {
   deriveCustomizablePermissionlessLbPair,
 } from "@meteora-ag/dlmm";
 import BN from "bn.js";
-import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
+import { getMint } from "@solana/spl-token";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -46,6 +46,9 @@ async function main() {
     throw new Error("Missing baseMint in configuration");
   }
   const baseMint = new PublicKey(config.baseMint);
+  const baseMintAccount = await getMint(connection, baseMint);
+  const baseDecimals = baseMintAccount.decimals;
+
   let quoteMint = getQuoteMint(config.quoteSymbol);
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
 
@@ -70,7 +73,7 @@ async function main() {
 
   const seedAmount = getAmountInLamports(
     config.singleBinSeedLiquidity.seedAmount,
-    config.baseDecimals,
+    baseDecimals,
   );
   const priceRounding = config.singleBinSeedLiquidity.priceRounding;
   if (priceRounding != "up" && priceRounding != "down") {
@@ -79,9 +82,14 @@ async function main() {
   const baseKeypair = safeParseKeypairFromFile(
     config.singleBinSeedLiquidity.basePositionKeypairFilepath,
   );
-  const operatorKeypair = safeParseKeypairFromFile(config.singleBinSeedLiquidity.operatorKeypairFilepath);
+  const operatorKeypair = safeParseKeypairFromFile(
+    config.singleBinSeedLiquidity.operatorKeypairFilepath,
+  );
   const basePublickey = baseKeypair.publicKey;
   const price = config.singleBinSeedLiquidity.price;
+  const positionOwner = new PublicKey(
+    config.singleBinSeedLiquidity.positionOwner,
+  );
   const feeOwner = new PublicKey(config.singleBinSeedLiquidity.feeOwner);
   const operator = operatorKeypair.publicKey;
   const lockReleasePoint = new BN(
@@ -91,27 +99,10 @@ async function main() {
   console.log(`- Using seedAmount in lamports = ${seedAmount}`);
   console.log(`- Using priceRounding = ${priceRounding}`);
   console.log(`- Using price ${price}`);
-  console.log(`- Using feeOwner ${feeOwner}`);
   console.log(`- Using operator ${operator}`);
+  console.log(`- Using positionOwner ${positionOwner}`);
+  console.log(`- Using feeOwner ${feeOwner}`);
   console.log(`- Using lockReleasePoint ${lockReleasePoint}`);
-
-  // create operator_token_x account if not existed
-  // const operatorTokenXInfo = await getOrCreateAssociatedTokenAccount(
-  //   connection,
-  //   wallet.payer,
-  //   baseMint,
-  //   operatorKeypair.publicKey,
-  //   false,
-  //   "confirmed",
-  //   {
-  //     commitment: "confirmed",
-  //   },
-  //   TOKEN_PROGRAM_ID,
-  //   ASSOCIATED_TOKEN_PROGRAM_ID
-  // );
-
-  // console.log(operatorTokenXInfo);
-  // console.log(operatorTokenXInfo.amount == BigInt(0));
 
   const seedLiquidityIxs = await pair.seedLiquiditySingleBin(
     wallet.publicKey,
@@ -119,9 +110,11 @@ async function main() {
     seedAmount,
     price,
     priceRounding == "up",
+    positionOwner,
     feeOwner,
     operator,
     lockReleasePoint,
+    true,
   );
 
   const setCUPriceIx = ComputeBudgetProgram.setComputeUnitPrice({

@@ -194,6 +194,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         seedAmount: { type: "string" },
         basePositionKeypairFilepath: { type: "string" },
         operatorKeypairFilepath: { type: "string" },
+        positionOwner: { type: "string" },
         feeOwner: { type: "string" },
         lockReleasePoint: { type: "number" },
       },
@@ -203,6 +204,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         "seedAmount",
         "basePositionKeypairFilepath",
         "operatorKeypairFilepath",
+        "positionOwner",
         "feeOwner",
         "lockReleasePoint",
       ],
@@ -319,6 +321,7 @@ export interface SingleBinSeedLiquidityConfig {
   seedAmount: string;
   basePositionKeypairFilepath: string;
   operatorKeypairFilepath: string;
+  positionOwner: string;
   feeOwner: string;
   lockReleasePoint: number;
 }
