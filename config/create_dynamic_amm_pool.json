@@ -5,7 +5,6 @@
   "computeUnitPriceMicroLamports": 100000,
   "baseMint": "GbXBoqiGLzaaXqpNUxWFsp1AxRdjXTng2FNbyLZY1jpc",
   "quoteSymbol": "SOL",
-  "baseDecimals": 6,
   "dynamicAmm": {
     "baseAmount": 100,
     "quoteAmount": 0.001,
