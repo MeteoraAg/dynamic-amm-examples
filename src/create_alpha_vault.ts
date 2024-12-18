@@ -121,7 +121,9 @@ async function main() {
 
   if (config.dryRun) {
     console.log(`\n> Simulating init alpha vault tx...`);
-    await runSimulateTransaction(connection, wallet, [initAlphaVaultTx]);
+    await runSimulateTransaction(connection, [wallet.payer], wallet.publicKey, [
+      initAlphaVaultTx,
+    ]);
   } else {
     console.log(`>> Sending init alpha vault transaction...`);
     const initAlphaVaulTxHash = await sendAndConfirmTransaction(
