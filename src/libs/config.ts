@@ -197,6 +197,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         positionOwner: { type: "string" },
         feeOwner: { type: "string" },
         lockReleasePoint: { type: "number" },
+        seedTokenXToPositionOwner: { type: "boolean" }
       },
       required: [
         "price",
@@ -207,6 +208,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         "positionOwner",
         "feeOwner",
         "lockReleasePoint",
+        "seedTokenXToPositionOwner"
       ],
     },
   },
@@ -324,6 +326,7 @@ export interface SingleBinSeedLiquidityConfig {
   positionOwner: string;
   feeOwner: string;
   lockReleasePoint: number;
+  seedTokenXToPositionOwner: boolean;
 }
 
 /// Parse and validate config from CLI

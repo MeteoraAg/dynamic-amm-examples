@@ -22,6 +22,7 @@
     "operatorKeypairFilepath": "keypair.json",
     "positionOwner": "2vqFyczcehkR7hTeZjEkiN5jvYnFXuFRinovqR2gakSb",
     "feeOwner": "2vqFyczcehkR7hTeZjEkiN5jvYnFXuFRinovqR2gakSb",
-    "lockReleasePoint": 0
+    "lockReleasePoint": 0,
+    "seedTokenXToPositionOwner": true
   }
 }
