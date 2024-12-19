@@ -139,78 +139,98 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         "whitelistMode",
       ],
     },
-    lockLiquidity: {
+    permissionedAlphaVault: {
       type: "object",
       nullable: true,
       properties: {
-        alllocations: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              percentage: {
-                type: "number",
-              },
-              address: {
-                type: "string",
-              },
+        poolType: { type: "string" },
+        alphaVaultType: { type: "string" },
+        baseMint: { type: "string" },
+        quoteMint: { type: "string" },
+        poolAddress: { type: "string" },
+        configAddress: { type: "string" }
+      },
+      required: [
+        "poolType",
+        "alphaVaultType",
+        "baseMint",
+        "quoteMint",
+        "poolAddress",
+        "configAddress",
+      ],
+    }
+  },
+  lockLiquidity: {
+    type: "object",
+    nullable: true,
+    properties: {
+      alllocations: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            percentage: {
+              type: "number",
             },
-            required: ["percentage", "address"],
+            address: {
+              type: "string",
+            },
           },
+          required: ["percentage", "address"],
         },
       },
-      required: ["allocations"],
     },
-    lfgSeedLiquidity: {
-      type: "object",
-      nullable: true,
-      properties: {
-        minPrice: {
-          type: "number",
-        },
-        maxPrice: { type: "number" },
-        binStep: { type: "number" },
-        curvature: { type: "number" },
-        seedAmount: { type: "string" },
-        basePositionKey: { type: "string" },
-        basePositionKeypairFilepath: { type: "string" },
+    required: ["allocations"],
+  },
+  lfgSeedLiquidity: {
+    type: "object",
+    nullable: true,
+    properties: {
+      minPrice: {
+        type: "number",
       },
-      required: [
-        "minPrice",
-        "maxPrice",
-        "binStep",
-        "curvature",
-        "seedAmount",
-        "basePositionKey",
-        "basePositionKeypairFilepath",
-      ],
+      maxPrice: { type: "number" },
+      binStep: { type: "number" },
+      curvature: { type: "number" },
+      seedAmount: { type: "string" },
+      basePositionKey: { type: "string" },
+      basePositionKeypairFilepath: { type: "string" },
     },
-    singleBinSeedLiquidity: {
-      type: "object",
-      nullable: true,
-      properties: {
-        price: { type: "number" },
-        priceRounding: { type: "string" },
-        seedAmount: { type: "string" },
-        basePositionKeypairFilepath: { type: "string" },
-        operatorKeypairFilepath: { type: "string" },
-        positionOwner: { type: "string" },
-        feeOwner: { type: "string" },
-        lockReleasePoint: { type: "number" },
-        seedTokenXToPositionOwner: { type: "boolean" }
-      },
-      required: [
-        "price",
-        "priceRounding",
-        "seedAmount",
-        "basePositionKeypairFilepath",
-        "operatorKeypairFilepath",
-        "positionOwner",
-        "feeOwner",
-        "lockReleasePoint",
-        "seedTokenXToPositionOwner"
-      ],
+    required: [
+      "minPrice",
+      "maxPrice",
+      "binStep",
+      "curvature",
+      "seedAmount",
+      "basePositionKey",
+      "basePositionKeypairFilepath",
+    ],
+  },
+  singleBinSeedLiquidity: {
+    type: "object",
+    nullable: true,
+    properties: {
+      price: { type: "number" },
+      priceRounding: { type: "string" },
+      seedAmount: { type: "string" },
+      basePositionKeypairFilepath: { type: "string" },
+      operatorKeypairFilepath: { type: "string" },
+      positionOwner: { type: "string" },
+      feeOwner: { type: "string" },
+      lockReleasePoint: { type: "number" },
+      seedTokenXToPositionOwner: { type: "boolean" }
     },
+    required: [
+      "price",
+      "priceRounding",
+      "seedAmount",
+      "basePositionKeypairFilepath",
+      "operatorKeypairFilepath",
+      "positionOwner",
+      "feeOwner",
+      "lockReleasePoint",
+      "seedTokenXToPositionOwner"
+    ],
   },
   required: [
     "rpcUrl",
@@ -233,6 +253,7 @@ export interface MeteoraConfig {
   dynamicAmm: DynamicAmmConfig | null;
   dlmm: DlmmConfig | null;
   alphaVault: FcfsAlphaVaultConfig | ProrataAlphaVaultConfig | null;
+  permissionedAlphaVault: PermissionedAlphaVaultConfig | null;
   lockLiquidity: LockLiquidityConfig | null;
   lfgSeedLiquidity: LfgSeedLiquidityConfig | null;
   singleBinSeedLiquidity: SingleBinSeedLiquidityConfig | null;
@@ -296,6 +317,15 @@ export interface ProrataAlphaVaultConfig {
   escrowFee: number;
   // whitelist mode: permissionless / permission_with_merkle_proof / permission_with_authority
   whitelistMode: string;
+}
+
+export interface PermissionedAlphaVaultConfig {
+  poolType: string;
+  alphaVaultType: string;
+  baseMint: string;
+  quoteMint: string;
+  poolAddress: string;
+  configAddress: string;
 }
 
 export interface LockLiquidityConfig {
