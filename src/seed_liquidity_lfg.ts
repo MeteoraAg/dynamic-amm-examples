@@ -79,12 +79,35 @@ async function main() {
   const curvature = config.lfgSeedLiquidity.curvature;
   const minPrice = config.lfgSeedLiquidity.minPrice;
   const maxPrice = config.lfgSeedLiquidity.maxPrice;
-  const basePositionKey = new PublicKey(
-    config.lfgSeedLiquidity.basePositionKey,
-  );
   const baseKeypair = safeParseKeypairFromFile(
     config.lfgSeedLiquidity.basePositionKeypairFilepath,
   );
+  const operatorKeypair = safeParseKeypairFromFile(
+    config.lfgSeedLiquidity.operatorKeypairFilepath,
+  );
+  const basePublickey = baseKeypair.publicKey;
+  const positionOwner = new PublicKey(
+    config.lfgSeedLiquidity.positionOwner,
+  );
+  const feeOwner = new PublicKey(config.lfgSeedLiquidity.feeOwner);
+  const operator = operatorKeypair.publicKey;
+  const lockReleasePoint = new BN(
+    config.lfgSeedLiquidity.lockReleasePoint,
+  );
+
+  console.log(`- Using seedAmount in lamports = ${seedAmount}`);
+  console.log(`- Using curvature = ${curvature}`);
+  console.log(`- Using minPrice ${minPrice}`);
+  console.log(`- Using maxPrice ${maxPrice}`);
+  console.log(`- Using operator ${operator}`);
+  console.log(`- Using positionOwner ${positionOwner}`);
+  console.log(`- Using feeOwner ${feeOwner}`);
+  console.log(`- Using lockReleasePoint ${lockReleasePoint}`);
+  console.log(`- Using seedTokenXToPositionOwner ${config.lfgSeedLiquidity.seedTokenXToPositionOwner}`);
+
+  if (!config.lfgSeedLiquidity.seedTokenXToPositionOwner) {
+    console.log(`WARNING: You selected seedTokenXToPositionOwner = false, you should manually send 1 lamport of token X to the position owner account to prove ownership.`)
+  }
 
   const { initializeBinArraysAndPositionIxs, addLiquidityIxs } =
     await pair.seedLiquidity(
