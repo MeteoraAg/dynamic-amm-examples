@@ -39,7 +39,13 @@ import DLMM, {
   getPriceOfBinByBinId,
 } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
-import { AccountLayout, createAssociatedTokenAccountInstruction, createTransferInstruction, getAssociatedTokenAddressSync, getMint } from "@solana/spl-token";
+import {
+  AccountLayout,
+  createAssociatedTokenAccountInstruction,
+  createTransferInstruction,
+  getAssociatedTokenAddressSync,
+  getMint,
+} from "@solana/spl-token";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -102,14 +108,10 @@ async function main() {
     config.lfgSeedLiquidity.operatorKeypairFilepath,
   );
   const basePublickey = baseKeypair.publicKey;
-  const positionOwner = new PublicKey(
-    config.lfgSeedLiquidity.positionOwner,
-  );
+  const positionOwner = new PublicKey(config.lfgSeedLiquidity.positionOwner);
   const feeOwner = new PublicKey(config.lfgSeedLiquidity.feeOwner);
   const operator = operatorKeypair.publicKey;
-  const lockReleasePoint = new BN(
-    config.lfgSeedLiquidity.lockReleasePoint,
-  );
+  const lockReleasePoint = new BN(config.lfgSeedLiquidity.lockReleasePoint);
 
   console.log(`- Using seedAmount in lamports = ${seedAmount}`);
   console.log(`- Using curvature = ${curvature}`);
@@ -119,17 +121,33 @@ async function main() {
   console.log(`- Using positionOwner ${positionOwner}`);
   console.log(`- Using feeOwner ${feeOwner}`);
   console.log(`- Using lockReleasePoint ${lockReleasePoint}`);
-  console.log(`- Using seedTokenXToPositionOwner ${config.lfgSeedLiquidity.seedTokenXToPositionOwner}`);
+  console.log(
+    `- Using seedTokenXToPositionOwner ${config.lfgSeedLiquidity.seedTokenXToPositionOwner}`,
+  );
 
   if (!config.lfgSeedLiquidity.seedTokenXToPositionOwner) {
-    console.log(`WARNING: You selected seedTokenXToPositionOwner = false, you should manually send 1 lamport of token X to the position owner account to prove ownership.`)
+    console.log(
+      `WARNING: You selected seedTokenXToPositionOwner = false, you should manually send 1 lamport of token X to the position owner account to prove ownership.`,
+    );
   }
 
-  const minPricePerLamport = DLMM.getPricePerLamport(baseDecimals, quoteDecimals, minPrice);
-  const maxPricePerLamport = DLMM.getPricePerLamport(baseDecimals, quoteDecimals, maxPrice);
+  const minPricePerLamport = DLMM.getPricePerLamport(
+    baseDecimals,
+    quoteDecimals,
+    minPrice,
+  );
+  const maxPricePerLamport = DLMM.getPricePerLamport(
+    baseDecimals,
+    quoteDecimals,
+    maxPrice,
+  );
 
-  const minBinId = new BN(DLMM.getBinIdFromPrice(minPricePerLamport, pair.lbPair.binStep, false));
-  const maxBinId = new BN(DLMM.getBinIdFromPrice(maxPricePerLamport, pair.lbPair.binStep, true));
+  const minBinId = new BN(
+    DLMM.getBinIdFromPrice(minPricePerLamport, pair.lbPair.binStep, false),
+  );
+  const maxBinId = new BN(
+    DLMM.getBinIdFromPrice(maxPricePerLamport, pair.lbPair.binStep, true),
+  );
 
   if (minBinId.toNumber() < pair.lbPair.activeId) {
     throw new Error("minPrice < current pair price");
@@ -148,32 +166,32 @@ async function main() {
     pair.tokenY.decimal,
     minBinId,
     maxBinId,
-    k
+    k,
   );
 
   const decompressMultiplier = new BN(10 ** this.tokenX.decimal);
 
   let { compressedBinAmount, compressionLoss } = compressBinAmount(
     binDepositAmount,
-    decompressMultiplier
+    decompressMultiplier,
   );
 
   // Distribute loss after compression back to bins based on bin ratio with total deposited amount
-  let {
-    newCompressedBinAmount: compressedBinDepositAmount,
-    loss: finalLoss,
-  } = distributeAmountToCompressedBinsByRatio(
-    compressedBinAmount,
-    compressionLoss,
-    decompressMultiplier,
-    new BN(2 ** 32 - 1) // u32
-  );
+  let { newCompressedBinAmount: compressedBinDepositAmount, loss: finalLoss } =
+    distributeAmountToCompressedBinsByRatio(
+      compressedBinAmount,
+      compressionLoss,
+      decompressMultiplier,
+      new BN(2 ** 32 - 1), // u32
+    );
 
   // This amount will be deposited to the last bin without compression
   const positionCount = getPositionCount(minBinId, maxBinId.sub(new BN(1)));
 
   const preflightIxs: Array<TransactionInstruction> = [];
-  const initializeBinArraysAndPositionIxs: Array<Array<TransactionInstruction>> = [];
+  const initializeBinArraysAndPositionIxs: Array<
+    Array<TransactionInstruction>
+  > = [];
   const addLiquidityIxs: Array<Array<TransactionInstruction>> = [];
   const appendedInitBinArrayIx = new Set();
 
@@ -182,7 +200,7 @@ async function main() {
       provider.connection,
       pair.lbPair.tokenXMint,
       operator,
-      wallet.publicKey
+      wallet.publicKey,
     );
 
   // create userTokenX account
@@ -191,28 +209,44 @@ async function main() {
   const operatorTokenX = getAssociatedTokenAddressSync(
     pair.lbPair.tokenXMint,
     operator,
-    true
+    true,
   );
   const positionOwnerTokenX = getAssociatedTokenAddressSync(
     pair.lbPair.tokenXMint,
     positionOwner,
-    true
+    true,
   );
 
-  const positionOwnerTokenXAccount = await provider.connection.getAccountInfo(positionOwnerTokenX);
+  const positionOwnerTokenXAccount =
+    await provider.connection.getAccountInfo(positionOwnerTokenX);
   if (positionOwnerTokenXAccount) {
     const account = AccountLayout.decode(positionOwnerTokenXAccount.data);
     if (account.amount == BigInt(0)) {
       // send 1 lamport to position owner token X to prove ownership
-      const transferIx = createTransferInstruction(operatorTokenX, positionOwnerTokenX, wallet.publicKey, 1);
+      const transferIx = createTransferInstruction(
+        operatorTokenX,
+        positionOwnerTokenX,
+        wallet.publicKey,
+        1,
+      );
       preflightIxs.push(transferIx);
     }
   } else {
-    const createPositionOwnerTokenXIx = createAssociatedTokenAccountInstruction(wallet.publicKey, positionOwnerTokenX, positionOwner, this.lbPair.tokenXMint);
+    const createPositionOwnerTokenXIx = createAssociatedTokenAccountInstruction(
+      wallet.publicKey,
+      positionOwnerTokenX,
+      positionOwner,
+      this.lbPair.tokenXMint,
+    );
     preflightIxs.push(createPositionOwnerTokenXIx);
 
     // send 1 lamport to position owner token X to prove ownership
-    const transferIx = createTransferInstruction(operatorTokenX, positionOwnerTokenX, wallet.publicKey, 1);
+    const transferIx = createTransferInstruction(
+      operatorTokenX,
+      positionOwnerTokenX,
+      wallet.publicKey,
+      1,
+    );
     preflightIxs.push(transferIx);
   }
 
@@ -228,27 +262,26 @@ async function main() {
       baseKeypair.publicKey,
       lowerBinId,
       MAX_BIN_PER_POSITION,
-      pair.program.programId
+      pair.program.programId,
     );
 
     const [lowerBinArray] = deriveBinArray(
       pair.pubkey,
       lowerBinArrayIndex,
-      pair.program.programId
+      pair.program.programId,
     );
 
     const [upperBinArray] = deriveBinArray(
       pair.pubkey,
       upperBinArrayIndex,
-      pair.program.programId
+      pair.program.programId,
     );
 
-    const accounts =
-      await provider.connection.getMultipleAccountsInfo([
-        lowerBinArray,
-        upperBinArray,
-        positionPda,
-      ]);
+    const accounts = await provider.connection.getMultipleAccountsInfo([
+      lowerBinArray,
+      upperBinArray,
+      positionPda,
+    ]);
 
     let instructions: TransactionInstruction[] = [];
 
@@ -265,7 +298,7 @@ async function main() {
             binArray: lowerBinArray,
             funder: wallet.publicKey,
           })
-          .instruction()
+          .instruction(),
       );
 
       appendedInitBinArrayIx.add(lowerBinArray.toBase58());
@@ -284,7 +317,7 @@ async function main() {
             binArray: upperBinArray,
             funder: wallet.publicKey,
           })
-          .instruction()
+          .instruction(),
       );
 
       appendedInitBinArrayIx.add(upperBinArray.toBase58());
@@ -298,7 +331,7 @@ async function main() {
             lowerBinId.toNumber(),
             MAX_BIN_PER_POSITION.toNumber(),
             feeOwner,
-            lockReleasePoint
+            lockReleasePoint,
           )
           .accounts({
             payer: wallet.publicKey,
@@ -310,7 +343,7 @@ async function main() {
             operatorTokenX,
             ownerTokenX: positionOwnerTokenX,
           })
-          .instruction()
+          .instruction(),
       );
     }
 
@@ -320,8 +353,8 @@ async function main() {
         await getEstimatedComputeUnitIxWithBuffer(
           this.program.provider.connection,
           instructions,
-          wallet.publicKey
-        )
+          wallet.publicKey,
+        ),
       );
       initializeBinArraysAndPositionIxs.push(instructions);
       instructions = [];
@@ -337,7 +370,7 @@ async function main() {
     if (!positionDeposited) {
       const cappedUpperBinId = Math.min(
         upperBinId.toNumber(),
-        maxBinId.toNumber() - 1
+        maxBinId.toNumber() - 1,
       );
 
       const bins: CompressedBinDepositAmounts = [];
@@ -368,7 +401,7 @@ async function main() {
             binArrayUpper: upperBinArray,
             sender: operator,
           })
-          .instruction()
+          .instruction(),
       );
 
       // Last position
@@ -399,7 +432,7 @@ async function main() {
               binArrayUpper: upperBinArray,
               sender: operator,
             })
-            .instruction()
+            .instruction(),
         );
       }
 
@@ -424,19 +457,19 @@ async function main() {
   const signers = [wallet.payer];
 
   if (config.dryRun) {
-    throw new Error("dryRun is not supported for this script, please set dryRun config to false");
+    throw new Error(
+      "dryRun is not supported for this script, please set dryRun config to false",
+    );
   }
 
   console.log(`>> Running preflight instructions...`);
   try {
     console.log(`>> Sending preflight transaction...`);
     const txHash = await sendAndConfirmTransaction(connection, tx, signers);
-    console.log(
-      `>>> Preflight successfully with tx hash: ${txHash}`,
-    );
+    console.log(`>>> Preflight successfully with tx hash: ${txHash}`);
   } catch (err) {
     console.error(err);
-    throw new Error(err)
+    throw new Error(err);
   }
 
   console.log(`>> Running initializeBinArraysAndPosition instructions...`);

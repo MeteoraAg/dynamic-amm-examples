@@ -9,14 +9,14 @@ export function generateAmountForBinRange(
   tokenYDecimal: number,
   minBinId: BN,
   maxBinId: BN,
-  k: number
+  k: number,
 ): Map<number, BN> {
   const toTokenMultiplier = new Decimal(10 ** (tokenXDecimal - tokenYDecimal));
   const minPrice = getPriceOfBinByBinId(minBinId.toNumber(), binStep).mul(
-    toTokenMultiplier
+    toTokenMultiplier,
   );
   const maxPrice = getPriceOfBinByBinId(maxBinId.toNumber(), binStep).mul(
-    toTokenMultiplier
+    toTokenMultiplier,
   );
   const binAmounts = new Map<number, BN>();
 
@@ -29,7 +29,7 @@ export function generateAmountForBinRange(
       tokenYDecimal,
       minPrice,
       maxPrice,
-      k
+      k,
     );
 
     binAmounts.set(i, binAmount);
@@ -46,7 +46,7 @@ export function generateBinAmount(
   tokenYDecimal: number,
   minPrice: Decimal,
   maxPrice: Decimal,
-  k: number
+  k: number,
 ) {
   const c1 = getC(
     amount,
@@ -56,7 +56,7 @@ export function generateBinAmount(
     tokenYDecimal,
     minPrice,
     maxPrice,
-    k
+    k,
   );
 
   const c0 = getC(
@@ -67,7 +67,7 @@ export function generateBinAmount(
     tokenYDecimal,
     minPrice,
     maxPrice,
-    k
+    k,
   );
 
   return new BN(c1.sub(c0).floor().toString());
@@ -81,21 +81,21 @@ export function getC(
   quoteTokenDecimal: number,
   minPrice: Decimal,
   maxPrice: Decimal,
-  k: number
+  k: number,
 ) {
   const currentPricePerLamport = new Decimal(1 + binStep / 10000).pow(
-    binId.toNumber()
+    binId.toNumber(),
   );
   const currentPricePerToken = currentPricePerLamport.mul(
-    new Decimal(10 ** (baseTokenDecimal - quoteTokenDecimal))
+    new Decimal(10 ** (baseTokenDecimal - quoteTokenDecimal)),
   );
   const priceRange = maxPrice.sub(minPrice);
   const currentPriceDeltaFromMin = currentPricePerToken.sub(
-    new Decimal(minPrice)
+    new Decimal(minPrice),
   );
 
   const c = new Decimal(amount.toString()).mul(
-    currentPriceDeltaFromMin.div(priceRange).pow(k)
+    currentPriceDeltaFromMin.div(priceRange).pow(k),
   );
 
   return c.floor();
@@ -126,7 +126,7 @@ export function distributeAmountToCompressedBinsByRatio(
   compressedBinAmount: Map<number, BN>,
   uncompressedAmount: BN,
   multiplier: BN,
-  binCapAmount: BN
+  binCapAmount: BN,
 ) {
   const newCompressedBinAmount = new Map<number, BN>();
   let totalCompressedAmount = new BN(0);
@@ -147,14 +147,14 @@ export function distributeAmountToCompressedBinsByRatio(
     let newCompressedAmount = compressedAmount.add(compressedDepositAmount);
     if (newCompressedAmount.gt(binCapAmount)) {
       compressedDepositAmount = compressedDepositAmount.sub(
-        newCompressedAmount.sub(binCapAmount)
+        newCompressedAmount.sub(binCapAmount),
       );
       newCompressedAmount = binCapAmount;
     }
     newCompressedBinAmount.set(binId, newCompressedAmount);
 
     totalDepositedAmount = totalDepositedAmount.add(
-      compressedDepositAmount.mul(multiplier)
+      compressedDepositAmount.mul(multiplier),
     );
   }
 

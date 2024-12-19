@@ -176,7 +176,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         positionOwner: { type: "string" },
         feeOwner: { type: "string" },
         lockReleasePoint: { type: "number" },
-        seedTokenXToPositionOwner: { type: "boolean" }
+        seedTokenXToPositionOwner: { type: "boolean" },
       },
       required: [
         "minPrice",
@@ -188,7 +188,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         "positionOwner",
         "feeOwner",
         "lockReleasePoint",
-        "seedTokenXToPositionOwner"
+        "seedTokenXToPositionOwner",
       ],
     },
     singleBinSeedLiquidity: {
@@ -203,7 +203,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         positionOwner: { type: "string" },
         feeOwner: { type: "string" },
         lockReleasePoint: { type: "number" },
-        seedTokenXToPositionOwner: { type: "boolean" }
+        seedTokenXToPositionOwner: { type: "boolean" },
       },
       required: [
         "price",
@@ -214,7 +214,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         "positionOwner",
         "feeOwner",
         "lockReleasePoint",
-        "seedTokenXToPositionOwner"
+        "seedTokenXToPositionOwner",
       ],
     },
   },
