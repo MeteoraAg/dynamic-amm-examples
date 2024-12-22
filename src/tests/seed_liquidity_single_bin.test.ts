@@ -4,8 +4,9 @@ import { DLMM_PROGRAM_IDS, DYNAMIC_AMM_PROGRAM_IDS } from "../libs/constants";
 import {
   createPermissionlessDlmmPool,
   createPermissionlessDynamicPool,
+  seedLiquiditySingleBin,
 } from "../index";
-import { Wallet, web3 } from "@coral-xyz/anchor";
+import { BN, Wallet, web3 } from "@coral-xyz/anchor";
 import { MeteoraConfig } from "../libs/config";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -14,6 +15,10 @@ import {
   getOrCreateAssociatedTokenAccount,
   mintTo,
 } from "@solana/spl-token";
+import {
+  deriveCustomizablePermissionlessLbPair,
+  getTokenBalance,
+} from "@meteora-ag/dlmm";
 
 const keypairFilePath =
   "./src/tests/keys/localnet/admin-bossj3JvwiNK7pvjr149DqdtJxf2gdygbcmEPTkb2F1.json";
@@ -25,20 +30,24 @@ const payerKeypair = Keypair.fromSecretKey(
 );
 const payerWallet = new Wallet(payerKeypair);
 const DLMM_PROGRAM_ID = new PublicKey(DLMM_PROGRAM_IDS["localhost"]);
-const DYNAMIC_AMM_PROGRAM_ID = new PublicKey(
-  DYNAMIC_AMM_PROGRAM_IDS["localhost"],
-);
 
-describe("Test Create Pool", () => {
+describe("Test Seed Liquidity Single Bin", () => {
   const WEN_DECIMALS = 5;
   const USDC_DECIMALS = 6;
   const WEN_SUPPLY = 100_000_000;
   const USDC_SUPPLY = 100_000_000;
+  const binStep = 200;
+  const feeBps = 200;
+  const initialPrice = 0.005;
+  const baseKeypair = Keypair.generate();
+  const positionOwner = Keypair.generate().publicKey;
+  const feeOwner = Keypair.generate().publicKey;
 
   let WEN: PublicKey;
   let USDC: PublicKey;
   let userWEN: web3.PublicKey;
   let userUSDC: web3.PublicKey;
+  let poolKey: PublicKey;
 
   beforeAll(async () => {
     WEN = await createMint(
@@ -120,37 +129,10 @@ describe("Test Create Pool", () => {
       },
       TOKEN_PROGRAM_ID,
     );
-  });
 
-  // it("Should able to create Basic Dynamic AMM pool", async () => {
-  //   const config: MeteoraConfig = {
-  //     dryRun: false,
-  //     rpcUrl,
-  //     keypairFilePath,
-  //     computeUnitPriceMicroLamports: 100000,
-  //     createBaseToken: null,
-  //     baseMint: WEN.toString(),
-  //     quoteSymbol: "USDC",
-  //     dynamicAmm: {
-  //       baseAmount: 1000,
-  //       quoteAmount: 500,
-  //       tradeFeeNumerator: 2500,
-  //       activationType: "timestamp",
-  //       activationPoint: null,
-  //       hasAlphaVault: false,
-  //     },
-  //     dlmm: null,
-  //     alphaVault: null,
-  //     lockLiquidity: null,
-  //     lfgSeedLiquidity: null,
-  //     singleBinSeedLiquidity: null,
-  //   };
-  //   await createPermissionlessDynamicPool(config, connection, payerWallet, WEN, USDC, {
-  //     programId: DYNAMIC_AMM_PROGRAM_ID.toString()
-  //   });
-  // })
+    const slot = await connection.getSlot();
+    const activationPoint = new BN(slot).add(new BN(100));
 
-  it("Should be able to create Basic DLMM pool", async () => {
     const config: MeteoraConfig = {
       dryRun: false,
       rpcUrl,
@@ -160,11 +142,11 @@ describe("Test Create Pool", () => {
       baseMint: WEN.toString(),
       quoteSymbol: "USDC",
       dlmm: {
-        binStep: 200,
-        feeBps: 200,
-        initialPrice: 0.5,
-        activationType: "timestamp",
-        activationPoint: null,
+        binStep,
+        feeBps,
+        initialPrice,
+        activationType: "slot",
+        activationPoint,
         priceRounding: "up",
         hasAlphaVault: false,
       },
@@ -174,6 +156,8 @@ describe("Test Create Pool", () => {
       lfgSeedLiquidity: null,
       singleBinSeedLiquidity: null,
     };
+
+    //create DLMM pool
     await createPermissionlessDlmmPool(
       config,
       connection,
@@ -183,6 +167,48 @@ describe("Test Create Pool", () => {
       {
         cluster: "localhost",
         programId: DLMM_PROGRAM_ID,
+      },
+    );
+
+    // send SOL to wallets
+    const payerBalance = await connection.getBalance(payerKeypair.publicKey);
+    console.log(`Payer balance ${payerBalance} lamports`);
+
+    const [poolKeyString] = deriveCustomizablePermissionlessLbPair(
+      WEN,
+      USDC,
+      new PublicKey(DLMM_PROGRAM_ID),
+    );
+    poolKey = new PublicKey(poolKeyString);
+  });
+
+  it("Should able to seed liquidity single bin", async () => {
+    const seedAmount = new BN(1000 * 10 ** WEN_DECIMALS);
+    const priceRounding = "up";
+    const lockReleasePoint = new BN(0);
+    const seedTokenXToPositionOwner = true;
+    const dryRun = false;
+    const computeUnitPriceMicroLamports = 100000;
+
+    await seedLiquiditySingleBin(
+      connection,
+      payerKeypair,
+      baseKeypair,
+      payerKeypair,
+      positionOwner,
+      feeOwner,
+      WEN,
+      USDC,
+      DLMM_PROGRAM_ID,
+      seedAmount,
+      initialPrice,
+      priceRounding,
+      lockReleasePoint,
+      seedTokenXToPositionOwner,
+      dryRun,
+      computeUnitPriceMicroLamports,
+      {
+        cluster: "localhost",
       },
     );
   });

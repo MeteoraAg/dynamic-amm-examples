@@ -35,7 +35,7 @@ export async function createPermissionlessDynamicPool(
   quoteMint: PublicKey,
   opts?: {
     cluster?: Cluster;
-    programId?: string;
+    programId?: PublicKey;
   },
 ) {
   if (!config.dynamicAmm) {
@@ -92,7 +92,10 @@ export async function createPermissionlessDynamicPool(
       baseAmount,
       quoteAmount,
       customizeParam,
-      opts,
+      {
+        cluster: opts?.cluster,
+        programId: opts?.programId.toString(),
+      },
     );
   modifyComputeUnitPriceIx(initPoolTx, config.computeUnitPriceMicroLamports);
   const poolKey = deriveCustomizablePermissionlessConstantProductPoolAddress(

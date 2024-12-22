@@ -1,11 +1,4 @@
-import {
-  ComputeBudgetProgram,
-  Connection,
-  Keypair,
-  PublicKey,
-  Transaction,
-  sendAndConfirmTransaction,
-} from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import {
   DEFAULT_COMMITMENT_LEVEL,
   MeteoraConfig,
@@ -13,8 +6,8 @@ import {
   getQuoteMint,
   getQuoteDecimals,
   safeParseKeypairFromFile,
-  runSimulateTransaction,
   parseConfigFromCli,
+  seedLiquiditySingleBin,
 } from ".";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import DLMM, {
@@ -95,74 +88,27 @@ async function main() {
   const lockReleasePoint = new BN(
     config.singleBinSeedLiquidity.lockReleasePoint,
   );
+  const seedTokenXToPositionOwner =
+    config.singleBinSeedLiquidity.seedTokenXToPositionOwner;
 
-  console.log(`- Using seedAmount in lamports = ${seedAmount}`);
-  console.log(`- Using priceRounding = ${priceRounding}`);
-  console.log(`- Using price ${price}`);
-  console.log(`- Using operator ${operator}`);
-  console.log(`- Using positionOwner ${positionOwner}`);
-  console.log(`- Using feeOwner ${feeOwner}`);
-  console.log(`- Using lockReleasePoint ${lockReleasePoint}`);
-  console.log(
-    `- Using seedTokenXToPositionOwner ${config.singleBinSeedLiquidity.seedTokenXToPositionOwner}`,
-  );
-
-  if (!config.singleBinSeedLiquidity.seedTokenXToPositionOwner) {
-    console.log(
-      `WARNING: You selected seedTokenXToPositionOwner = false, you should manually send 1 lamport of token X to the position owner account to prove ownership.`,
-    );
-  }
-
-  const seedLiquidityIxs = await pair.seedLiquiditySingleBin(
-    wallet.publicKey,
-    basePublickey,
-    seedAmount,
-    price,
-    priceRounding == "up",
+  await seedLiquiditySingleBin(
+    connection,
+    keypair,
+    baseKeypair,
+    operatorKeypair,
     positionOwner,
     feeOwner,
-    operator,
+    baseMint,
+    quoteMint,
+    DLMM_PROGRAM_ID,
+    seedAmount,
+    price,
+    priceRounding,
     lockReleasePoint,
-    config.singleBinSeedLiquidity.seedTokenXToPositionOwner,
+    seedTokenXToPositionOwner,
+    config.dryRun,
+    config.computeUnitPriceMicroLamports,
   );
-
-  const setCUPriceIx = ComputeBudgetProgram.setComputeUnitPrice({
-    microLamports: config.computeUnitPriceMicroLamports,
-  });
-
-  const { blockhash, lastValidBlockHeight } =
-    await connection.getLatestBlockhash("confirmed");
-
-  const tx = new Transaction({
-    feePayer: keypair.publicKey,
-    blockhash,
-    lastValidBlockHeight,
-  })
-    .add(setCUPriceIx)
-    .add(...seedLiquidityIxs);
-
-  if (config.dryRun) {
-    console.log(`\n> Simulating seedLiquiditySingleBin transaction...`);
-    await runSimulateTransaction(
-      connection,
-      [wallet.payer, baseKeypair, operatorKeypair],
-      wallet.publicKey,
-      [tx],
-    );
-  } else {
-    console.log(`>> Sending seedLiquiditySingleBin transaction...`);
-    const txHash = await sendAndConfirmTransaction(connection, tx, [
-      wallet.payer,
-      baseKeypair,
-      operatorKeypair,
-    ]).catch((err) => {
-      console.error(err);
-      throw err;
-    });
-    console.log(
-      `>>> SeedLiquiditySingleBin successfully with tx hash: ${txHash}`,
-    );
-  }
 }
 
 main();
