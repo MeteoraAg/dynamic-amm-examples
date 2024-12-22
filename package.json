@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "format": "bun prettier ./src --write",
-    "test": "jest 'src/tests/(create_pool).test.ts'",
+    "test": "bun test",
     "create-dynamic-amm-pool": "bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool.json",
     "create-dlmm-pool": "bun run src/create_pool.ts --config ./config/create_dlmm_pool.json"
   },

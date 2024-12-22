@@ -5,8 +5,11 @@ skip-lint = false
 [registry]
 url = "https://api.apr.dev"
 
+[programs.localnet]
+amm = { address = "ammbh4CQztZ6txJ8AaQgPsWjd6o7GhmvopS2JAo5bCB" }
+
 [provider]
-cluster = "Localnet"
+cluster = "localnet"
 wallet = "./src/tests/keys/localnet/admin-bossj3JvwiNK7pvjr149DqdtJxf2gdygbcmEPTkb2F1.json"
 
 [[test.genesis]]
