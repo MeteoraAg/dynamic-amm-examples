@@ -3,234 +3,227 @@ import {
   safeParseJsonFromFile,
   validate_config,
 } from "./utils";
-// import Ajv, { JSONSchemaType } from "ajv";
-// import Ajv, { JTDDataType } from "ajv/dist/jtd"
+import Ajv, { JSONSchemaType } from "ajv";
 
-// const SCHEMA = {
-//   properties: {}
-// };
-
-// type CONFIG_SCHEMA = JTDDataType<typeof SCHEMA>;
-
-// const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
-//   type: "object",
-//   properties: {
-//     rpcUrl: {
-//       type: "string",
-//     },
-//     dryRun: {
-//       type: "boolean",
-//     },
-//     keypairFilePath: {
-//       type: "string",
-//     },
-//     computeUnitPriceMicroLamports: {
-//       type: "number",
-//     },
-//     createBaseToken: {
-//       type: "object",
-//       nullable: true,
-//       properties: {
-//         mintBaseTokenAmount: {
-//           anyOf: [{ type: "number" }, { type: "string" }],
-//         },
-//         baseDecimals: {
-//           type: "number",
-//         },
-//       },
-//       required: ["mintBaseTokenAmount", "baseDecimals"],
-//       additionalProperties: false,
-//     },
-//     baseMint: {
-//       type: "string",
-//       nullable: true,
-//     },
-//     quoteSymbol: {
-//       type: "string",
-//     },
-//     dynamicAmm: {
-//       type: "object",
-//       nullable: true,
-//       properties: {
-//         baseAmount: {
-//           anyOf: [{ type: "number" }, { type: "string" }],
-//         },
-//         quoteAmount: {
-//           anyOf: [{ type: "number" }, { type: "string" }],
-//         },
-//         tradeFeeNumerator: {
-//           type: "number",
-//         },
-//         activationType: {
-//           type: "string",
-//         },
-//         activationPoint: {
-//           type: "number",
-//           nullable: true,
-//         },
-//         hasAlphaVault: {
-//           type: "boolean",
-//         },
-//       },
-//       required: [
-//         "baseAmount",
-//         "quoteAmount",
-//         "tradeFeeNumerator",
-//         "activationType",
-//         "hasAlphaVault",
-//       ],
-//       additionalProperties: false,
-//     },
-//     dlmm: {
-//       type: "object",
-//       nullable: true,
-//       properties: {
-//         binStep: {
-//           type: "number",
-//         },
-//         feeBps: {
-//           type: "number",
-//         },
-//         initialPrice: {
-//           type: "number",
-//         },
-//         activationType: {
-//           type: "string",
-//         },
-//         activationPoint: {
-//           type: "number",
-//           nullable: true,
-//         },
-//         priceRounding: {
-//           type: "string",
-//         },
-//         hasAlphaVault: {
-//           type: "boolean",
-//         },
-//       },
-//       required: [
-//         "binStep",
-//         "feeBps",
-//         "initialPrice",
-//         "activationType",
-//         "priceRounding",
-//         "hasAlphaVault",
-//       ],
-//       additionalProperties: false,
-//     },
-//     alphaVault: {
-//       type: "object",
-//       nullable: true,
-//       properties: {
-//         poolType: { type: "string" },
-//         alphaVaultType: { type: "string" },
-//         depositingPoint: { type: "number" },
-//         startVestingPoint: { type: "number" },
-//         endVestingPoint: { type: "number" },
-//         maxDepositCap: { type: "number", nullable: true },
-//         individualDepositingCap: { type: "number", nullable: true },
-//         maxBuyingCap: { type: "number", nullable: true },
-//         escrowFee: { type: "number" },
-//         whitelistMode: { type: "string" },
-//       },
-//       required: [
-//         "poolType",
-//         "alphaVaultType",
-//         "depositingPoint",
-//         "startVestingPoint",
-//         "endVestingPoint",
-//         "escrowFee",
-//         "whitelistMode",
-//       ],
-//     },
-//     lockLiquidity: {
-//       type: "object",
-//       nullable: true,
-//       properties: {
-//         alllocations: {
-//           type: "array",
-//           items: {
-//             type: "object",
-//             properties: {
-//               percentage: {
-//                 type: "number",
-//               },
-//               address: {
-//                 type: "string",
-//               },
-//             },
-//             required: ["percentage", "address"],
-//           },
-//         },
-//       },
-//       required: ["allocations"],
-//     },
-//     lfgSeedLiquidity: {
-//       type: "object",
-//       nullable: true,
-//       properties: {
-//         minPrice: {
-//           type: "number",
-//         },
-//         maxPrice: { type: "number" },
-//         curvature: { type: "number" },
-//         seedAmount: { type: "string" },
-//         basePositionKeypairFilepath: { type: "string" },
-//         operatorKeypairFilepath: { type: "string" },
-//         positionOwner: { type: "string" },
-//         feeOwner: { type: "string" },
-//         lockReleasePoint: { type: "number" },
-//         seedTokenXToPositionOwner: { type: "boolean" },
-//       },
-//       required: [
-//         "minPrice",
-//         "maxPrice",
-//         "curvature",
-//         "seedAmount",
-//         "basePositionKeypairFilepath",
-//         "operatorKeypairFilepath",
-//         "positionOwner",
-//         "feeOwner",
-//         "lockReleasePoint",
-//         "seedTokenXToPositionOwner",
-//       ],
-//     },
-//     singleBinSeedLiquidity: {
-//       type: "object",
-//       nullable: true,
-//       properties: {
-//         price: { type: "number" },
-//         priceRounding: { type: "string" },
-//         seedAmount: { type: "string" },
-//         basePositionKeypairFilepath: { type: "string" },
-//         operatorKeypairFilepath: { type: "string" },
-//         positionOwner: { type: "string" },
-//         feeOwner: { type: "string" },
-//         lockReleasePoint: { type: "number" },
-//         seedTokenXToPositionOwner: { type: "boolean" },
-//       },
-//       required: [
-//         "price",
-//         "priceRounding",
-//         "seedAmount",
-//         "basePositionKeypairFilepath",
-//         "operatorKeypairFilepath",
-//         "positionOwner",
-//         "feeOwner",
-//         "lockReleasePoint",
-//         "seedTokenXToPositionOwner",
-//       ],
-//     },
-//   },
-//   required: [
-//     "rpcUrl",
-//     "dryRun",
-//     "keypairFilePath",
-//     "computeUnitPriceMicroLamports",
-//     "quoteSymbol",
-//   ],
-//   additionalProperties: true,
-// };
+const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
+  type: "object",
+  properties: {
+    rpcUrl: {
+      type: "string",
+    },
+    dryRun: {
+      type: "boolean",
+    },
+    keypairFilePath: {
+      type: "string",
+    },
+    computeUnitPriceMicroLamports: {
+      type: "number",
+    },
+    createBaseToken: {
+      type: "object",
+      nullable: true,
+      properties: {
+        mintBaseTokenAmount: {
+          anyOf: [{ type: "number" }, { type: "string" }],
+        },
+        baseDecimals: {
+          type: "number",
+        },
+      },
+      required: ["mintBaseTokenAmount", "baseDecimals"],
+      additionalProperties: false,
+    },
+    baseMint: {
+      type: "string",
+      nullable: true,
+    },
+    quoteSymbol: {
+      type: "string",
+    },
+    dynamicAmm: {
+      type: "object",
+      nullable: true,
+      properties: {
+        baseAmount: {
+          anyOf: [{ type: "number" }, { type: "string" }],
+        },
+        quoteAmount: {
+          anyOf: [{ type: "number" }, { type: "string" }],
+        },
+        tradeFeeNumerator: {
+          type: "number",
+        },
+        activationType: {
+          type: "string",
+        },
+        activationPoint: {
+          type: "number",
+          nullable: true,
+        },
+        hasAlphaVault: {
+          type: "boolean",
+        },
+      },
+      required: [
+        "baseAmount",
+        "quoteAmount",
+        "tradeFeeNumerator",
+        "activationType",
+        "hasAlphaVault",
+      ],
+      additionalProperties: false,
+    },
+    dlmm: {
+      type: "object",
+      nullable: true,
+      properties: {
+        binStep: {
+          type: "number",
+        },
+        feeBps: {
+          type: "number",
+        },
+        initialPrice: {
+          type: "number",
+        },
+        activationType: {
+          type: "string",
+        },
+        activationPoint: {
+          type: "number",
+          nullable: true,
+        },
+        priceRounding: {
+          type: "string",
+        },
+        hasAlphaVault: {
+          type: "boolean",
+        },
+      },
+      required: [
+        "binStep",
+        "feeBps",
+        "initialPrice",
+        "activationType",
+        "priceRounding",
+        "hasAlphaVault",
+      ],
+      additionalProperties: false,
+    },
+    alphaVault: {
+      type: "object",
+      nullable: true,
+      properties: {
+        poolType: { type: "string" },
+        alphaVaultType: { type: "string" },
+        depositingPoint: { type: "number" },
+        startVestingPoint: { type: "number" },
+        endVestingPoint: { type: "number" },
+        maxDepositCap: { type: "number", nullable: true },
+        individualDepositingCap: { type: "number", nullable: true },
+        maxBuyingCap: { type: "number", nullable: true },
+        escrowFee: { type: "number" },
+        whitelistMode: { type: "string" },
+      },
+      required: [
+        "poolType",
+        "alphaVaultType",
+        "depositingPoint",
+        "startVestingPoint",
+        "endVestingPoint",
+        "escrowFee",
+        "whitelistMode",
+      ],
+    },
+    lockLiquidity: {
+      type: "object",
+      nullable: true,
+      properties: {
+        alllocations: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              percentage: {
+                type: "number",
+              },
+              address: {
+                type: "string",
+              },
+            },
+            required: ["percentage", "address"],
+          },
+        },
+      },
+      required: ["allocations"],
+    },
+    lfgSeedLiquidity: {
+      type: "object",
+      nullable: true,
+      properties: {
+        minPrice: {
+          type: "number",
+        },
+        maxPrice: { type: "number" },
+        curvature: { type: "number" },
+        seedAmount: { type: "string" },
+        basePositionKeypairFilepath: { type: "string" },
+        operatorKeypairFilepath: { type: "string" },
+        positionOwner: { type: "string" },
+        feeOwner: { type: "string" },
+        lockReleasePoint: { type: "number" },
+        seedTokenXToPositionOwner: { type: "boolean" },
+      },
+      required: [
+        "minPrice",
+        "maxPrice",
+        "curvature",
+        "seedAmount",
+        "basePositionKeypairFilepath",
+        "operatorKeypairFilepath",
+        "positionOwner",
+        "feeOwner",
+        "lockReleasePoint",
+        "seedTokenXToPositionOwner",
+      ],
+    },
+    singleBinSeedLiquidity: {
+      type: "object",
+      nullable: true,
+      properties: {
+        price: { type: "number" },
+        priceRounding: { type: "string" },
+        seedAmount: { type: "string" },
+        basePositionKeypairFilepath: { type: "string" },
+        operatorKeypairFilepath: { type: "string" },
+        positionOwner: { type: "string" },
+        feeOwner: { type: "string" },
+        lockReleasePoint: { type: "number" },
+        seedTokenXToPositionOwner: { type: "boolean" },
+      },
+      required: [
+        "price",
+        "priceRounding",
+        "seedAmount",
+        "basePositionKeypairFilepath",
+        "operatorKeypairFilepath",
+        "positionOwner",
+        "feeOwner",
+        "lockReleasePoint",
+        "seedTokenXToPositionOwner",
+      ],
+    },
+  },
+  required: [
+    "rpcUrl",
+    "dryRun",
+    "keypairFilePath",
+    "computeUnitPriceMicroLamports",
+    "quoteSymbol",
+  ],
+  additionalProperties: true,
+};
 
 export interface MeteoraConfig {
   rpcUrl: string;
@@ -344,7 +337,7 @@ export interface SingleBinSeedLiquidityConfig {
 
 /// Parse and validate config from CLI
 export function parseConfigFromCli(): MeteoraConfig {
-  // const ajv = new Ajv();
+  const ajv = new Ajv();
   const cliArguments = parseCliArguments();
   if (!cliArguments.config) {
     throw new Error("Please provide a config file path to --config flag");
@@ -352,15 +345,15 @@ export function parseConfigFromCli(): MeteoraConfig {
   const configFilePath = cliArguments.config!;
   console.log(`> Using config file: ${configFilePath}`);
 
-  // const validate = ajv.compile<CONFIG_SCHEMA>(SCHEMA);
+  const validate = ajv.compile(CONFIG_SCHEMA);
 
   let config: MeteoraConfig = safeParseJsonFromFile(configFilePath);
 
-  // const isValid = validate(config);
-  // if (!isValid) {
-  //   console.error(validate.errors);
-  //   throw new Error("Config file is invalid");
-  // }
+  const isValid = validate(config);
+  if (!isValid) {
+    console.error(validate.errors);
+    throw new Error("Config file is invalid");
+  }
 
   validate_config(config);
 

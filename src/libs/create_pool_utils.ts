@@ -36,7 +36,7 @@ export async function createPermissionlessDynamicPool(
   opts?: {
     cluster?: Cluster;
     programId?: string;
-  }
+  },
 ) {
   if (!config.dynamicAmm) {
     throw new Error("Missing dynamic amm configuration");
@@ -92,7 +92,7 @@ export async function createPermissionlessDynamicPool(
       baseAmount,
       quoteAmount,
       customizeParam,
-      opts
+      opts,
     );
   modifyComputeUnitPriceIx(initPoolTx, config.computeUnitPriceMicroLamports);
   const poolKey = deriveCustomizablePermissionlessConstantProductPoolAddress(
@@ -133,7 +133,7 @@ export async function createPermissionlessDlmmPool(
   opts?: {
     cluster?: Cluster | "localhost";
     programId?: PublicKey;
-  }
+  },
 ) {
   if (!config.dlmm) {
     throw new Error("Missing DLMM configuration");
@@ -193,7 +193,7 @@ export async function createPermissionlessDlmmPool(
     hasAlphaVault,
     wallet.publicKey,
     activationPoint,
-    opts
+    opts,
   );
   modifyComputeUnitPriceIx(initPoolTx, config.computeUnitPriceMicroLamports);
 

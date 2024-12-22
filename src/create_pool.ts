@@ -1,7 +1,4 @@
-import {
-  Connection,
-  PublicKey,
-} from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import {
   DEFAULT_COMMITMENT_LEVEL,
   MeteoraConfig,
@@ -11,7 +8,10 @@ import {
 } from ".";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { createTokenMint } from "./libs/create_token_mint";
-import { createPermissionlessDlmmPool, createPermissionlessDynamicPool } from "./libs/create_pool_utils";
+import {
+  createPermissionlessDlmmPool,
+  createPermissionlessDynamicPool,
+} from "./libs/create_pool_utils";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();

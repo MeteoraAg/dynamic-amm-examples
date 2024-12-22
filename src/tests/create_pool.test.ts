@@ -1,24 +1,33 @@
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import fs from "fs";
 import { DLMM_PROGRAM_IDS, DYNAMIC_AMM_PROGRAM_IDS } from "../libs/constants";
-import { createPermissionlessDlmmPool, createPermissionlessDynamicPool } from "../index";
+import {
+  createPermissionlessDlmmPool,
+  createPermissionlessDynamicPool,
+} from "../index";
 import { Wallet, web3 } from "@coral-xyz/anchor";
 import { MeteoraConfig } from "../libs/config";
-import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  createMint,
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
+} from "@solana/spl-token";
 
-const keypairFilePath = "./src/tests/keys/localnet/admin-bossj3JvwiNK7pvjr149DqdtJxf2gdygbcmEPTkb2F1.json";
-const keypairBuffer = fs.readFileSync(
-  keypairFilePath,
-  "utf-8"
-);
+const keypairFilePath =
+  "./src/tests/keys/localnet/admin-bossj3JvwiNK7pvjr149DqdtJxf2gdygbcmEPTkb2F1.json";
+const keypairBuffer = fs.readFileSync(keypairFilePath, "utf-8");
 const rpcUrl = "http://127.0.0.1:8899";
 const connection = new Connection("http://127.0.0.1:8899", "confirmed");
 const payerKeypair = Keypair.fromSecretKey(
-  new Uint8Array(JSON.parse(keypairBuffer))
+  new Uint8Array(JSON.parse(keypairBuffer)),
 );
 const payerWallet = new Wallet(payerKeypair);
 const DLMM_PROGRAM_ID = new PublicKey(DLMM_PROGRAM_IDS["localhost"]);
-const DYNAMIC_AMM_PROGRAM_ID = new PublicKey(DYNAMIC_AMM_PROGRAM_IDS["localhost"]);
+const DYNAMIC_AMM_PROGRAM_ID = new PublicKey(
+  DYNAMIC_AMM_PROGRAM_IDS["localhost"],
+);
 
 console.log("DLMM program ID: " + DLMM_PROGRAM_ID);
 console.log("Dynamic AMM program ID: " + DYNAMIC_AMM_PROGRAM_ID);
@@ -43,7 +52,7 @@ describe("Test Create Pool", () => {
       WEN_DECIMALS,
       Keypair.generate(),
       undefined,
-      TOKEN_PROGRAM_ID
+      TOKEN_PROGRAM_ID,
     );
 
     USDC = await createMint(
@@ -54,7 +63,7 @@ describe("Test Create Pool", () => {
       USDC_DECIMALS,
       Keypair.generate(),
       undefined,
-      TOKEN_PROGRAM_ID
+      TOKEN_PROGRAM_ID,
     );
 
     const userWenInfo = await getOrCreateAssociatedTokenAccount(
@@ -68,7 +77,7 @@ describe("Test Create Pool", () => {
         commitment: "confirmed",
       },
       TOKEN_PROGRAM_ID,
-      ASSOCIATED_TOKEN_PROGRAM_ID
+      ASSOCIATED_TOKEN_PROGRAM_ID,
     );
     userWEN = userWenInfo.address;
 
@@ -83,7 +92,7 @@ describe("Test Create Pool", () => {
         commitment: "confirmed",
       },
       TOKEN_PROGRAM_ID,
-      ASSOCIATED_TOKEN_PROGRAM_ID
+      ASSOCIATED_TOKEN_PROGRAM_ID,
     );
     userUSDC = userUsdcInfo.address;
 
@@ -98,7 +107,7 @@ describe("Test Create Pool", () => {
       {
         commitment: "confirmed",
       },
-      TOKEN_PROGRAM_ID
+      TOKEN_PROGRAM_ID,
     );
 
     await mintTo(
@@ -112,10 +121,9 @@ describe("Test Create Pool", () => {
       {
         commitment: "confirmed",
       },
-      TOKEN_PROGRAM_ID
+      TOKEN_PROGRAM_ID,
     );
-
-  })
+  });
 
   // it("Should able to create Basic Dynamic AMM pool", async () => {
   //   const config: MeteoraConfig = {
@@ -161,7 +169,7 @@ describe("Test Create Pool", () => {
         activationType: "timestamp",
         activationPoint: null,
         priceRounding: "up",
-        hasAlphaVault: false
+        hasAlphaVault: false,
       },
       dynamicAmm: null,
       alphaVault: null,
@@ -169,9 +177,16 @@ describe("Test Create Pool", () => {
       lfgSeedLiquidity: null,
       singleBinSeedLiquidity: null,
     };
-    await createPermissionlessDlmmPool(config, connection, payerWallet, WEN, USDC, {
-      cluster: "localhost",
-      programId: DLMM_PROGRAM_ID
-    })
-  })
-})
+    await createPermissionlessDlmmPool(
+      config,
+      connection,
+      payerWallet,
+      WEN,
+      USDC,
+      {
+        cluster: "localhost",
+        programId: DLMM_PROGRAM_ID,
+      },
+    );
+  });
+});
