@@ -230,7 +230,9 @@ describe("Test Seed Liquidity Single Bin", () => {
 
     // WEN balance after = WEN supply - seed amount - 1 lamport
     const wenBalanceAfter = await getTokenBalance(connection, userWEN);
-    const expectedBalanceAfter = new BN(WEN_SUPPLY * 10 ** WEN_DECIMALS - 1).sub(seedAmount);
+    const expectedBalanceAfter = new BN(
+      WEN_SUPPLY * 10 ** WEN_DECIMALS - 1,
+    ).sub(seedAmount);
     expect(wenBalanceAfter.toString()).toEqual(expectedBalanceAfter.toString());
   });
 });
