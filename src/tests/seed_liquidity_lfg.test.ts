@@ -18,8 +18,12 @@ import {
 } from "@solana/spl-token";
 import DLMM, {
   deriveCustomizablePermissionlessLbPair,
+  getBinArrayLowerUpperBinId,
+  getPriceOfBinByBinId,
   getTokenBalance,
 } from "@meteora-ag/dlmm";
+import Decimal from "decimal.js";
+import babar from "babar";
 
 const keypairFilePath =
   "./src/tests/keys/localnet/admin-bossj3JvwiNK7pvjr149DqdtJxf2gdygbcmEPTkb2F1.json";
@@ -234,5 +238,41 @@ describe("Test Seed Liquidity Single Bin", () => {
       WEN_SUPPLY * 10 ** WEN_DECIMALS - 1,
     ).sub(seedAmount);
     expect(wenBalanceAfter.toString()).toEqual(expectedBalanceAfter.toString());
+
+    const pair = await DLMM.create(connection, poolKey, {
+      cluster: "localhost",
+      programId: DLMM_PROGRAM_ID
+    });
+
+    await pair.refetchStates();
+
+    let binArrays = await pair.getBinArrays();
+    binArrays = binArrays.sort((a, b) =>
+      a.account.index.cmp(b.account.index)
+    );
+
+    const binLiquidities = binArrays
+      .map((ba) => {
+        const [lowerBinId, upperBinId] = getBinArrayLowerUpperBinId(
+          ba.account.index
+        );
+        const binWithLiquidity: [number, number][] = [];
+        for (let i = lowerBinId.toNumber(); i <= upperBinId.toNumber(); i++) {
+          const binAmountX =
+            ba.account.bins[i - lowerBinId.toNumber()].amountX;
+          const binPrice = getPriceOfBinByBinId(i, pair.lbPair.binStep);
+          const liquidity = new Decimal(binAmountX.toString())
+            .mul(binPrice)
+            .floor()
+            .toNumber();
+          binWithLiquidity.push([i, liquidity]);
+        }
+        return binWithLiquidity;
+      })
+      .flat();
+
+    console.log(binLiquidities.filter((b) => b[1] > 0).reverse());
+    console.log(binLiquidities.filter((b) => b[1] > 0));
+    console.log(babar(binLiquidities));
   });
 });
