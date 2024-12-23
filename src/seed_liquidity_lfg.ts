@@ -109,7 +109,6 @@ async function main() {
   const operatorKeypair = safeParseKeypairFromFile(
     config.lfgSeedLiquidity.operatorKeypairFilepath,
   );
-  const basePublickey = baseKeypair.publicKey;
   const positionOwner = new PublicKey(config.lfgSeedLiquidity.positionOwner);
   const feeOwner = new PublicKey(config.lfgSeedLiquidity.feeOwner);
   const operator = operatorKeypair.publicKey;
