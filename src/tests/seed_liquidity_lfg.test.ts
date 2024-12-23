@@ -241,25 +241,22 @@ describe("Test Seed Liquidity Single Bin", () => {
 
     const pair = await DLMM.create(connection, poolKey, {
       cluster: "localhost",
-      programId: DLMM_PROGRAM_ID
+      programId: DLMM_PROGRAM_ID,
     });
 
     await pair.refetchStates();
 
     let binArrays = await pair.getBinArrays();
-    binArrays = binArrays.sort((a, b) =>
-      a.account.index.cmp(b.account.index)
-    );
+    binArrays = binArrays.sort((a, b) => a.account.index.cmp(b.account.index));
 
     const binLiquidities = binArrays
       .map((ba) => {
         const [lowerBinId, upperBinId] = getBinArrayLowerUpperBinId(
-          ba.account.index
+          ba.account.index,
         );
         const binWithLiquidity: [number, number][] = [];
         for (let i = lowerBinId.toNumber(); i <= upperBinId.toNumber(); i++) {
-          const binAmountX =
-            ba.account.bins[i - lowerBinId.toNumber()].amountX;
+          const binAmountX = ba.account.bins[i - lowerBinId.toNumber()].amountX;
           const binPrice = getPriceOfBinByBinId(i, pair.lbPair.binStep);
           const liquidity = new Decimal(binAmountX.toString())
             .mul(binPrice)

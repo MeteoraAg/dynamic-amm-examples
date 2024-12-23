@@ -6,7 +6,8 @@
     "format": "bun prettier ./src --write",
     "test": "bun test",
     "create-dynamic-amm-pool": "bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool.json",
-    "create-dlmm-pool": "bun run src/create_pool.ts --config ./config/create_dlmm_pool.json"
+    "create-dlmm-pool": "bun run src/create_pool.ts --config ./config/create_dlmm_pool.json",
+    "start-test-validator": "solana-test-validator --account-dir ./src/tests/artifacts/accounts --reset"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",

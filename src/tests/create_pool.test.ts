@@ -1,6 +1,10 @@
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import fs from "fs";
-import { DLMM_PROGRAM_IDS, DYNAMIC_AMM_PROGRAM_IDS } from "../libs/constants";
+import {
+  DLMM_PROGRAM_IDS,
+  DYNAMIC_AMM_PROGRAM_IDS,
+  SOL_TOKEN_MINT,
+} from "../libs/constants";
 import {
   createPermissionlessDlmmPool,
   createPermissionlessDynamicPool,
@@ -122,33 +126,40 @@ describe("Test Create Pool", () => {
     );
   });
 
-  // it("Should able to create Basic Dynamic AMM pool", async () => {
-  //   const config: MeteoraConfig = {
-  //     dryRun: false,
-  //     rpcUrl,
-  //     keypairFilePath,
-  //     computeUnitPriceMicroLamports: 100000,
-  //     createBaseToken: null,
-  //     baseMint: WEN.toString(),
-  //     quoteSymbol: "USDC",
-  //     dynamicAmm: {
-  //       baseAmount: 1000,
-  //       quoteAmount: 500,
-  //       tradeFeeNumerator: 2500,
-  //       activationType: "timestamp",
-  //       activationPoint: null,
-  //       hasAlphaVault: false,
-  //     },
-  //     dlmm: null,
-  //     alphaVault: null,
-  //     lockLiquidity: null,
-  //     lfgSeedLiquidity: null,
-  //     singleBinSeedLiquidity: null,
-  //   };
-  //   await createPermissionlessDynamicPool(config, connection, payerWallet, WEN, USDC, {
-  //     programId: DYNAMIC_AMM_PROGRAM_ID.toString()
-  //   });
-  // })
+  it("Should able to create Basic Dynamic AMM pool", async () => {
+    const config: MeteoraConfig = {
+      dryRun: false,
+      rpcUrl,
+      keypairFilePath,
+      computeUnitPriceMicroLamports: 100000,
+      createBaseToken: null,
+      baseMint: WEN.toString(),
+      quoteSymbol: "SOL",
+      dynamicAmm: {
+        baseAmount: 1000,
+        quoteAmount: 0.1,
+        tradeFeeNumerator: 2500,
+        activationType: "timestamp",
+        activationPoint: null,
+        hasAlphaVault: false,
+      },
+      dlmm: null,
+      alphaVault: null,
+      lockLiquidity: null,
+      lfgSeedLiquidity: null,
+      singleBinSeedLiquidity: null,
+    };
+    await createPermissionlessDynamicPool(
+      config,
+      connection,
+      payerWallet,
+      WEN,
+      new PublicKey(SOL_TOKEN_MINT),
+      {
+        programId: DYNAMIC_AMM_PROGRAM_ID,
+      },
+    );
+  });
 
   it("Should be able to create Basic DLMM pool", async () => {
     const config: MeteoraConfig = {
