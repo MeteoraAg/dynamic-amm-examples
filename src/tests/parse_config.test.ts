@@ -1,9 +1,12 @@
 import {
   AlphaVaultTypeConfig,
+  MeteoraConfig,
   PoolTypeConfig,
   WhitelistModeConfig,
   validateConfig,
 } from "../libs/config";
+import * as fs from "fs";
+import * as path from "path";
 
 describe("Test parsing JSON configuration", () => {
   it("Should able to parse alpha vault configuration", () => {
@@ -168,3 +171,45 @@ describe("Test parsing JSON configuration", () => {
     }
   });
 });
+
+describe("Test config directory", () => {
+  const configDir = "./config/";
+  it("All config files inside the config directory should be valid", () => {
+    parseFilesFromDirectory(configDir, (filePath, content) => {
+      console.log(`Validating config file: ${filePath}...`);
+      let config: MeteoraConfig = JSON.parse(content);
+
+      try {
+        validateConfig(config);
+      } catch (error) {
+        console.error(`Config file ${filePath} is invalid`);
+        throw new Error(error);
+      }
+    });
+  });
+});
+
+function parseFilesFromDirectory(
+  directory: string,
+  fileProcessor: (filePath: string, content: string) => void,
+) {
+  try {
+    // Read the directory
+    const files = fs.readdirSync(directory);
+
+    files.forEach((file) => {
+      const filePath = path.join(directory, file);
+
+      // Check if the filePath is a file
+      if (fs.statSync(filePath).isFile()) {
+        // Read the file content
+        const content = fs.readFileSync(filePath, "utf-8");
+
+        // Call the file processor callback
+        fileProcessor(filePath, content);
+      }
+    });
+  } catch (error) {
+    console.error("Error processing directory:", error);
+  }
+}
