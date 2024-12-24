@@ -16,8 +16,9 @@ import {
   ProrataAlphaVaultConfig,
   getAlphaVaultWhitelistMode,
   parseConfigFromCli,
-  getAlphaVaultPoolType,
   modifyComputeUnitPriceIx,
+  PoolTypeConfig,
+  toAlphaVaulSdkPoolType,
 } from ".";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 
@@ -62,17 +63,16 @@ async function main() {
   if (!config.alphaVault) {
     throw new Error("Missing alpha vault in configuration");
   }
-
-  const poolType = getAlphaVaultPoolType(config.alphaVault.poolType);
+  const poolType = config.alphaVault.poolType;
 
   let poolKey: PublicKey;
-  if (poolType == PoolType.DYNAMIC) {
+  if (poolType == PoolTypeConfig.Dynamic) {
     poolKey = deriveCustomizablePermissionlessConstantProductPoolAddress(
       baseMint,
       quoteMint,
       createProgram(connection).ammProgram.programId,
     );
-  } else if (poolType == PoolType.DLMM) {
+  } else if (poolType == PoolTypeConfig.Dlmm) {
     [poolKey] = deriveCustomizablePermissionlessLbPair(
       baseMint,
       quoteMint,
@@ -82,16 +82,14 @@ async function main() {
     throw new Error(`Invalid pool type ${poolType}`);
   }
 
-  console.log(
-    `\n> Pool address: ${poolKey}, pool type ${config.alphaVault.poolType}`,
-  );
+  console.log(`\n> Pool address: ${poolKey}, pool type ${poolType}`);
 
   let initAlphaVaultTx: Transaction | null = null;
   if (config.alphaVault.alphaVaultType == "fcfs") {
     initAlphaVaultTx = await createFcfsAlphaVault(
       connection,
       wallet,
-      poolType,
+      toAlphaVaulSdkPoolType(poolType),
       poolKey,
       baseMint,
       quoteMint,
@@ -102,7 +100,7 @@ async function main() {
     initAlphaVaultTx = await createProrataAlphaVault(
       connection,
       wallet,
-      poolType,
+      toAlphaVaulSdkPoolType(poolType),
       poolKey,
       baseMint,
       quoteMint,

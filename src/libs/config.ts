@@ -1,7 +1,7 @@
 import {
+  extraConfigValidation,
   parseCliArguments,
   safeParseJsonFromFile,
-  validate_config,
 } from "./utils";
 import Ajv, { JSONSchemaType } from "ajv";
 
@@ -115,8 +115,8 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
       type: "object",
       nullable: true,
       properties: {
-        poolType: { type: "string" },
-        alphaVaultType: { type: "string" },
+        poolType: { enum: ["dynamic", "dlmm"] },
+        alphaVaultType: { enum: ["fcfs", "prorata"] },
         depositingPoint: { type: "number" },
         startVestingPoint: { type: "number" },
         endVestingPoint: { type: "number" },
@@ -124,7 +124,13 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         individualDepositingCap: { type: "number", nullable: true },
         maxBuyingCap: { type: "number", nullable: true },
         escrowFee: { type: "number" },
-        whitelistMode: { type: "string" },
+        whitelistMode: {
+          enum: [
+            "permissionless",
+            "permissioned_with_authority",
+            "permissioned_with_merkle_proof",
+          ],
+        },
       },
       required: [
         "poolType",
@@ -145,7 +151,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         baseMint: { type: "string" },
         quoteMint: { type: "string" },
         poolAddress: { type: "string" },
-        configAddress: { type: "string" }
+        configAddress: { type: "string" },
       },
       required: [
         "poolType",
@@ -155,7 +161,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         "poolAddress",
         "configAddress",
       ],
-    }
+    },
   },
   lockLiquidity: {
     type: "object",
@@ -242,7 +248,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
       "positionOwner",
       "feeOwner",
       "lockReleasePoint",
-      "seedTokenXToPositionOwner"
+      "seedTokenXToPositionOwner",
     ],
   },
   required: [
@@ -266,7 +272,6 @@ export interface MeteoraConfig {
   dynamicAmm: DynamicAmmConfig | null;
   dlmm: DlmmConfig | null;
   alphaVault: FcfsAlphaVaultConfig | ProrataAlphaVaultConfig | null;
-  permissionedAlphaVault: PermissionedAlphaVaultConfig | null;
   lockLiquidity: LockLiquidityConfig | null;
   lfgSeedLiquidity: LfgSeedLiquidityConfig | null;
   singleBinSeedLiquidity: SingleBinSeedLiquidityConfig | null;
@@ -297,8 +302,8 @@ export interface DlmmConfig {
 }
 
 export interface FcfsAlphaVaultConfig {
-  poolType: string;
-  alphaVaultType: string;
+  poolType: PoolTypeConfig;
+  alphaVaultType: AlphaVaultTypeConfig;
   // absolute value, depend on the pool activation type it will be the timestamp in secs or the slot number
   depositingPoint: number;
   // absolute value
@@ -311,13 +316,13 @@ export interface FcfsAlphaVaultConfig {
   individualDepositingCap: number;
   // fee to create stake escrow account
   escrowFee: number;
-  // whitelist mode: permissionless / permission_with_merkle_proof / permission_with_authority
-  whitelistMode: string;
+  // whitelist mode
+  whitelistMode: WhitelistModeConfig;
 }
 
 export interface ProrataAlphaVaultConfig {
-  poolType: string;
-  alphaVaultType: string;
+  poolType: PoolTypeConfig;
+  alphaVaultType: AlphaVaultTypeConfig;
   // absolute value, depend on the pool activation type it will be the timestamp in secs or the slot number
   depositingPoint: number;
   // absolute value
@@ -328,8 +333,24 @@ export interface ProrataAlphaVaultConfig {
   maxBuyingCap: number;
   // fee to create stake escrow account
   escrowFee: number;
-  // whitelist mode: permissionless / permission_with_merkle_proof / permission_with_authority
-  whitelistMode: string;
+  // whitelist mode
+  whitelistMode: WhitelistModeConfig;
+}
+
+export enum AlphaVaultTypeConfig {
+  Fcfs = "fcfs",
+  Prorata = "prorata",
+}
+
+export enum PoolTypeConfig {
+  Dynamic = "dynamic",
+  Dlmm = "dlmm",
+}
+
+export enum WhitelistModeConfig {
+  Permissionless = "permissionless",
+  PermissionedWithMerkleProof = "permissioned_with_merkle_proof",
+  PermissionedWithAuthority = "permissioned_with_authority",
 }
 
 export interface PermissionedAlphaVaultConfig {
@@ -377,7 +398,6 @@ export interface SingleBinSeedLiquidityConfig {
 
 /// Parse and validate config from CLI
 export function parseConfigFromCli(): MeteoraConfig {
-  const ajv = new Ajv();
   const cliArguments = parseCliArguments();
   if (!cliArguments.config) {
     throw new Error("Please provide a config file path to --config flag");
@@ -385,17 +405,23 @@ export function parseConfigFromCli(): MeteoraConfig {
   const configFilePath = cliArguments.config!;
   console.log(`> Using config file: ${configFilePath}`);
 
-  const validate = ajv.compile(CONFIG_SCHEMA);
-
   let config: MeteoraConfig = safeParseJsonFromFile(configFilePath);
 
+  validateConfig(config);
+
+  return config;
+}
+
+export function validateConfig(config: MeteoraConfig) {
+  const ajv = new Ajv({
+    strict: false,
+  });
+  const validate = ajv.compile(CONFIG_SCHEMA);
   const isValid = validate(config);
   if (!isValid) {
     console.error(validate.errors);
     throw new Error("Config file is invalid");
   }
 
-  validate_config(config);
-
-  return config;
+  extraConfigValidation(config);
 }

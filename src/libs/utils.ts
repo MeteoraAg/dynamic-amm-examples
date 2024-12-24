@@ -31,11 +31,11 @@ import {
   PoolType,
   WhitelistMode,
 } from "@meteora-ag/alpha-vault";
-import { MeteoraConfig } from "..";
+import { MeteoraConfig, PoolTypeConfig } from "..";
 
 export const DEFAULT_ADD_LIQUIDITY_CU = 800_000;
 
-export function validate_config(config: MeteoraConfig) {
+export function extraConfigValidation(config: MeteoraConfig) {
   if (!config.keypairFilePath) {
     throw new Error("Missing keypairFilePath in config file.");
   }
@@ -53,26 +53,6 @@ export function validate_config(config: MeteoraConfig) {
     throw new Error(
       "Both Dynamic AMM and DLMM configuration cannot be set simultaneously.",
     );
-  }
-
-  if (config.alphaVault) {
-    if (
-      config.alphaVault.alphaVaultType != "fcfs" &&
-      config.alphaVault.alphaVaultType != "prorata"
-    ) {
-      throw new Error(
-        `Alpha vault type ${config.alphaVault.alphaVaultType} isn't supported.`,
-      );
-    }
-
-    if (
-      config.alphaVault.poolType != "dynamic" &&
-      config.alphaVault.poolType != "dlmm"
-    ) {
-      throw new Error(
-        `Alpha vault pool tyep ${config.alphaVault.poolType} isn't supported.`,
-      );
-    }
   }
 }
 
@@ -189,11 +169,11 @@ export function getDlmmActivationType(
   }
 }
 
-export function getAlphaVaultPoolType(poolType: string): PoolType {
-  switch (poolType.toLowerCase()) {
-    case "dynamic":
+export function toAlphaVaulSdkPoolType(poolType: PoolTypeConfig): PoolType {
+  switch (poolType) {
+    case PoolTypeConfig.Dynamic:
       return PoolType.DYNAMIC;
-    case "dlmm":
+    case PoolTypeConfig.Dlmm:
       return PoolType.DLMM;
     default:
       throw new Error(`Unsupported alpha vault pool type: ${poolType}`);
