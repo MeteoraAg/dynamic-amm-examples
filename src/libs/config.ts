@@ -41,9 +41,6 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
     quoteSymbol: {
       type: "string",
     },
-    baseDecimals: {
-      type: "number",
-    },
     dynamicAmm: {
       type: "object",
       nullable: true,
@@ -180,45 +177,61 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         },
       },
     },
-    required: ["allocations"],
-  },
-  lfgSeedLiquidity: {
-    type: "object",
-    nullable: true,
-    properties: {
-      minPrice: {
-        type: "number",
+    lfgSeedLiquidity: {
+      type: "object",
+      nullable: true,
+      properties: {
+        minPrice: {
+          type: "number",
+        },
+        maxPrice: { type: "number" },
+        curvature: { type: "number" },
+        seedAmount: { type: "string" },
+        basePositionKeypairFilepath: { type: "string" },
+        operatorKeypairFilepath: { type: "string" },
+        positionOwner: { type: "string" },
+        feeOwner: { type: "string" },
+        lockReleasePoint: { type: "number" },
+        seedTokenXToPositionOwner: { type: "boolean" },
       },
-      maxPrice: { type: "number" },
-      binStep: { type: "number" },
-      curvature: { type: "number" },
-      seedAmount: { type: "string" },
-      basePositionKey: { type: "string" },
-      basePositionKeypairFilepath: { type: "string" },
+      required: [
+        "minPrice",
+        "maxPrice",
+        "curvature",
+        "seedAmount",
+        "basePositionKeypairFilepath",
+        "operatorKeypairFilepath",
+        "positionOwner",
+        "feeOwner",
+        "lockReleasePoint",
+        "seedTokenXToPositionOwner",
+      ],
     },
-    required: [
-      "minPrice",
-      "maxPrice",
-      "binStep",
-      "curvature",
-      "seedAmount",
-      "basePositionKey",
-      "basePositionKeypairFilepath",
-    ],
-  },
-  singleBinSeedLiquidity: {
-    type: "object",
-    nullable: true,
-    properties: {
-      price: { type: "number" },
-      priceRounding: { type: "string" },
-      seedAmount: { type: "string" },
-      basePositionKeypairFilepath: { type: "string" },
-      operatorKeypairFilepath: { type: "string" },
-      positionOwner: { type: "string" },
-      feeOwner: { type: "string" },
-      lockReleasePoint: { type: "number" },
-      seedTokenXToPositionOwner: { type: "boolean" }
+    singleBinSeedLiquidity: {
+      type: "object",
+      nullable: true,
+      properties: {
+        price: { type: "number" },
+        priceRounding: { type: "string" },
+        seedAmount: { type: "string" },
+        basePositionKeypairFilepath: { type: "string" },
+        operatorKeypairFilepath: { type: "string" },
+        positionOwner: { type: "string" },
+        feeOwner: { type: "string" },
+        lockReleasePoint: { type: "number" },
+        seedTokenXToPositionOwner: { type: "boolean" },
+      },
+      required: [
+        "price",
+        "priceRounding",
+        "seedAmount",
+        "basePositionKeypairFilepath",
+        "operatorKeypairFilepath",
+        "positionOwner",
+        "feeOwner",
+        "lockReleasePoint",
+        "seedTokenXToPositionOwner",
+      ],
     },
     required: [
       "price",
@@ -340,11 +353,14 @@ export interface LockLiquidityAllocation {
 export interface LfgSeedLiquidityConfig {
   minPrice: number;
   maxPrice: number;
-  binStep: number;
   curvature: number;
   seedAmount: string;
-  basePositionKey: string;
   basePositionKeypairFilepath: string;
+  operatorKeypairFilepath: string;
+  positionOwner: string;
+  feeOwner: string;
+  lockReleasePoint: number;
+  seedTokenXToPositionOwner: boolean;
 }
 
 export interface SingleBinSeedLiquidityConfig {

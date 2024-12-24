@@ -67,6 +67,14 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `escrowFee`: Fee to create stake escrow account.
 - `whitelistMode`: `permissionless` or `permission_with_merkle_proof` or `permission_with_authority`.
 
+## Testings
+First, run the localnet
+```bash
+anchor localnet -- --features localnet
+```
+
+Then run the test: `bun test`
+
 ## Run the scripts
 Run the script with config file specified in the CLI, some examples:
 
