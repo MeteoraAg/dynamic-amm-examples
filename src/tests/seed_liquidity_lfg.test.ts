@@ -1,13 +1,6 @@
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import fs from "fs";
-import { DLMM_PROGRAM_IDS, DYNAMIC_AMM_PROGRAM_IDS } from "../libs/constants";
-import {
-  createPermissionlessDlmmPool,
-  createPermissionlessDynamicPool,
-  seedLiquidityLfg,
-  seedLiquiditySingleBin,
-} from "../index";
-import { BN, Wallet, web3 } from "@coral-xyz/anchor";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { createPermissionlessDlmmPool, seedLiquidityLfg } from "../index";
+import { BN, web3 } from "@coral-xyz/anchor";
 import { MeteoraConfig } from "../libs/config";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -24,17 +17,14 @@ import DLMM, {
 } from "@meteora-ag/dlmm";
 import Decimal from "decimal.js";
 import babar from "babar";
-
-const keypairFilePath =
-  "./src/tests/keys/localnet/admin-bossj3JvwiNK7pvjr149DqdtJxf2gdygbcmEPTkb2F1.json";
-const keypairBuffer = fs.readFileSync(keypairFilePath, "utf-8");
-const rpcUrl = "http://127.0.0.1:8899";
-const connection = new Connection("http://127.0.0.1:8899", "confirmed");
-const payerKeypair = Keypair.fromSecretKey(
-  new Uint8Array(JSON.parse(keypairBuffer)),
-);
-const payerWallet = new Wallet(payerKeypair);
-const DLMM_PROGRAM_ID = new PublicKey(DLMM_PROGRAM_IDS["localhost"]);
+import {
+  connection,
+  payerKeypair,
+  rpcUrl,
+  keypairFilePath,
+  payerWallet,
+  DLMM_PROGRAM_ID,
+} from "./setup";
 
 describe("Test Seed Liquidity Single Bin", () => {
   const WEN_DECIMALS = 5;
