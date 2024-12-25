@@ -91,7 +91,7 @@ async function main() {
 
   let initAlphaVaultTx: Transaction | null = null;
   if (config.alphaVault.alphaVaultType == AlphaVaultTypeConfig.Fcfs) {
-    initAlphaVaultTx = await createFcfsAlphaVault(
+    await createFcfsAlphaVault(
       connection,
       wallet,
       toAlphaVaulSdkPoolType(poolType),
@@ -100,9 +100,11 @@ async function main() {
       quoteMint,
       quoteDecimals,
       config.alphaVault as FcfsAlphaVaultConfig,
+      config.dryRun,
+      config.computeUnitPriceMicroLamports,
     );
   } else if (config.alphaVault.alphaVaultType == AlphaVaultTypeConfig.Prorata) {
-    initAlphaVaultTx = await createProrataAlphaVault(
+    await createProrataAlphaVault(
       connection,
       wallet,
       toAlphaVaulSdkPoolType(poolType),
@@ -111,34 +113,12 @@ async function main() {
       quoteMint,
       quoteDecimals,
       config.alphaVault as ProrataAlphaVaultConfig,
+      config.dryRun,
+      config.computeUnitPriceMicroLamports,
     );
   } else {
     throw new Error(
       `Invalid alpha vault type ${config.alphaVault.alphaVaultType}`,
-    );
-  }
-  modifyComputeUnitPriceIx(
-    initAlphaVaultTx,
-    config.computeUnitPriceMicroLamports,
-  );
-
-  if (config.dryRun) {
-    console.log(`\n> Simulating init alpha vault tx...`);
-    await runSimulateTransaction(connection, [wallet.payer], wallet.publicKey, [
-      initAlphaVaultTx,
-    ]);
-  } else {
-    console.log(`>> Sending init alpha vault transaction...`);
-    const initAlphaVaulTxHash = await sendAndConfirmTransaction(
-      connection,
-      initAlphaVaultTx,
-      [wallet.payer],
-    ).catch((err) => {
-      console.error(err);
-      throw err;
-    });
-    console.log(
-      `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
     );
   }
 }

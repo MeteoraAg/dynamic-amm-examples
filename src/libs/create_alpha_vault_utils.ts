@@ -1,8 +1,23 @@
 import { Wallet, BN } from "@coral-xyz/anchor";
 import AlphaVault, { PoolType } from "@meteora-ag/alpha-vault";
-import { Cluster, Connection, PublicKey, Transaction } from "@solana/web3.js";
-import { FcfsAlphaVaultConfig, ProrataAlphaVaultConfig } from "./config";
-import { getAmountInLamports, getAlphaVaultWhitelistMode } from "./utils";
+import {
+  Cluster,
+  Connection,
+  PublicKey,
+  Transaction,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import {
+  AlphaVaultTypeConfig,
+  FcfsAlphaVaultConfig,
+  ProrataAlphaVaultConfig,
+} from "./config";
+import {
+  getAmountInLamports,
+  getAlphaVaultWhitelistMode,
+  modifyComputeUnitPriceIx,
+  runSimulateTransaction,
+} from "./utils";
 
 export async function createFcfsAlphaVault(
   connection: Connection,
@@ -13,10 +28,12 @@ export async function createFcfsAlphaVault(
   quoteMint: PublicKey,
   quoteDecimals: number,
   params: FcfsAlphaVaultConfig,
+  dryRun: boolean,
+  computeUnitPriceMicroLamports: number,
   opts?: {
     cluster: Cluster;
   },
-): Promise<Transaction> {
+): Promise<void> {
   let maxDepositingCap = getAmountInLamports(
     params.maxDepositCap,
     quoteDecimals,
@@ -49,7 +66,7 @@ export async function createFcfsAlphaVault(
     `- Using whitelistMode ${params.whitelistMode}. In value ${whitelistMode}`,
   );
 
-  const tx = await AlphaVault.createCustomizableFcfsVault(
+  const initAlphaVaultTx = (await AlphaVault.createCustomizableFcfsVault(
     connection,
     {
       quoteMint,
@@ -66,8 +83,29 @@ export async function createFcfsAlphaVault(
     },
     wallet.publicKey,
     opts,
-  );
-  return tx;
+  )) as Transaction;
+
+  modifyComputeUnitPriceIx(initAlphaVaultTx, computeUnitPriceMicroLamports);
+
+  if (dryRun) {
+    console.log(`\n> Simulating init alpha vault tx...`);
+    await runSimulateTransaction(connection, [wallet.payer], wallet.publicKey, [
+      initAlphaVaultTx,
+    ]);
+  } else {
+    console.log(`>> Sending init alpha vault transaction...`);
+    const initAlphaVaulTxHash = await sendAndConfirmTransaction(
+      connection,
+      initAlphaVaultTx,
+      [wallet.payer],
+    ).catch((err) => {
+      console.error(err);
+      throw err;
+    });
+    console.log(
+      `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
+    );
+  }
 }
 
 export async function createProrataAlphaVault(
@@ -79,6 +117,8 @@ export async function createProrataAlphaVault(
   quoteMint: PublicKey,
   quoteDecimals: number,
   params: ProrataAlphaVaultConfig,
+  dryRun: boolean,
+  computeUnitPriceMicroLamports: number,
   opts?: {
     cluster: Cluster;
   },
@@ -105,7 +145,7 @@ export async function createProrataAlphaVault(
     `- Using whitelistMode ${params.whitelistMode}. In value ${whitelistMode}`,
   );
 
-  const tx = await AlphaVault.createCustomizableProrataVault(
+  const initAlphaVaultTx = (await AlphaVault.createCustomizableProrataVault(
     connection,
     {
       quoteMint,
@@ -121,6 +161,42 @@ export async function createProrataAlphaVault(
     },
     wallet.publicKey,
     opts,
-  );
-  return tx;
+  )) as Transaction;
+
+  modifyComputeUnitPriceIx(initAlphaVaultTx, computeUnitPriceMicroLamports);
+
+  if (dryRun) {
+    console.log(`\n> Simulating init alpha vault tx...`);
+    await runSimulateTransaction(connection, [wallet.payer], wallet.publicKey, [
+      initAlphaVaultTx,
+    ]);
+  } else {
+    console.log(`>> Sending init alpha vault transaction...`);
+    const initAlphaVaulTxHash = await sendAndConfirmTransaction(
+      connection,
+      initAlphaVaultTx,
+      [wallet.payer],
+    ).catch((err) => {
+      console.error(err);
+      throw err;
+    });
+    console.log(
+      `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
+    );
+  }
 }
+
+// export async function createPermissionedAlphaVaultWithAuthority(
+//   connection: Connection,
+//   wallet: Wallet,
+//   alphaVaultType: AlphaVaultTypeConfig,
+//   poolType: PoolType,
+//   poolAddress: PublicKey,
+//   baseMint: PublicKey,
+//   quoteMint: PublicKey,
+//   quoteDecimals: number,
+//   params: FcfsAlphaVaultConfig | ProrataAlphaVaultConfig,
+//   opts?: {
+//     cluster: Cluster;
+//   },
+// ): Promise< {}
