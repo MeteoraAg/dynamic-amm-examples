@@ -144,7 +144,7 @@ describe("Test Create Pool", () => {
       connection,
       payerWallet,
       WEN,
-      new PublicKey(SOL_TOKEN_MINT),
+      SOL_TOKEN_MINT,
       {
         programId: DYNAMIC_AMM_PROGRAM_ID,
       },

@@ -29,6 +29,7 @@ import {
   PermissionWithMerkleProof,
   Permissionless,
   PoolType,
+  SEED,
   WhitelistMode,
 } from "@meteora-ag/alpha-vault";
 import { MeteoraConfig, PoolTypeConfig } from "..";
@@ -94,9 +95,9 @@ export function getDecimalizedAmount(amountLamport: BN, decimals: number): BN {
 
 export function getQuoteMint(quoteSymbol: string): PublicKey {
   if (quoteSymbol.toLowerCase() == "sol") {
-    return new PublicKey(SOL_TOKEN_MINT);
+    return SOL_TOKEN_MINT;
   } else if (quoteSymbol.toLowerCase() == "usdc") {
-    return new PublicKey(USDC_TOKEN_MINT);
+    return USDC_TOKEN_MINT;
   } else {
     throw new Error(`Unsupported quote symbol: ${quoteSymbol}`);
   }
@@ -262,4 +263,15 @@ export function parseCliArguments(): CliArguments {
   });
 
   return values;
+}
+
+export function deriveAlphaVault(
+  base: PublicKey,
+  lbPair: PublicKey,
+  programId: PublicKey,
+) {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from(SEED.vault), base.toBuffer(), lbPair.toBuffer()],
+    programId,
+  );
 }

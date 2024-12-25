@@ -1,6 +1,10 @@
 import { Wallet } from "@coral-xyz/anchor";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { DLMM_PROGRAM_IDS, DYNAMIC_AMM_PROGRAM_IDS } from "../libs/constants";
+import {
+  ALPHA_VAULT_PROGRAM_IDS,
+  DLMM_PROGRAM_IDS,
+  DYNAMIC_AMM_PROGRAM_IDS,
+} from "../libs/constants";
 import fs from "fs";
 
 export const keypairFilePath =
@@ -15,4 +19,7 @@ export const payerWallet = new Wallet(payerKeypair);
 export const DLMM_PROGRAM_ID = new PublicKey(DLMM_PROGRAM_IDS["localhost"]);
 export const DYNAMIC_AMM_PROGRAM_ID = new PublicKey(
   DYNAMIC_AMM_PROGRAM_IDS["localhost"],
+);
+export const ALPHA_VAULT_PROGRAM_ID = new PublicKey(
+  ALPHA_VAULT_PROGRAM_IDS["localhost"],
 );

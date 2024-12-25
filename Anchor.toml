@@ -25,6 +25,13 @@ program = "./src/tests/artifacts/dynamic_vault.so"
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 program = "./src/tests/artifacts/metaplex.so"
 
+[[test.genesis]]
+address = "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2"
+program = "./src/tests/artifacts/alpha_vault.so"
+
+[test.program]
+name = "lb_clmm"
+
 [test.validator]
 bind_address = "0.0.0.0"
 

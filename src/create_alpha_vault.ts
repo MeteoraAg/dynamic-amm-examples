@@ -19,6 +19,7 @@ import {
   modifyComputeUnitPriceIx,
   PoolTypeConfig,
   toAlphaVaulSdkPoolType,
+  AlphaVaultTypeConfig,
 } from ".";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 
@@ -32,6 +33,10 @@ import {
   deriveCustomizablePermissionlessConstantProductPoolAddress,
   createProgram,
 } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import {
+  createFcfsAlphaVault,
+  createProrataAlphaVault,
+} from "./libs/create_alpha_vault_utils";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -85,7 +90,7 @@ async function main() {
   console.log(`\n> Pool address: ${poolKey}, pool type ${poolType}`);
 
   let initAlphaVaultTx: Transaction | null = null;
-  if (config.alphaVault.alphaVaultType == "fcfs") {
+  if (config.alphaVault.alphaVaultType == AlphaVaultTypeConfig.Fcfs) {
     initAlphaVaultTx = await createFcfsAlphaVault(
       connection,
       wallet,
@@ -96,7 +101,7 @@ async function main() {
       quoteDecimals,
       config.alphaVault as FcfsAlphaVaultConfig,
     );
-  } else if (config.alphaVault.alphaVaultType == "prorata") {
+  } else if (config.alphaVault.alphaVaultType == AlphaVaultTypeConfig.Prorata) {
     initAlphaVaultTx = await createProrataAlphaVault(
       connection,
       wallet,
@@ -136,125 +141,6 @@ async function main() {
       `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
     );
   }
-}
-
-async function createFcfsAlphaVault(
-  connection: Connection,
-  wallet: Wallet,
-  poolType: PoolType,
-  poolAddress: PublicKey,
-  baseMint: PublicKey,
-  quoteMint: PublicKey,
-  quoteDecimals: number,
-  params: FcfsAlphaVaultConfig,
-): Promise<Transaction> {
-  let maxDepositingCap = getAmountInLamports(
-    params.maxDepositCap,
-    quoteDecimals,
-  );
-  let individualDepositingCap = getAmountInLamports(
-    params.individualDepositingCap,
-    quoteDecimals,
-  );
-  let escrowFee = getAmountInLamports(params.escrowFee, quoteDecimals);
-  let whitelistMode = getAlphaVaultWhitelistMode(params.whitelistMode);
-
-  console.log(`\n> Initializing FcfsAlphaVault...`);
-  console.log(`- Using poolType: ${poolType}`);
-  console.log(`- Using poolMint ${poolAddress}`);
-  console.log(`- Using baseMint ${baseMint}`);
-  console.log(`- Using quoteMint ${quoteMint}`);
-  console.log(`- Using depositingPoint ${params.depositingPoint}`);
-  console.log(`- Using startVestingPoint ${params.startVestingPoint}`);
-  console.log(`- Using endVestingPoint ${params.endVestingPoint}`);
-  console.log(
-    `- Using maxDepositingCap ${params.maxDepositCap}. In lamports ${maxDepositingCap}`,
-  );
-  console.log(
-    `- Using individualDepositingCap ${params.individualDepositingCap}. In lamports ${individualDepositingCap}`,
-  );
-  console.log(
-    `- Using escrowFee ${params.escrowFee}. In lamports ${escrowFee}`,
-  );
-  console.log(
-    `- Using whitelistMode ${params.whitelistMode}. In value ${whitelistMode}`,
-  );
-
-  const tx = await AlphaVault.createCustomizableFcfsVault(
-    connection,
-    {
-      quoteMint,
-      baseMint,
-      poolAddress,
-      poolType,
-      depositingPoint: new BN(params.depositingPoint),
-      startVestingPoint: new BN(params.startVestingPoint),
-      endVestingPoint: new BN(params.endVestingPoint),
-      maxDepositingCap,
-      individualDepositingCap,
-      escrowFee,
-      whitelistMode,
-    },
-    wallet.publicKey,
-    {
-      cluster: "mainnet-beta",
-    },
-  );
-  return tx;
-}
-
-async function createProrataAlphaVault(
-  connection: Connection,
-  wallet: Wallet,
-  poolType: PoolType,
-  poolAddress: PublicKey,
-  baseMint: PublicKey,
-  quoteMint: PublicKey,
-  quoteDecimals: number,
-  params: ProrataAlphaVaultConfig,
-): Promise<Transaction> {
-  let maxBuyingCap = getAmountInLamports(params.maxBuyingCap, quoteDecimals);
-  let escrowFee = getAmountInLamports(params.escrowFee, quoteDecimals);
-  let whitelistMode = getAlphaVaultWhitelistMode(params.whitelistMode);
-
-  console.log(`\n> Initializing ProrataAlphaVault...`);
-  console.log(`- Using poolType: ${poolType}`);
-  console.log(`- Using poolMint ${poolAddress}`);
-  console.log(`- Using baseMint ${baseMint}`);
-  console.log(`- Using quoteMint ${quoteMint}`);
-  console.log(`- Using depositingPoint ${params.depositingPoint}`);
-  console.log(`- Using startVestingPoint ${params.startVestingPoint}`);
-  console.log(`- Using endVestingPoint ${params.endVestingPoint}`);
-  console.log(
-    `- Using maxBuyingCap ${params.maxBuyingCap}. In lamports ${maxBuyingCap}`,
-  );
-  console.log(
-    `- Using escrowFee ${params.escrowFee}. In lamports ${escrowFee}`,
-  );
-  console.log(
-    `- Using whitelistMode ${params.whitelistMode}. In value ${whitelistMode}`,
-  );
-
-  const tx = await AlphaVault.createCustomizableProrataVault(
-    connection,
-    {
-      quoteMint,
-      baseMint,
-      poolAddress,
-      poolType,
-      depositingPoint: new BN(params.depositingPoint),
-      startVestingPoint: new BN(params.startVestingPoint),
-      endVestingPoint: new BN(params.endVestingPoint),
-      maxBuyingCap,
-      escrowFee,
-      whitelistMode,
-    },
-    wallet.publicKey,
-    {
-      cluster: "mainnet-beta",
-    },
-  );
-  return tx;
 }
 
 main();
