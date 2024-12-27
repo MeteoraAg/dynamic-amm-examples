@@ -151,7 +151,7 @@ describe("Test create dynamic pool with permissioned authority fcfs alpha vault"
     const clockAccount = await connection.getAccountInfo(SYSVAR_CLOCK_PUBKEY);
     const clock: Clock = ClockLayout.decode(clockAccount.data);
 
-    const activationPoint = clock.unixTimestamp.add(new BN(3600));
+    const activationPoint = clock.unixTimestamp.add(new BN(30));
 
     // 1. Create pool
     const config: MeteoraConfig = {

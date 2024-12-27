@@ -346,6 +346,9 @@ export async function createPermissionedAlphaVaultWithAuthority(
   whitelistList: WalletDepositCap[],
   dryRun: boolean,
   computeUnitPriceMicroLamports: number,
+  opts?: {
+    alphaVaultProgramId: PublicKey;
+  },
 ): Promise<void> {
   if (params.whitelistMode != WhitelistModeConfig.PermissionedWithAuthority) {
     throw new Error(`Invalid whitelist mode ${params.whitelistMode}. Only Permissioned with authority is allowed 
@@ -365,6 +368,7 @@ export async function createPermissionedAlphaVaultWithAuthority(
         params as FcfsAlphaVaultConfig,
         dryRun,
         computeUnitPriceMicroLamports,
+        opts,
       );
     case AlphaVaultTypeConfig.Prorata:
       await createProrataAlphaVault(
@@ -378,6 +382,7 @@ export async function createPermissionedAlphaVaultWithAuthority(
         params as ProrataAlphaVaultConfig,
         dryRun,
         computeUnitPriceMicroLamports,
+        opts,
       );
   }
 
@@ -387,11 +392,7 @@ export async function createPermissionedAlphaVaultWithAuthority(
     new PublicKey(PROGRAM_ID),
   );
 
-  const alphaVault = await AlphaVault.create(
-    connection,
-    alphaVaultPubkey,
-    opts,
-  );
+  const alphaVault = await AlphaVault.create(connection, alphaVaultPubkey);
 
   // Create StakeEscrow accounts for whitelist list
   const instructions =
@@ -402,12 +403,17 @@ export async function createPermissionedAlphaVaultWithAuthority(
 
   const { blockhash, lastValidBlockHeight } =
     await connection.getLatestBlockhash("confirmed");
+  const setPriorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
+    microLamports: computeUnitPriceMicroLamports,
+  });
 
   const createStakeEscrowAccountsTx = new Transaction({
     blockhash,
     lastValidBlockHeight,
     feePayer: vaultAuthority.publicKey,
-  }).add(...instructions);
+  })
+    .add(...instructions)
+    .add(setPriorityFeeIx);
 
   if (dryRun) {
     console.log(`\n> Simulating create stake escrow accounts tx...`);
