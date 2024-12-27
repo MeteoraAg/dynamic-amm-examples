@@ -16,7 +16,6 @@ import {
   ProrataAlphaVaultConfig,
   getAlphaVaultWhitelistMode,
   parseConfigFromCli,
-  getAlphaVaultPoolType,
   modifyComputeUnitPriceIx,
 } from ".";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";

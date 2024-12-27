@@ -24,6 +24,6 @@ export const DYNAMIC_AMM_PROGRAM_IDS = {
 
 export const ALPHA_VAULT_PROGRAM_IDS = {
   devnet: "SNPmGgnywBvvrAKMLundzG6StojyHTHDLu7T4sdhP4k",
-  localhost: "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
+  localhost: "SNPmGgnywBvvrAKMLundzG6StojyHTHDLu7T4sdhP4k",
   "mainnet-beta": "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
 };

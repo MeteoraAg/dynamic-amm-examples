@@ -2,6 +2,7 @@ import {
   Keypair,
   PublicKey,
   SYSVAR_CLOCK_PUBKEY,
+  clusterApiUrl,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import { SOL_TOKEN_MINT } from "../libs/constants";
@@ -151,7 +152,7 @@ describe("Test create permissonless dynamic pool with fcfs alpha vault", () => {
     });
     const activationPoint = currentSlot + 30;
     const depositingPoint = currentSlot;
-    const startVestingPoint = currentSlot + 40;
+    const startVestingPoint = currentSlot + 50;
     const endVestingPoint = currentSlot + 60;
 
     // 1. Create pool
@@ -210,7 +211,7 @@ describe("Test create permissonless dynamic pool with fcfs alpha vault", () => {
     });
 
     // 2. Create alpha vault
-    const initAlphaVaultTx = await createFcfsAlphaVault(
+    await createFcfsAlphaVault(
       connection,
       payerWallet,
       PoolType.DYNAMIC,
@@ -221,18 +222,9 @@ describe("Test create permissonless dynamic pool with fcfs alpha vault", () => {
       config.alphaVault as FcfsAlphaVaultConfig,
       dryRun,
       computeUnitPriceMicroLamports,
-    );
-
-    const initAlphaVaulTxHash = await sendAndConfirmTransaction(
-      connection,
-      initAlphaVaultTx,
-      [payerKeypair],
-    ).catch((err) => {
-      console.error(err);
-      throw err;
-    });
-    console.log(
-      `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
+      {
+        alphaVaultProgramId: ALPHA_VAULT_PROGRAM_ID,
+      },
     );
 
     const [alphaVaultPubkey] = deriveAlphaVault(
@@ -409,7 +401,7 @@ describe("Test create permissonless dynamic pool with prorata alpha vault", () =
     });
 
     // 2. Create alpha vault
-    const initAlphaVaultTx = await createProrataAlphaVault(
+    await createProrataAlphaVault(
       connection,
       payerWallet,
       PoolType.DYNAMIC,
@@ -420,18 +412,9 @@ describe("Test create permissonless dynamic pool with prorata alpha vault", () =
       config.alphaVault as ProrataAlphaVaultConfig,
       dryRun,
       computeUnitPriceMicroLamports,
-    );
-
-    const initAlphaVaulTxHash = await sendAndConfirmTransaction(
-      connection,
-      initAlphaVaultTx,
-      [payerKeypair],
-    ).catch((err) => {
-      console.error(err);
-      throw err;
-    });
-    console.log(
-      `>>> Alpha vault initialized successfully with tx hash: ${initAlphaVaulTxHash}`,
+      {
+        alphaVaultProgramId: ALPHA_VAULT_PROGRAM_ID,
+      },
     );
 
     const [alphaVaultPubkey] = deriveAlphaVault(
