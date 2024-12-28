@@ -9,6 +9,7 @@ import {
   createPermissionlessDlmmPool,
   createPermissionlessDynamicPool,
   deriveAlphaVault,
+  toAlphaVaulSdkPoolType,
 } from "../index";
 import { web3 } from "@coral-xyz/anchor";
 import {
@@ -39,6 +40,7 @@ import {
 import { deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
 import {
   createFcfsAlphaVault,
+  createPermissionedAlphaVaultWithAuthority,
   createProrataAlphaVault,
 } from "../libs/create_alpha_vault_utils";
 import AlphaVault, {
@@ -147,11 +149,14 @@ describe("Test create dynamic pool with permissioned authority fcfs alpha vault"
   });
 
   it("Happy case", async () => {
-    const activationType = "timestamp";
-    const clockAccount = await connection.getAccountInfo(SYSVAR_CLOCK_PUBKEY);
-    const clock: Clock = ClockLayout.decode(clockAccount.data);
-
-    const activationPoint = clock.unixTimestamp.add(new BN(30));
+    const activationType = "slot";
+    const currentSlot = await connection.getSlot({
+      commitment: "confirmed",
+    });
+    const activationPoint = currentSlot + 30;
+    const depositingPoint = currentSlot;
+    const startVestingPoint = currentSlot + 50;
+    const endVestingPoint = currentSlot + 60;
 
     // 1. Create pool
     const config: MeteoraConfig = {
@@ -171,7 +176,17 @@ describe("Test create dynamic pool with permissioned authority fcfs alpha vault"
         hasAlphaVault: true,
       },
       dlmm: null,
-      alphaVault: null,
+      alphaVault: {
+        poolType: PoolTypeConfig.Dynamic,
+        alphaVaultType: AlphaVaultTypeConfig.Fcfs,
+        depositingPoint,
+        startVestingPoint,
+        endVestingPoint,
+        maxDepositCap: 0.5,
+        individualDepositingCap: 0.01,
+        escrowFee: 0,
+        whitelistMode: WhitelistModeConfig.PermissionedWithAuthority,
+      },
       lockLiquidity: null,
       lfgSeedLiquidity: null,
       singleBinSeedLiquidity: null,
@@ -187,5 +202,50 @@ describe("Test create dynamic pool with permissioned authority fcfs alpha vault"
         programId: DYNAMIC_AMM_PROGRAM_ID,
       },
     );
+
+    const vaultAuthority = payerKeypair;
+    const alphaVaultType = config.alphaVault.alphaVaultType;
+    const poolType = toAlphaVaulSdkPoolType(config.alphaVault.poolType);
+    const poolAddress = deriveCustomizablePermissionlessConstantProductPoolAddress(
+      WEN,
+      SOL_TOKEN_MINT,
+      DYNAMIC_AMM_PROGRAM_ID,
+    );
+    const alphaVaultConfig = config.alphaVault;
+
+    const whiteListedWallet_1 = Keypair.generate();
+    const whiteListedWallet_2 = Keypair.generate();
+    const whiteListedWallet_1_maxAmount = new BN(1 * 10 ** 9);
+    const whiteListedWallet_2_maxAmount = new BN(5 * 10 ** 9);
+
+    const whitelistList = [
+      {
+        address: whiteListedWallet_1.publicKey,
+        maxAmount: whiteListedWallet_1_maxAmount
+      }, {
+        address: whiteListedWallet_2.publicKey,
+        maxAmount: whiteListedWallet_2_maxAmount
+      }
+    ];
+
+    // 2. Create permissioned alpha vault
+    await createPermissionedAlphaVaultWithAuthority(
+      connection,
+      payerWallet,
+      vaultAuthority,
+      alphaVaultType,
+      poolType,
+      poolAddress,
+      WEN,
+      SOL_TOKEN_MINT,
+      9,
+      alphaVaultConfig,
+      whitelistList,
+      dryRun,
+      computeUnitPriceMicroLamports,
+      {
+        alphaVaultProgramId: ALPHA_VAULT_PROGRAM_ID,
+      },
+    )
   });
 });

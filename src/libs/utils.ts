@@ -32,7 +32,7 @@ import {
   SEED,
   WhitelistMode,
 } from "@meteora-ag/alpha-vault";
-import { MeteoraConfig, PoolTypeConfig } from "..";
+import { MeteoraConfig, PoolTypeConfig, WhitelistModeConfig } from "..";
 
 export const DEFAULT_ADD_LIQUIDITY_CU = 800_000;
 
@@ -181,14 +181,14 @@ export function toAlphaVaulSdkPoolType(poolType: PoolTypeConfig): PoolType {
   }
 }
 
-export function getAlphaVaultWhitelistMode(mode: string): WhitelistMode {
-  switch (mode.toLowerCase()) {
-    case "permissionless":
+export function getAlphaVaultWhitelistMode(mode: WhitelistModeConfig): WhitelistMode {
+  switch (mode) {
+    case WhitelistModeConfig.Permissionless:
       return Permissionless;
-    case "permission_with_merkle_proof":
-      return PermissionWithMerkleProof;
-    case "permission_with_authority":
+    case WhitelistModeConfig.PermissionedWithAuthority:
       return PermissionWithAuthority;
+    case WhitelistModeConfig.PermissionedWithMerkleProof:
+      return PermissionWithMerkleProof;
     default:
       throw new Error(`Unsupported alpha vaultWhitelist mode: ${mode}`);
   }
