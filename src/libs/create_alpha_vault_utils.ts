@@ -100,7 +100,7 @@ export async function createFcfsAlphaVault(
     wallet.publicKey,
     computeUnitPriceMicroLamports,
     opts?.alphaVaultProgramId ??
-    new PublicKey(ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"]),
+      new PublicKey(ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"]),
   )) as Transaction;
 
   if (dryRun) {
@@ -178,7 +178,7 @@ export async function createProrataAlphaVault(
     wallet.publicKey,
     computeUnitPriceMicroLamports,
     opts?.alphaVaultProgramId ??
-    new PublicKey(ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"]),
+      new PublicKey(ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"]),
   )) as Transaction;
 
   if (dryRun) {
@@ -227,47 +227,54 @@ export async function createPermissionedAlphaVaultWithAuthority(
   }
 
   // 1. Create alpha vault
-  switch (alphaVaultType) {
-    case AlphaVaultTypeConfig.Fcfs:
-      await createFcfsAlphaVault(
-        connection,
-        wallet,
-        poolType,
-        poolAddress,
-        baseMint,
-        quoteMint,
-        quoteDecimals,
-        params as FcfsAlphaVaultConfig,
-        dryRun,
-        computeUnitPriceMicroLamports,
-        opts,
-      );
-    case AlphaVaultTypeConfig.Prorata:
-      await createProrataAlphaVault(
-        connection,
-        wallet,
-        poolType,
-        poolAddress,
-        baseMint,
-        quoteMint,
-        quoteDecimals,
-        params as ProrataAlphaVaultConfig,
-        dryRun,
-        computeUnitPriceMicroLamports,
-        opts,
-      );
+  if (alphaVaultType == AlphaVaultTypeConfig.Fcfs) {
+    await createFcfsAlphaVault(
+      connection,
+      wallet,
+      poolType,
+      poolAddress,
+      baseMint,
+      quoteMint,
+      quoteDecimals,
+      params as FcfsAlphaVaultConfig,
+      dryRun,
+      computeUnitPriceMicroLamports,
+      opts,
+    );
+  } else if (alphaVaultType == AlphaVaultTypeConfig.Prorata) {
+    await createProrataAlphaVault(
+      connection,
+      wallet,
+      poolType,
+      poolAddress,
+      baseMint,
+      quoteMint,
+      quoteDecimals,
+      params as ProrataAlphaVaultConfig,
+      dryRun,
+      computeUnitPriceMicroLamports,
+      opts,
+    );
   }
 
   // 2. Create StakeEscrow account for each whitelisted wallet
-  const alphaVaultProgramId = new PublicKey(opts?.alphaVaultProgramId ?? ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"]);
+  const alphaVaultProgramId = new PublicKey(
+    opts?.alphaVaultProgramId ?? ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"],
+  );
 
   const [alphaVaultPubkey] = deriveAlphaVault(
     wallet.publicKey,
     poolAddress,
-    alphaVaultProgramId
+    alphaVaultProgramId,
   );
 
-  const alphaVault = await createAlphaVaultInstance(connection, alphaVaultProgramId, alphaVaultPubkey);
+  console.log("Creating stake escrow accounts...");
+
+  const alphaVault = await createAlphaVaultInstance(
+    connection,
+    alphaVaultProgramId,
+    alphaVaultPubkey,
+  );
 
   // Create StakeEscrow accounts for whitelist list
   const instructions =
@@ -309,29 +316,22 @@ export async function createPermissionedAlphaVaultWithAuthority(
       `>>> Create stake escrow accounts successfully with tx hash: ${createStakeEscrowAccountTxHash}`,
     );
   }
-
-
 }
 
 export async function createAlphaVaultInstance(
   connection: Connection,
   alphaVaultProgramId: PublicKey,
-  vaultAddress: PublicKey
+  vaultAddress: PublicKey,
 ): Promise<AlphaVault> {
   const provider = new AnchorProvider(
     connection,
     {} as any,
-    AnchorProvider.defaultOptions()
+    AnchorProvider.defaultOptions(),
   );
-  const program = new Program(
-    IDL,
-    alphaVaultProgramId,
-    provider
-  );
+  const program = new Program(IDL, alphaVaultProgramId, provider);
 
   const vault = await program.account.vault.fetch(vaultAddress);
-  const vaultMode =
-    vault.vaultMode === 0 ? VaultMode.PRORATA : VaultMode.FCFS;
+  const vaultMode = vault.vaultMode === 0 ? VaultMode.PRORATA : VaultMode.FCFS;
 
   return new AlphaVault(program, vaultAddress, vault, vaultMode);
 }
@@ -357,11 +357,20 @@ async function createCustomizableFcfsVault(
     whitelistMode,
   } = vaultParam;
 
-  const [alphaVault] = deriveAlphaVault(owner, poolAddress, alphaVaultProgramId);
+  const [alphaVaultPubkey] = deriveAlphaVault(
+    owner,
+    poolAddress,
+    alphaVaultProgramId,
+  );
 
-  const alphaVaultInstance = await createAlphaVaultInstance(connection, alphaVaultProgramId, alphaVault)
+  const provider = new AnchorProvider(
+    connection,
+    {} as any,
+    AnchorProvider.defaultOptions(),
+  );
+  const program = new Program(IDL, alphaVaultProgramId, provider);
 
-  const createTx = await alphaVaultInstance.program.methods
+  const createTx = await program.methods
     .initializeFcfsVault({
       poolType,
       baseMint,
@@ -376,7 +385,7 @@ async function createCustomizableFcfsVault(
     })
     .accounts({
       base: owner,
-      vault: alphaVault,
+      vault: alphaVaultPubkey,
       pool: poolAddress,
       funder: owner,
       program: alphaVaultProgramId,
@@ -418,11 +427,20 @@ async function createCustomizableProrataVault(
     whitelistMode,
   } = vaultParam;
 
-  const [alphaVault] = deriveAlphaVault(owner, poolAddress, alphaVaultProgramId);
+  const [alphaVaultPubkey] = deriveAlphaVault(
+    owner,
+    poolAddress,
+    alphaVaultProgramId,
+  );
 
-  const alphaVaultInstance = await createAlphaVaultInstance(connection, alphaVaultProgramId, alphaVault)
+  const provider = new AnchorProvider(
+    connection,
+    {} as any,
+    AnchorProvider.defaultOptions(),
+  );
+  const program = new Program(IDL, alphaVaultProgramId, provider);
 
-  const createTx = await alphaVaultInstance.program.methods
+  const createTx = await program.methods
     .initializeProrataVault({
       poolType,
       baseMint,
@@ -436,7 +454,7 @@ async function createCustomizableProrataVault(
     })
     .accounts({
       base: owner,
-      vault: alphaVault,
+      vault: alphaVaultPubkey,
       pool: poolAddress,
       funder: owner,
       program: alphaVaultProgramId,

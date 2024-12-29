@@ -181,7 +181,9 @@ export function toAlphaVaulSdkPoolType(poolType: PoolTypeConfig): PoolType {
   }
 }
 
-export function getAlphaVaultWhitelistMode(mode: WhitelistModeConfig): WhitelistMode {
+export function getAlphaVaultWhitelistMode(
+  mode: WhitelistModeConfig,
+): WhitelistMode {
   switch (mode) {
     case WhitelistModeConfig.Permissionless:
       return Permissionless;

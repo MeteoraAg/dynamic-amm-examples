@@ -192,6 +192,7 @@ describe("Test create dynamic pool with permissioned authority fcfs alpha vault"
       singleBinSeedLiquidity: null,
     };
 
+    // 1. Create pool
     await createPermissionlessDynamicPool(
       config,
       connection,
@@ -206,11 +207,12 @@ describe("Test create dynamic pool with permissioned authority fcfs alpha vault"
     const vaultAuthority = payerKeypair;
     const alphaVaultType = config.alphaVault.alphaVaultType;
     const poolType = toAlphaVaulSdkPoolType(config.alphaVault.poolType);
-    const poolAddress = deriveCustomizablePermissionlessConstantProductPoolAddress(
-      WEN,
-      SOL_TOKEN_MINT,
-      DYNAMIC_AMM_PROGRAM_ID,
-    );
+    const poolAddress =
+      deriveCustomizablePermissionlessConstantProductPoolAddress(
+        WEN,
+        SOL_TOKEN_MINT,
+        DYNAMIC_AMM_PROGRAM_ID,
+      );
     const alphaVaultConfig = config.alphaVault;
 
     const whiteListedWallet_1 = Keypair.generate();
@@ -221,11 +223,12 @@ describe("Test create dynamic pool with permissioned authority fcfs alpha vault"
     const whitelistList = [
       {
         address: whiteListedWallet_1.publicKey,
-        maxAmount: whiteListedWallet_1_maxAmount
-      }, {
+        maxAmount: whiteListedWallet_1_maxAmount,
+      },
+      {
         address: whiteListedWallet_2.publicKey,
-        maxAmount: whiteListedWallet_2_maxAmount
-      }
+        maxAmount: whiteListedWallet_2_maxAmount,
+      },
     ];
 
     // 2. Create permissioned alpha vault
@@ -246,6 +249,6 @@ describe("Test create dynamic pool with permissioned authority fcfs alpha vault"
       {
         alphaVaultProgramId: ALPHA_VAULT_PROGRAM_ID,
       },
-    )
+    );
   });
 });
