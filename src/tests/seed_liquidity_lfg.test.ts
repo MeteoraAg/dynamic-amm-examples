@@ -218,7 +218,6 @@ describe("Test Seed Liquidity Single Bin", () => {
       feeOwner,
       WEN,
       USDC,
-      DLMM_PROGRAM_ID,
       seedAmount,
       curvature,
       minPricePerLamport,
@@ -229,6 +228,7 @@ describe("Test Seed Liquidity Single Bin", () => {
       computeUnitPriceMicroLamports,
       {
         cluster: "localhost",
+        programId: DLMM_PROGRAM_ID,
       },
     );
 
