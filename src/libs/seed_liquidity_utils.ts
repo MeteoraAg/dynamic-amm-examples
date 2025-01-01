@@ -50,7 +50,6 @@ export async function seedLiquiditySingleBin(
   feeOwner: PublicKey,
   baseMint: PublicKey,
   quoteMint: PublicKey,
-  dlmm_program_id: PublicKey,
   seedAmount: BN,
   price: number,
   priceRounding: string,
@@ -67,11 +66,14 @@ export async function seedLiquiditySingleBin(
     throw new Error("Invalid selective rounding value. Must be 'up' or 'down'");
   }
 
+  const cluster = opts?.cluster || "mainnet-beta";
+  const dlmmProgramId = opts?.programId ?? DLMM_PROGRAM_IDS[cluster];
+
   let poolKey: PublicKey;
   [poolKey] = deriveCustomizablePermissionlessLbPair(
     baseMint,
     quoteMint,
-    dlmm_program_id,
+    dlmmProgramId,
   );
   console.log(`- Using pool key ${poolKey.toString()}`);
 
@@ -168,13 +170,13 @@ export async function seedLiquidityLfg(
   },
 ) {
   const cluster = opts?.cluster || "mainnet-beta";
-  const dlmm_program_id = opts?.programId ?? DLMM_PROGRAM_IDS[cluster];
+  const dlmmProgramId = opts?.programId ?? DLMM_PROGRAM_IDS[cluster];
 
   let poolKey: PublicKey;
   [poolKey] = deriveCustomizablePermissionlessLbPair(
     baseMint,
     quoteMint,
-    dlmm_program_id,
+    dlmmProgramId,
   );
   console.log(`- Using pool key ${poolKey.toString()}`);
 

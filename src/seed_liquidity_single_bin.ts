@@ -100,7 +100,6 @@ async function main() {
     feeOwner,
     baseMint,
     quoteMint,
-    DLMM_PROGRAM_ID,
     seedAmount,
     price,
     priceRounding,

@@ -199,7 +199,6 @@ describe("Test Seed Liquidity Single Bin", () => {
       feeOwner,
       WEN,
       USDC,
-      DLMM_PROGRAM_ID,
       seedAmount,
       initialPrice,
       priceRounding,
