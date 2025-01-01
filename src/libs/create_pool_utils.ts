@@ -202,7 +202,8 @@ export async function createPermissionlessDlmmPool(
   modifyComputeUnitPriceIx(initPoolTx, config.computeUnitPriceMicroLamports);
 
   const cluster = opts?.cluster || "mainnet-beta";
-  const dlmmProgramId = opts?.programId ?? DLMM_PROGRAM_IDS[cluster];
+  const dlmmProgramId =
+    opts?.programId ?? new PublicKey(DLMM_PROGRAM_IDS[cluster]);
 
   let poolKey: PublicKey;
   [poolKey] = deriveCustomizablePermissionlessLbPair(
