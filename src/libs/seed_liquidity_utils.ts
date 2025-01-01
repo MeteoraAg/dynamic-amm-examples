@@ -92,21 +92,23 @@ export async function seedLiquiditySingleBin(
     );
   }
 
-  const seedLiquidityIxs = await createSeedLiquiditySingleBinInstructions(
-    connection,
-    poolKey,
-    payerKeypair.publicKey,
-    baseKeypair.publicKey,
-    seedAmount,
-    price,
-    priceRounding == "up",
-    positionOwner,
-    feeOwner,
-    operatorKeypair.publicKey,
-    lockReleasePoint,
-    seedTokenXToPositionOwner,
-    opts,
-  );
+  const { preInstructions, addLiquidityInstructions } =
+    await createSeedLiquiditySingleBinInstructions(
+      connection,
+      poolKey,
+      payerKeypair.publicKey,
+      baseKeypair.publicKey,
+      seedAmount,
+      price,
+      priceRounding == "up",
+      positionOwner,
+      feeOwner,
+      operatorKeypair.publicKey,
+      lockReleasePoint,
+      seedTokenXToPositionOwner,
+      opts,
+    );
+  const seedLiquidityIxs = [...preInstructions, ...addLiquidityInstructions];
 
   const setCUPriceIx = ComputeBudgetProgram.setComputeUnitPrice({
     microLamports: computeUnitPriceMicroLamports,
@@ -417,11 +419,6 @@ export async function createSeedLiquiditySingleBinInstructions(
     binArrayBitmapExtension = pair.program.programId;
   }
 
-  const operatorTokenX = getAssociatedTokenAddressSync(
-    pair.lbPair.tokenXMint,
-    operator,
-    true,
-  );
   const positionOwnerTokenX = getAssociatedTokenAddressSync(
     pair.lbPair.tokenXMint,
     positionOwner,
@@ -436,7 +433,7 @@ export async function createSeedLiquiditySingleBinInstructions(
       if (account.amount == BigInt(0)) {
         // send 1 lamport to position owner token X to prove ownership
         const transferIx = createTransferInstruction(
-          operatorTokenX,
+          userTokenX,
           positionOwnerTokenX,
           payer,
           1,
@@ -455,7 +452,7 @@ export async function createSeedLiquiditySingleBinInstructions(
 
       // send 1 lamport to position owner token X to prove ownership
       const transferIx = createTransferInstruction(
-        operatorTokenX,
+        userTokenX,
         positionOwnerTokenX,
         payer,
         1,
@@ -510,7 +507,7 @@ export async function createSeedLiquiditySingleBinInstructions(
           lbPair: pair.pubkey,
           owner: positionOwner,
           operator,
-          operatorTokenX,
+          operatorTokenX: userTokenX,
           ownerTokenX: positionOwnerTokenX,
         })
         .instruction(),
@@ -636,11 +633,6 @@ export async function createSeedLiquidityLfgInstructions(
   // create userTokenX account
   createPayerTokenXIx && preInstructions.push(createPayerTokenXIx);
 
-  const operatorTokenX = getAssociatedTokenAddressSync(
-    pair.lbPair.tokenXMint,
-    operator,
-    true,
-  );
   const positionOwnerTokenX = getAssociatedTokenAddressSync(
     pair.lbPair.tokenXMint,
     positionOwner,
@@ -654,7 +646,7 @@ export async function createSeedLiquidityLfgInstructions(
     if (account.amount == BigInt(0)) {
       // send 1 lamport to position owner token X to prove ownership
       const transferIx = createTransferInstruction(
-        operatorTokenX,
+        userTokenX,
         positionOwnerTokenX,
         payer,
         1,
@@ -672,7 +664,7 @@ export async function createSeedLiquidityLfgInstructions(
 
     // send 1 lamport to position owner token X to prove ownership
     const transferIx = createTransferInstruction(
-      operatorTokenX,
+      userTokenX,
       positionOwnerTokenX,
       payer,
       1,
@@ -770,7 +762,7 @@ export async function createSeedLiquidityLfgInstructions(
             lbPair: pair.pubkey,
             owner: positionOwner,
             operator,
-            operatorTokenX,
+            operatorTokenX: userTokenX,
             ownerTokenX: positionOwnerTokenX,
           })
           .instruction(),
@@ -797,7 +789,10 @@ export async function createSeedLiquidityLfgInstructions(
     const positionDeposited =
       positionAccount &&
       pair.program.coder.accounts
-        .decode<PositionV2>("positionV2", positionAccount.data)
+        .decode<PositionV2>(
+          pair.program.account.positionV2.idlAccount.name,
+          positionAccount.data,
+        )
         .liquidityShares.reduce((total, cur) => total.add(cur), new BN(0))
         .gt(new BN(0));
 
