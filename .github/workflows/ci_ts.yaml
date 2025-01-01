@@ -44,5 +44,7 @@ jobs:
       # This much more faster than anchor localnet
       - run: bun run start-test-validator & sleep 2
         shell: bash
+      - run: bun install
+        shell: bash
       - run: bun test
         shell: bash
