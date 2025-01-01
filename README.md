@@ -70,7 +70,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 ## Testings
 First, run the localnet
 ```bash
-anchor localnet -- --features localnet
+bun run start-test-validator
 ```
 
 Then run the test: `bun test`
