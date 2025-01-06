@@ -17,13 +17,9 @@ import {
   USDC_TOKEN_DECIMALS,
   USDC_TOKEN_MINT,
 } from "./constants";
-import { Wallet } from "@coral-xyz/anchor";
 import { simulateTransaction } from "@coral-xyz/anchor/dist/cjs/utils/rpc";
 import { ActivationType as DynamicAmmActivationType } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/types";
-import {
-  ActivationType as DlmmActivationType,
-  getPriceOfBinByBinId,
-} from "@meteora-ag/dlmm";
+import { ActivationType as DlmmActivationType } from "@meteora-ag/dlmm";
 import {
   PermissionWithAuthority,
   PermissionWithMerkleProof,
@@ -35,7 +31,7 @@ import { ActivationTypeConfig, MeteoraConfig } from "..";
 
 export const DEFAULT_ADD_LIQUIDITY_CU = 800_000;
 
-export function validate_config(config: MeteoraConfig) {
+export function extraConfigValidation(config: MeteoraConfig) {
   if (!config.keypairFilePath) {
     throw new Error("Missing keypairFilePath in config file.");
   }

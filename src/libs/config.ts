@@ -1,4 +1,5 @@
 import {
+  extraConfigValidation,
   parseCliArguments,
   safeParseJsonFromFile,
   validate_config,
@@ -345,9 +346,24 @@ export enum PriceRoundingConfig {
   Down = "down",
 }
 
+export enum AlphaVaultTypeConfig {
+  Fcfs = "fcfs",
+  Prorata = "prorata",
+}
+
+export enum PoolTypeConfig {
+  Dynamic = "dynamic",
+  Dlmm = "dlmm",
+}
+
+export enum WhitelistModeConfig {
+  Permissionless = "permissionless",
+  PermissionedWithMerkleProof = "permissioned_with_merkle_proof",
+  PermissionedWithAuthority = "permissioned_with_authority",
+}
+
 /// Parse and validate config from CLI
 export function parseConfigFromCli(): MeteoraConfig {
-  const ajv = new Ajv();
   const cliArguments = parseCliArguments();
   if (!cliArguments.config) {
     throw new Error("Please provide a config file path to --config flag");
@@ -355,17 +371,23 @@ export function parseConfigFromCli(): MeteoraConfig {
   const configFilePath = cliArguments.config!;
   console.log(`> Using config file: ${configFilePath}`);
 
-  const validate = ajv.compile(CONFIG_SCHEMA);
-
   let config: MeteoraConfig = safeParseJsonFromFile(configFilePath);
 
+  validateConfig(config);
+
+  return config;
+}
+
+export function validateConfig(config: MeteoraConfig) {
+  const ajv = new Ajv({
+    strict: false,
+  });
+  const validate = ajv.compile(CONFIG_SCHEMA);
   const isValid = validate(config);
   if (!isValid) {
     console.error(validate.errors);
     throw new Error("Config file is invalid");
   }
 
-  validate_config(config);
-
-  return config;
+  extraConfigValidation(config);
 }
