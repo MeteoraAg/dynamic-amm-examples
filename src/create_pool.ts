@@ -26,9 +26,6 @@ async function main() {
 
   const connection = new Connection(config.rpcUrl, DEFAULT_COMMITMENT_LEVEL);
   const wallet = new Wallet(keypair);
-  const provider = new AnchorProvider(connection, wallet, {
-    commitment: connection.commitment,
-  });
 
   let baseMint: PublicKey;
   let quoteMint = getQuoteMint(config.quoteSymbol);

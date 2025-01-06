@@ -8,6 +8,7 @@
   "lfgSeedLiquidity": {
     "minPrice": 0.003393,
     "maxPrice": 0.004393,
+    "seedAmount": "200000",
     "curvature": 0.6,
     "basePositionKeypairFilepath": "keypair.json",
     "operatorKeypairFilepath": "keypair.json",

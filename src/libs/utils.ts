@@ -17,13 +17,9 @@ import {
   USDC_TOKEN_DECIMALS,
   USDC_TOKEN_MINT,
 } from "./constants";
-import { Wallet } from "@coral-xyz/anchor";
 import { simulateTransaction } from "@coral-xyz/anchor/dist/cjs/utils/rpc";
 import { ActivationType as DynamicAmmActivationType } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/types";
-import {
-  ActivationType as DlmmActivationType,
-  getPriceOfBinByBinId,
-} from "@meteora-ag/dlmm";
+import { ActivationType as DlmmActivationType } from "@meteora-ag/dlmm";
 import {
   PermissionWithAuthority,
   PermissionWithMerkleProof,
@@ -31,11 +27,17 @@ import {
   PoolType,
   WhitelistMode,
 } from "@meteora-ag/alpha-vault";
-import { MeteoraConfig } from "..";
+import {
+  ActivationTypeConfig,
+  MeteoraConfig,
+  PoolTypeConfig,
+  PriceRoundingConfig,
+  WhitelistModeConfig,
+} from "..";
 
 export const DEFAULT_ADD_LIQUIDITY_CU = 800_000;
 
-export function validate_config(config: MeteoraConfig) {
+export function extraConfigValidation(config: MeteoraConfig) {
   if (!config.keypairFilePath) {
     throw new Error("Missing keypairFilePath in config file.");
   }
@@ -162,54 +164,58 @@ export async function runSimulateTransaction(
 }
 
 export function getDynamicAmmActivationType(
-  activationType: string,
+  activationType: ActivationTypeConfig,
 ): DynamicAmmActivationType {
-  switch (activationType.toLowerCase()) {
-    case "timestamp":
-      return DynamicAmmActivationType.Timestamp;
-    case "slot":
-      return DynamicAmmActivationType.Slot;
-    default:
-      throw new Error(
-        `Unsupported Dynamic AMM activation type: ${activationType}`,
-      );
+  if (activationType == ActivationTypeConfig.Slot) {
+    return DynamicAmmActivationType.Slot;
+  } else if (activationType == ActivationTypeConfig.Timestamp) {
+    return DynamicAmmActivationType.Timestamp;
+  } else {
+    throw new Error(
+      `Unsupported Dynamic AMM activation type: ${activationType}`,
+    );
   }
 }
 
 export function getDlmmActivationType(
-  activationType: string,
+  activationType: ActivationTypeConfig,
 ): DlmmActivationType {
-  switch (activationType.toLowerCase()) {
-    case "timestamp":
-      return DlmmActivationType.Timestamp;
-    case "slot":
-      return DlmmActivationType.Slot;
-    default:
-      throw new Error(`Unsupported DLMM activation type: ${activationType}`);
+  if (activationType == ActivationTypeConfig.Slot) {
+    return DlmmActivationType.Slot;
+  } else if (activationType == ActivationTypeConfig.Timestamp) {
+    return DlmmActivationType.Timestamp;
+  } else {
+    throw new Error(`Unsupported DLMM activation type: ${activationType}`);
   }
 }
 
-export function getAlphaVaultPoolType(poolType: string): PoolType {
-  switch (poolType.toLowerCase()) {
-    case "dynamic":
-      return PoolType.DYNAMIC;
-    case "dlmm":
-      return PoolType.DLMM;
-    default:
-      throw new Error(`Unsupported alpha vault pool type: ${poolType}`);
+export function isPriceRoundingUp(
+  priceRoundingConfig: PriceRoundingConfig,
+): boolean {
+  return priceRoundingConfig == PriceRoundingConfig.Up;
+}
+
+export function getAlphaVaultPoolType(poolType: PoolTypeConfig): PoolType {
+  if (poolType == PoolTypeConfig.Dynamic) {
+    return PoolType.DYNAMIC;
+  } else if (poolType == PoolTypeConfig.Dlmm) {
+    return PoolType.DLMM;
+  } else {
+    throw new Error(`Unsupported alpha vault pool type: ${poolType}`);
   }
 }
 
-export function getAlphaVaultWhitelistMode(mode: string): WhitelistMode {
-  switch (mode.toLowerCase()) {
-    case "permissionless":
-      return Permissionless;
-    case "permission_with_merkle_proof":
-      return PermissionWithMerkleProof;
-    case "permission_with_authority":
-      return PermissionWithAuthority;
-    default:
-      throw new Error(`Unsupported alpha vaultWhitelist mode: ${mode}`);
+export function getAlphaVaultWhitelistMode(
+  mode: WhitelistModeConfig,
+): WhitelistMode {
+  if (mode == WhitelistModeConfig.Permissionless) {
+    return Permissionless;
+  } else if (mode == WhitelistModeConfig.PermissionedWithAuthority) {
+    return PermissionWithAuthority;
+  } else if (mode == WhitelistModeConfig.PermissionedWithMerkleProof) {
+    return PermissionWithMerkleProof;
+  } else {
+    throw new Error(`Unsupported alpha vault whitelist mode: ${mode}`);
   }
 }
 
