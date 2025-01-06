@@ -774,15 +774,13 @@ export async function createSeedLiquidityLfgInstructions(
     let cluster = opts?.cluster ?? "mainnet-beta";
     // Initialize bin arrays and initialize position account in 1 tx
     if (instructions.length > 1) {
-      if (cluster != "localhost") {
-        instructions.push(
-          await getEstimatedComputeUnitIxWithBuffer(
-            connection,
-            instructions,
-            payer,
-          ),
-        );
-      }
+      instructions.push(
+        await getEstimatedComputeUnitIxWithBuffer(
+          connection,
+          instructions,
+          payer,
+        ),
+      );
 
       initializeBinArraysAndPositionIxs.push(instructions);
       instructions = [];
