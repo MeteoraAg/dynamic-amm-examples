@@ -31,7 +31,7 @@ import {
   PoolType,
   WhitelistMode,
 } from "@meteora-ag/alpha-vault";
-import { MeteoraConfig } from "..";
+import { ActivationTypeConfig, MeteoraConfig } from "..";
 
 export const DEFAULT_ADD_LIQUIDITY_CU = 800_000;
 
@@ -162,17 +162,16 @@ export async function runSimulateTransaction(
 }
 
 export function getDynamicAmmActivationType(
-  activationType: string,
+  activationType: ActivationTypeConfig,
 ): DynamicAmmActivationType {
-  switch (activationType.toLowerCase()) {
-    case "timestamp":
-      return DynamicAmmActivationType.Timestamp;
-    case "slot":
-      return DynamicAmmActivationType.Slot;
-    default:
-      throw new Error(
-        `Unsupported Dynamic AMM activation type: ${activationType}`,
-      );
+  if (activationType == ActivationTypeConfig.Slot) {
+    return DynamicAmmActivationType.Slot;
+  } else if (activationType == ActivationTypeConfig.Timestamp) {
+    return DynamicAmmActivationType.Timestamp;
+  } else {
+    throw new Error(
+      `Unsupported dynamic AMM activation type: ${activationType}`,
+    );
   }
 }
 

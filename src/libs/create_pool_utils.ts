@@ -13,6 +13,7 @@ import {
   getDlmmActivationType,
   modifyComputeUnitPriceIx,
   DLMM_PROGRAM_IDS,
+  PriceRoundingConfig,
 } from "../";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { Wallet } from "@coral-xyz/anchor";
@@ -170,9 +171,9 @@ export async function createPermissionlessDlmmPool(
     config.dlmm.initialPrice,
   );
   let selectiveRounding = false;
-  if (config.dlmm.priceRounding == "up") {
+  if (config.dlmm.priceRounding == PriceRoundingConfig.Up) {
     selectiveRounding = false;
-  } else if (config.dlmm.priceRounding == "down") {
+  } else if (config.dlmm.priceRounding == PriceRoundingConfig.Down) {
     selectiveRounding = true;
   } else {
     throw new Error(

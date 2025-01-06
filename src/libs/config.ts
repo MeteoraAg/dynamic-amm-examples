@@ -250,7 +250,7 @@ export interface DynamicAmmConfig {
   baseAmount: number | string;
   quoteAmount: number | string;
   tradeFeeNumerator: number;
-  activationType: string;
+  activationType: ActivationTypeConfig;
   activationPoint: number | null;
   hasAlphaVault: boolean;
 }
@@ -259,9 +259,9 @@ export interface DlmmConfig {
   binStep: number;
   feeBps: number;
   initialPrice: number;
-  activationType: string;
+  activationType: ActivationTypeConfig;
   activationPoint: number | null;
-  priceRounding: string;
+  priceRounding: PriceRoundingConfig;
   hasAlphaVault: boolean;
 }
 
@@ -333,6 +333,16 @@ export interface SingleBinSeedLiquidityConfig {
   feeOwner: string;
   lockReleasePoint: number;
   seedTokenXToPositionOwner: boolean;
+}
+
+export enum ActivationTypeConfig {
+  Slot = "slot",
+  Timestamp = "timestamp",
+}
+
+export enum PriceRoundingConfig {
+  Up = "up",
+  Down = "down",
 }
 
 /// Parse and validate config from CLI
