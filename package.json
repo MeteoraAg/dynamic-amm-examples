@@ -1,6 +1,6 @@
 {
-  "name": "swap_quote",
-  "version": "1.1.0",
+  "name": "meteora_pool_setup",
+  "version": "1.2.0",
   "main": "index.js",
   "scripts": {
     "format": "bun prettier ./src --write",

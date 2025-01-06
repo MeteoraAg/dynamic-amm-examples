@@ -17,7 +17,6 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `createBaseToken`: Configuration to create base token.
 - `baseMint`: Base token address if the `createBaseToken` field is not set. 
 - `quoteSymbol`: Quote token symbol, only `SOL` or `USDC` is supported.
-- `baseDecimals`: Base token decimal.
 - `dynamicAmm`: Dynamic AMM pool configuration.
 - `dlmm`: DLMM pool configuration.
 - `alphaVault`: Fcfs or Prorata Alpha Vault configuration.
@@ -28,6 +27,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 
 ### Create Base Token configuration
 - `mintBaseTokenAmount`: Base token amount to be minted.
+- `baseDecimals`: Base token decimal.
 
 ### Dynamic AMM configuration
 - `baseAmount`: Base token amount.
