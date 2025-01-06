@@ -14,6 +14,7 @@ import {
   modifyComputeUnitPriceIx,
   DLMM_PROGRAM_IDS,
   PriceRoundingConfig,
+  isPriceRoundingUp,
 } from "../";
 import { AmmImpl } from "@mercurial-finance/dynamic-amm-sdk";
 import { Wallet } from "@coral-xyz/anchor";
@@ -170,21 +171,11 @@ export async function createPermissionlessDlmmPool(
     quoteDecimals,
     config.dlmm.initialPrice,
   );
-  let selectiveRounding = false;
-  if (config.dlmm.priceRounding == PriceRoundingConfig.Up) {
-    selectiveRounding = false;
-  } else if (config.dlmm.priceRounding == PriceRoundingConfig.Down) {
-    selectiveRounding = true;
-  } else {
-    throw new Error(
-      `Unknown price rounding: ${config.dlmm.priceRounding}. Should be 'up' or 'down'`,
-    );
-  }
 
   const activateBinId = DLMM.getBinIdFromPrice(
     initPrice,
     binStep,
-    selectiveRounding,
+    !isPriceRoundingUp(config.dlmm.priceRounding),
   );
 
   const initPoolTx = await DLMM.createCustomizablePermissionlessLbPair(

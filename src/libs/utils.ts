@@ -31,6 +31,7 @@ import {
   ActivationTypeConfig,
   MeteoraConfig,
   PoolTypeConfig,
+  PriceRoundingConfig,
   WhitelistModeConfig,
 } from "..";
 
@@ -186,6 +187,12 @@ export function getDlmmActivationType(
   } else {
     throw new Error(`Unsupported DLMM activation type: ${activationType}`);
   }
+}
+
+export function isPriceRoundingUp(
+  priceRoundingConfig: PriceRoundingConfig,
+): boolean {
+  return priceRoundingConfig == PriceRoundingConfig.Up;
 }
 
 export function getAlphaVaultPoolType(poolType: PoolTypeConfig): PoolType {
