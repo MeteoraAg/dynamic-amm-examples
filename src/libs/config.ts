@@ -55,7 +55,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
           type: "number",
         },
         activationType: {
-          type: "string",
+          enum: ["slot", "timestamp"],
         },
         activationPoint: {
           type: "number",
@@ -88,14 +88,14 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
           type: "number",
         },
         activationType: {
-          type: "string",
+          enum: ["slot", "timestamp"],
         },
         activationPoint: {
           type: "number",
           nullable: true,
         },
         priceRounding: {
-          type: "string",
+          enum: ["up", "down"],
         },
         hasAlphaVault: {
           type: "boolean",

@@ -14,6 +14,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `rpcUrl`: Solana RPC URL to get data and send transactions.
 - `keypairFilePath`: Keypair file path to send transactions.
 - `dryRun`: Set to true to send transactions.
+- `computeUnitPriceMicroLamports`: CU price in micro lamports unit. For example: 100000.
 - `createBaseToken`: Configuration to create base token.
 - `baseMint`: Base token address if the `createBaseToken` field is not set. 
 - `quoteSymbol`: Quote token symbol, only `SOL` or `USDC` is supported.
