@@ -116,8 +116,12 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
       type: "object",
       nullable: true,
       properties: {
-        poolType: { type: "string" },
-        alphaVaultType: { type: "string" },
+        poolType: {
+          enum: ["dynamic", "dlmm"],
+        },
+        alphaVaultType: {
+          enum: ["fcfs", "prorata"],
+        },
         depositingPoint: { type: "number" },
         startVestingPoint: { type: "number" },
         endVestingPoint: { type: "number" },
@@ -125,7 +129,13 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         individualDepositingCap: { type: "number", nullable: true },
         maxBuyingCap: { type: "number", nullable: true },
         escrowFee: { type: "number" },
-        whitelistMode: { type: "string" },
+        whitelistMode: {
+          enum: [
+            "permissionless",
+            "permissioned_with_merkle_proof",
+            "permissioned_with_authority",
+          ],
+        },
       },
       required: [
         "poolType",
@@ -267,8 +277,8 @@ export interface DlmmConfig {
 }
 
 export interface FcfsAlphaVaultConfig {
-  poolType: string;
-  alphaVaultType: string;
+  poolType: PoolTypeConfig;
+  alphaVaultType: AlphaVaultTypeConfig;
   // absolute value, depend on the pool activation type it will be the timestamp in secs or the slot number
   depositingPoint: number;
   // absolute value
@@ -282,12 +292,12 @@ export interface FcfsAlphaVaultConfig {
   // fee to create stake escrow account
   escrowFee: number;
   // whitelist mode: permissionless / permission_with_merkle_proof / permission_with_authority
-  whitelistMode: string;
+  whitelistMode: WhitelistModeConfig;
 }
 
 export interface ProrataAlphaVaultConfig {
-  poolType: string;
-  alphaVaultType: string;
+  poolType: PoolTypeConfig;
+  alphaVaultType: AlphaVaultTypeConfig;
   // absolute value, depend on the pool activation type it will be the timestamp in secs or the slot number
   depositingPoint: number;
   // absolute value
@@ -299,7 +309,7 @@ export interface ProrataAlphaVaultConfig {
   // fee to create stake escrow account
   escrowFee: number;
   // whitelist mode: permissionless / permission_with_merkle_proof / permission_with_authority
-  whitelistMode: string;
+  whitelistMode: WhitelistModeConfig;
 }
 
 export interface LockLiquidityConfig {

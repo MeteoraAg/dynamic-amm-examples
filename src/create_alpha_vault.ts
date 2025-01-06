@@ -19,7 +19,7 @@ import {
   getAlphaVaultPoolType,
   modifyComputeUnitPriceIx,
 } from ".";
-import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
+import { Wallet } from "@coral-xyz/anchor";
 
 import { BN } from "bn.js";
 import AlphaVault, { PoolType } from "@meteora-ag/alpha-vault";
@@ -45,9 +45,6 @@ async function main() {
 
   const connection = new Connection(config.rpcUrl, DEFAULT_COMMITMENT_LEVEL);
   const wallet = new Wallet(keypair);
-  const provider = new AnchorProvider(connection, wallet, {
-    commitment: connection.commitment,
-  });
 
   if (!config.baseMint) {
     throw new Error("Missing baseMint in configuration");
