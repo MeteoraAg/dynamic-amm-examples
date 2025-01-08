@@ -381,7 +381,7 @@ export async function createPermissionedAlphaVaultWithMerkleProof(
   );
 
   // 2. Create merkle tree
-  const tree = await createMerkleTree(connection, alphaVault, whitelistList);
+  const tree = await createMerkleTree(whitelistList);
 
   // 3. Create merkle root config
   // If the tree grew too large, one can partition it into multiple tree by setting different version
@@ -572,6 +572,21 @@ export function deriveAlphaVault(
   return PublicKey.findProgramAddressSync(
     [Buffer.from(SEED.vault), base.toBuffer(), lbPair.toBuffer()],
     alphaVaultProgramId,
+  );
+}
+
+export function deriveMerkleRootConfig(
+  alphaVault: PublicKey,
+  version: BN,
+  programId: PublicKey,
+) {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from(SEED.merkleRoot),
+      alphaVault.toBuffer(),
+      new Uint8Array(version.toArrayLike(Buffer, "le", 8)),
+    ],
+    programId,
   );
 }
 
