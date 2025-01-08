@@ -31,16 +31,12 @@ import {
 import { deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
 import {
   createAlphaVaultInstance,
-  createPermissionedAlphaVaultWithAuthority,
   createPermissionedAlphaVaultWithMerkleProof,
   deriveAlphaVault,
   deriveMerkleRootConfig,
 } from "../libs/create_alpha_vault_utils";
 import { BN } from "bn.js";
-import {
-  PermissionWithAuthority,
-  PermissionWithMerkleProof,
-} from "@meteora-ag/alpha-vault";
+import { PermissionWithMerkleProof } from "@meteora-ag/alpha-vault";
 import { createMerkleTree } from "../libs/merkle_tree";
 
 describe("Test create dynamic pool with permissioned with merkle proof fcfs alpha vault", () => {
