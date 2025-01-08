@@ -42,6 +42,7 @@ import {
 import {
   createFcfsAlphaVault,
   createPermissionedAlphaVaultWithAuthority,
+  createPermissionedAlphaVaultWithMerkleProof,
   createProrataAlphaVault,
 } from "./libs/create_alpha_vault_utils";
 
@@ -105,23 +106,38 @@ async function main() {
       throw new Error("Missing whitelist filepath in configuration");
     }
 
-    interface WhitelistCsv {
-      address: string;
-      maxAmount: string;
-    }
-    const whitelistListCsv: Array<WhitelistCsv> = await parseCsv(
+    const whitelistList = await parseWhitelistListFromCsv(
       config.alphaVault.whitelistFilepath,
+      quoteDecimals,
     );
 
-    const whitelistList: Array<WalletDepositCap> = new Array(0);
-    for (const item of whitelistListCsv) {
-      whitelistList.push({
-        address: new PublicKey(item.address),
-        maxAmount: getAmountInLamports(item.maxAmount, quoteDecimals),
-      });
+    await createPermissionedAlphaVaultWithAuthority(
+      connection,
+      wallet,
+      config.alphaVault.alphaVaultType,
+      toAlphaVaulSdkPoolType(poolType),
+      poolKey,
+      baseMint,
+      quoteMint,
+      quoteDecimals,
+      config.alphaVault,
+      whitelistList,
+      config.dryRun,
+      config.computeUnitPriceMicroLamports,
+    );
+  } else if (
+    config.alphaVault.whitelistMode ==
+    WhitelistModeConfig.PermissionedWithMerkleProof
+  ) {
+    if (!config.alphaVault.whitelistFilepath) {
+      throw new Error("Missing whitelist filepath in configuration");
     }
 
-    await createPermissionedAlphaVaultWithAuthority(
+    const whitelistList = await parseWhitelistListFromCsv(
+      config.alphaVault.whitelistFilepath,
+      quoteDecimals,
+    );
+    await createPermissionedAlphaVaultWithMerkleProof(
       connection,
       wallet,
       config.alphaVault.alphaVaultType,
@@ -172,6 +188,27 @@ async function main() {
       );
     }
   }
+}
+
+interface WhitelistCsv {
+  address: string;
+  maxAmount: string;
+}
+async function parseWhitelistListFromCsv(
+  csvFilepath: string,
+  quoteDecimals: number,
+): Promise<Array<WalletDepositCap>> {
+  const whitelistListCsv: Array<WhitelistCsv> = await parseCsv(csvFilepath);
+
+  const whitelistList: Array<WalletDepositCap> = new Array(0);
+  for (const item of whitelistListCsv) {
+    whitelistList.push({
+      address: new PublicKey(item.address),
+      maxAmount: getAmountInLamports(item.maxAmount, quoteDecimals),
+    });
+  }
+
+  return whitelistList;
 }
 
 main();

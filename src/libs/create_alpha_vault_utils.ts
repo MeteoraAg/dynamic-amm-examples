@@ -30,6 +30,7 @@ import {
   WhitelistModeConfig,
 } from "./config";
 import { BN } from "bn.js";
+import { createMerkleTree } from "./merkle_tree";
 
 export async function createFcfsAlphaVault(
   connection: Connection,
@@ -214,7 +215,7 @@ export async function createPermissionedAlphaVaultWithAuthority(
   },
 ): Promise<void> {
   if (params.whitelistMode != WhitelistModeConfig.PermissionedWithAuthority) {
-    throw new Error(`Invalid whitelist mode ${params.whitelistMode}. Only Permissioned with authority is allowed 
+    throw new Error(`Invalid whitelist mode ${params.whitelistMode}. Only permissioned_with_authority is allowed 
     `);
   }
 
@@ -295,7 +296,7 @@ export async function createPermissionedAlphaVaultWithAuthority(
       createStakeEscrowAccountsTx,
     ]);
   } else {
-    console.log(`>> Sending stake escrow accounts transaction...`);
+    console.log(`>> Sending create stake escrow accounts transaction...`);
     const createStakeEscrowAccountTxHash = await sendAndConfirmTransaction(
       connection,
       createStakeEscrowAccountsTx,
@@ -306,6 +307,109 @@ export async function createPermissionedAlphaVaultWithAuthority(
     });
     console.log(
       `>>> Create stake escrow accounts successfully with tx hash: ${createStakeEscrowAccountTxHash}`,
+    );
+  }
+}
+
+export async function createPermissionedAlphaVaultWithMerkleProof(
+  connection: Connection,
+  wallet: Wallet,
+  alphaVaultType: AlphaVaultTypeConfig,
+  poolType: PoolType,
+  poolAddress: PublicKey,
+  baseMint: PublicKey,
+  quoteMint: PublicKey,
+  quoteDecimals: number,
+  params: FcfsAlphaVaultConfig | ProrataAlphaVaultConfig,
+  whitelistList: WalletDepositCap[],
+  dryRun: boolean,
+  computeUnitPriceMicroLamports: number,
+  opts?: {
+    alphaVaultProgramId: PublicKey;
+  },
+): Promise<void> {
+  if (params.whitelistMode != WhitelistModeConfig.PermissionedWithMerkleProof) {
+    throw new Error(`Invalid whitelist mode ${params.whitelistMode}. Only permissioned_with_merkle_proof is allowed 
+    `);
+  }
+
+  // 1. Create alpha vault
+  if (alphaVaultType == AlphaVaultTypeConfig.Fcfs) {
+    await createFcfsAlphaVault(
+      connection,
+      wallet,
+      poolType,
+      poolAddress,
+      baseMint,
+      quoteMint,
+      quoteDecimals,
+      params as FcfsAlphaVaultConfig,
+      dryRun,
+      computeUnitPriceMicroLamports,
+      opts,
+    );
+  } else if (alphaVaultType == AlphaVaultTypeConfig.Prorata) {
+    await createProrataAlphaVault(
+      connection,
+      wallet,
+      poolType,
+      poolAddress,
+      baseMint,
+      quoteMint,
+      quoteDecimals,
+      params as ProrataAlphaVaultConfig,
+      dryRun,
+      computeUnitPriceMicroLamports,
+      opts,
+    );
+  }
+
+  const alphaVaultProgramId = new PublicKey(
+    opts?.alphaVaultProgramId ?? ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"],
+  );
+
+  const [alphaVaultPubkey] = deriveAlphaVault(
+    wallet.publicKey,
+    poolAddress,
+    alphaVaultProgramId,
+  );
+
+  const alphaVault = await createAlphaVaultInstance(
+    connection,
+    alphaVaultProgramId,
+    alphaVaultPubkey,
+  );
+
+  // 2. Create merkle tree
+  const tree = await createMerkleTree(connection, alphaVault, whitelistList);
+
+  // 3. Create merkle root config
+  // If the tree grew too large, one can partition it into multiple tree by setting different version
+  const version = new BN(0);
+  const createMerkleRootConfigTx = await alphaVault.createMerkleRootConfig(
+    tree.getRoot(),
+    version,
+    wallet.publicKey,
+  );
+
+  // 4. Send transaction
+  if (dryRun) {
+    console.log(`\n> Simulating create merkle root config tx...`);
+    await runSimulateTransaction(connection, [wallet.payer], wallet.publicKey, [
+      createMerkleRootConfigTx,
+    ]);
+  } else {
+    console.log(`>> Sending create merkle root config transaction...`);
+    const createStakeEscrowAccountTxHash = await sendAndConfirmTransaction(
+      connection,
+      createMerkleRootConfigTx,
+      [wallet.payer],
+    ).catch((err) => {
+      console.error(err);
+      throw err;
+    });
+    console.log(
+      `>>> Create merkle root config successfully with tx hash: ${createStakeEscrowAccountTxHash}`,
     );
   }
 }
