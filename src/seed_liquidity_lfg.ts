@@ -116,22 +116,6 @@ async function main() {
   const seedTokenXToPositionOwner =
     config.lfgSeedLiquidity.seedTokenXToPositionOwner;
 
-  console.log(`- Using seedAmount in lamports = ${seedAmount}`);
-  console.log(`- Using curvature = ${curvature}`);
-  console.log(`- Using minPrice ${minPrice}`);
-  console.log(`- Using maxPrice ${maxPrice}`);
-  console.log(`- Using operator ${operator}`);
-  console.log(`- Using positionOwner ${positionOwner}`);
-  console.log(`- Using feeOwner ${feeOwner}`);
-  console.log(`- Using lockReleasePoint ${lockReleasePoint}`);
-  console.log(`- Using seedTokenXToPositionOwner ${seedTokenXToPositionOwner}`);
-
-  if (!seedTokenXToPositionOwner) {
-    console.log(
-      `WARNING: You selected seedTokenXToPositionOwner = false, you should manually send 1 lamport of token X to the position owner account to prove ownership.`,
-    );
-  }
-
   const minPricePerLamport = DLMM.getPricePerLamport(
     baseDecimals,
     quoteDecimals,

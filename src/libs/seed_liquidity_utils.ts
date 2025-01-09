@@ -109,6 +109,7 @@ export async function seedLiquiditySingleBin(
       seedTokenXToPositionOwner,
       opts,
     );
+
   const seedLiquidityIxs = [...preInstructions, ...addLiquidityInstructions];
 
   const setCUPriceIx = ComputeBudgetProgram.setComputeUnitPrice({
@@ -220,36 +221,38 @@ export async function seedLiquidityLfg(
     opts,
   );
 
-  // run preflight ixs
-  const { blockhash, lastValidBlockHeight } =
-    await connection.getLatestBlockhash("confirmed");
-  const setCUPriceIx = ComputeBudgetProgram.setComputeUnitPrice({
-    microLamports: computeUnitPriceMicroLamports,
-  });
-  const tx = new Transaction({
-    feePayer: payerKeypair.publicKey,
-    blockhash,
-    lastValidBlockHeight,
-  })
-    .add(setCUPriceIx)
-    .add(...preInstructions);
+  if (preInstructions.length > 0) {
+    // run preflight ixs
+    const { blockhash, lastValidBlockHeight } =
+      await connection.getLatestBlockhash("confirmed");
+    const setCUPriceIx = ComputeBudgetProgram.setComputeUnitPrice({
+      microLamports: computeUnitPriceMicroLamports,
+    });
 
-  const signers = [payerKeypair];
+    const signers = [payerKeypair];
+    const tx = new Transaction({
+      feePayer: payerKeypair.publicKey,
+      blockhash,
+      lastValidBlockHeight,
+    }).add(setCUPriceIx);
 
-  if (dryRun) {
-    throw new Error(
-      "dryRun is not supported for this script, please set dryRun config to false",
-    );
-  }
+    tx.add(...preInstructions);
 
-  console.log(`>> Running preflight instructions...`);
-  try {
-    console.log(`>> Sending preflight transaction...`);
-    const txHash = await sendAndConfirmTransaction(connection, tx, signers);
-    console.log(`>>> Preflight successfully with tx hash: ${txHash}`);
-  } catch (err) {
-    console.error(err);
-    throw new Error(err);
+    if (dryRun) {
+      throw new Error(
+        "dryRun is not supported for this script, please set dryRun config to false",
+      );
+    }
+
+    console.log(`>> Running preflight instructions...`);
+    try {
+      console.log(`>> Sending preflight transaction...`);
+      const txHash = await sendAndConfirmTransaction(connection, tx, signers);
+      console.log(`>>> Preflight successfully with tx hash: ${txHash}`);
+    } catch (err) {
+      console.error(err);
+      throw new Error(err);
+    }
   }
 
   console.log(`>> Running initializeBinArraysAndPosition instructions...`);
@@ -300,17 +303,17 @@ export async function seedLiquidityLfg(
 
       const signers = [payerKeypair, operatorKeypair];
 
-      transactions.push(sendAndConfirmTransaction(connection, tx, signers));
+      await sendAndConfirmTransaction(connection, tx, signers);
     }
 
-    await Promise.all(transactions)
-      .then((txs) => {
-        txs.map(console.log);
-      })
-      .catch((e) => {
-        console.error(e);
-        throw e;
-      });
+    // await Promise.all(transactions)
+    //   .then((txs) => {
+    //     txs.map(console.log);
+    //   })
+    //   .catch((e) => {
+    //     console.error(e);
+    //     throw e;
+    //   });
   }
   console.log(`>>> Finished addLiquidity instructions!`);
 }
@@ -771,7 +774,6 @@ export async function createSeedLiquidityLfgInstructions(
       );
     }
 
-    let cluster = opts?.cluster ?? "mainnet-beta";
     // Initialize bin arrays and initialize position account in 1 tx
     if (instructions.length > 1) {
       instructions.push(

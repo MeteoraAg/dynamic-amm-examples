@@ -195,7 +195,7 @@ export async function createPermissionlessDlmmPool(
     activationPoint,
     {
       cluster,
-      programId: dlmmProgramId
+      programId: dlmmProgramId,
     },
   );
   modifyComputeUnitPriceIx(initPoolTx, config.computeUnitPriceMicroLamports);
