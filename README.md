@@ -108,8 +108,15 @@ bun run src/create_alpha_vault.ts --config ./config/create_dlmm_pool_with_fcfs_a
 bun run src/lock_liquidity.ts --config ./config/lock_liquidity.json
 ```
 
-**NOTICE**
-The seed liquidity scripts are still WIP, do not use them.
+** Seed liquidity for DLMM pool with single bin strategy**
+```bash
+bun run src/seed_liquidity_single_bin.ts --config ./config/seed_liquidity_single_bin.json
+```
+
+** Seed liquidity for DLMM pool with LFG strategy**
+```bash
+bun run src/seed_liquidity_lfg.ts --config ./config/seed_liquidity_lfg.json
+```
 
 ## After deployment
 To view pool on the UI, access the links below
