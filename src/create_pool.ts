@@ -32,12 +32,6 @@ async function main() {
 
   // If we want to create a new token mint
   if (config.createBaseToken) {
-    if (!config.createBaseToken.mintBaseTokenAmount) {
-      throw new Error("Missing mintBaseTokenAmount in configuration");
-    }
-    if (!config.createBaseToken.baseDecimals) {
-      throw new Error("Missing baseDecimals in configuration");
-    }
     baseMint = await createTokenMint(connection, wallet, {
       dryRun: config.dryRun,
       mintTokenAmount: config.createBaseToken.mintBaseTokenAmount,

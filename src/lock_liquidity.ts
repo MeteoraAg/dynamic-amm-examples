@@ -69,7 +69,7 @@ async function main() {
     [Buffer.from(SEEDS.LP_MINT), poolKey.toBuffer()],
     createProgram(connection).ammProgram.programId,
   );
-  const payerPoolLp = await getAssociatedTokenAccount(lpMint, wallet.publicKey);
+  const payerPoolLp = getAssociatedTokenAccount(lpMint, wallet.publicKey);
   const payerPoolLpBalance = (
     await provider.connection.getTokenAccountBalance(payerPoolLp)
   ).value.amount;

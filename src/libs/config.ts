@@ -2,7 +2,6 @@ import {
   extraConfigValidation,
   parseCliArguments,
   safeParseJsonFromFile,
-  validate_config,
 } from "./utils";
 import Ajv, { JSONSchemaType } from "ajv";
 
@@ -250,6 +249,7 @@ export interface MeteoraConfig {
   lockLiquidity: LockLiquidityConfig | null;
   lfgSeedLiquidity: LfgSeedLiquidityConfig | null;
   singleBinSeedLiquidity: SingleBinSeedLiquidityConfig | null;
+  m3m3: M3m3Config | null;
 }
 
 export interface CreateBaseMintConfig {
@@ -344,6 +344,13 @@ export interface SingleBinSeedLiquidityConfig {
   feeOwner: string;
   lockReleasePoint: number;
   seedTokenXToPositionOwner: boolean;
+}
+
+export interface M3m3Config {
+  topListLength: number;
+  unstakeLockDurationSecs: number;
+  secondsToFullUnlock: number;
+  startFeeDistributeTimestamp: number;
 }
 
 export enum ActivationTypeConfig {
