@@ -5,7 +5,9 @@ import {
   Keypair,
   PublicKey,
   Transaction,
+  TransactionInstruction,
   VersionedTransaction,
+  sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import * as fs from "fs";
 import { parseArgs } from "util";
@@ -14,6 +16,7 @@ import Decimal from "decimal.js";
 import {
   SOL_TOKEN_DECIMALS,
   SOL_TOKEN_MINT,
+  TX_SIZE_LIMIT_BYTES,
   USDC_TOKEN_DECIMALS,
   USDC_TOKEN_MINT,
 } from "./constants";
@@ -34,6 +37,7 @@ import {
   PriceRoundingConfig,
   WhitelistModeConfig,
 } from "..";
+import { parse } from "csv-parse";
 
 export const DEFAULT_ADD_LIQUIDITY_CU = 800_000;
 
@@ -99,6 +103,26 @@ export function parseKeypairFromSecretKey(secretKey: string): Keypair {
   const keypairBytes = bs58.decode(secretKey);
   const keypair = Keypair.fromSecretKey(keypairBytes);
   return keypair;
+}
+
+// Function to parse CSV file
+export async function parseCsv<T>(filePath: string): Promise<Array<T>> {
+  const fileStream = fs.createReadStream(filePath);
+
+  return new Promise((resolve, reject) => {
+    const parser = parse({
+      columns: true, // Use the header row as keys
+      skip_empty_lines: true, // Skip empty lines
+    });
+
+    const results = [];
+
+    fileStream
+      .pipe(parser)
+      .on("data", (row) => results.push(row)) // Collect rows
+      .on("end", () => resolve(results)) // Resolve the promise with results
+      .on("error", (err) => reject(err)); // Reject the promise if error occurs
+  });
 }
 
 export function getAmountInLamports(
@@ -216,6 +240,70 @@ export function getAlphaVaultWhitelistMode(
     return PermissionWithMerkleProof;
   } else {
     throw new Error(`Unsupported alpha vault whitelist mode: ${mode}`);
+  }
+}
+
+export function toAlphaVaulSdkPoolType(poolType: PoolTypeConfig): PoolType {
+  switch (poolType) {
+    case PoolTypeConfig.Dynamic:
+      return PoolType.DYNAMIC;
+    case PoolTypeConfig.Dlmm:
+      return PoolType.DLMM;
+    default:
+      throw new Error(`Unsupported alpha vault pool type: ${poolType}`);
+  }
+}
+
+/// Divine the instructions to multiple transactions
+export async function handleSendTxs(
+  connection: Connection,
+  instructions: TransactionInstruction[],
+  instructionsPerTx: number,
+  payer: Keypair,
+  computeUnitPriceMicroLamports: number,
+  dryRun: boolean,
+  txLabel?: string,
+): Promise<void> {
+  const numTransactions = Math.ceil(instructions.length / instructionsPerTx);
+
+  for (let i = 0; i < numTransactions; i++) {
+    const { blockhash, lastValidBlockHeight } =
+      await connection.getLatestBlockhash("confirmed");
+    const setPriorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
+      microLamports: computeUnitPriceMicroLamports,
+    });
+    let tx = new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: payer.publicKey,
+    }).add(setPriorityFeeIx);
+    let lowerIndex = i * instructionsPerTx;
+    let upperIndex = (i + 1) * instructionsPerTx;
+    for (let j = lowerIndex; j < upperIndex; j++) {
+      if (instructions[j]) tx.add(instructions[j]);
+    }
+
+    const txSize = tx.serialize({
+      verifySignatures: false,
+    }).length;
+    console.log(`Tx number ${i + 1} txSize = ${txSize}`);
+
+    let label = txLabel ?? "";
+    if (dryRun) {
+      console.log(`\n> Simulating ${label} tx number ${i + 1}...`);
+      await runSimulateTransaction(connection, [payer], payer.publicKey, [tx]);
+    } else {
+      console.log(`>> Sending ${label} transaction number ${i + 1}...`);
+      const txHash = await sendAndConfirmTransaction(connection, tx, [
+        payer,
+      ]).catch((err) => {
+        console.error(err);
+        throw err;
+      });
+      console.log(
+        `>>> Transaction ${i + 1} ${label} successfully with tx hash: ${txHash}`,
+      );
+    }
   }
 }
 
