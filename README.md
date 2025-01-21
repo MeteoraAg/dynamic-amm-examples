@@ -47,7 +47,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `priceRounding`: Should be `up` or `down`.
 - `hasAlphaVault`: Whether alpha vault is enabled or not for this pool.
 
-**NOTICE**: There is only one DLMM pool that can be created with the same base and quote tokens, using the instruction `initializeCustomizablePermissionlessLbPair`. So if users are using that instruction to create a new DLMM pool with the same base and quote tokens, but with different parameters, then the transaction will be failed.
+**NOTICE**: There is only one DLMM pool that can be created with the same base and quote tokens, using the instruction `initializeCustomizablePermissionlessLbPair`. So if users try to create a new DLMM pool with the same base and quote tokens but with different parameters, the transaction will fail.
 
 ### Alpha Vault configuration
 - `poolType`: `dynamic` or `dlmm` pool type.
@@ -79,22 +79,22 @@ Then run the test: `bun test`
 ## Run the scripts
 Run the script with the specified config file in the CLI, some examples:
 
-** Create a dynamic AMM pool**
+**Create a dynamic AMM pool**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool.json
 ```
 
-** Create a dynamic AMM pool with new token mint**
+**Create a dynamic AMM pool with new token mint**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool_with_new_token.json
 ```
 
-** Create a new DLMM pool**
+**Create a new DLMM pool**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dlmm_pool.json
 ```
 
-** Create a new DLMM pool with alpha vault**
+**Create a new DLMM pool with alpha vault**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dlmm_pool_with_fcfs_alpha_vault.json
 ```
@@ -103,17 +103,17 @@ Then run
 bun run src/create_alpha_vault.ts --config ./config/create_dlmm_pool_with_fcfs_alpha_vault.json
 ```
 
-** Lock liquidity for Dynamic AMM pool**
+**Lock liquidity for Dynamic AMM pool**
 ```bash
 bun run src/lock_liquidity.ts --config ./config/lock_liquidity.json
 ```
 
-** Seed liquidity for DLMM pool with single bin strategy**
+**Seed liquidity for DLMM pool with single bin strategy**
 ```bash
 bun run src/seed_liquidity_single_bin.ts --config ./config/seed_liquidity_single_bin.json
 ```
 
-** Seed liquidity for DLMM pool with LFG strategy**
+**Seed liquidity for DLMM pool with LFG strategy**
 ```bash
 bun run src/seed_liquidity_lfg.ts --config ./config/seed_liquidity_lfg.json
 ```
