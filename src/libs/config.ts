@@ -224,6 +224,25 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         "seedTokenXToPositionOwner",
       ],
     },
+    m3m3: {
+      type: "object",
+      nullable: true,
+      properties: {
+        topListLength: {
+          type: "number",
+        },
+        unstakeLockDurationSecs: {
+          type: "number",
+        },
+        secondsToFullUnlock: {
+          type: "string",
+        },
+        startFeeDistributeTimestamp: {
+          type: "number"
+        }
+      },
+      required: ["topListLength", "unstakeLockDurationSecs", "secondsToFullUnlock", "startFeeDistributeTimestamp"],
+    }
   },
   required: [
     "rpcUrl",
