@@ -39,61 +39,31 @@ async function main() {
   const connection = new Connection(config.rpcUrl, DEFAULT_COMMITMENT_LEVEL);
   const wallet = new Wallet(keypair);
 
+  if (!config.baseMint) {
+    throw new Error("Missing baseMint in configuration");
+  }
+  let baseMint = new PublicKey(config.baseMint);
   let quoteMint = getQuoteMint(config.quoteSymbol);
   const ammProgram = createProgram(connection).ammProgram;
   const poolKey = deriveCustomizablePermissionlessConstantProductPoolAddress(
-    new PublicKey(config.baseMint),
+    baseMint,
     quoteMint,
     ammProgram.programId,
   );
 
-  let baseMint: PublicKey;
   let poolExisted = false;
-  if (config.baseMint) {
-    try {
-      await AmmImpl.create(connection, poolKey);
-      // pool existed, can use configured base mint
-      baseMint = new PublicKey(config.baseMint);
-      poolExisted = true;
-    } catch (err) {
-      // pool not existed, require create base token mint
-      if (!config.createBaseToken) {
-        throw new Error(
-          "Missing createBaseToken in configuration. New token mint is required when creating M3M3 farm.",
-        );
-      }
-
-      // 1. Mint token
-      baseMint = await createTokenMint(connection, wallet, {
-        dryRun: config.dryRun,
-        mintTokenAmount: config.createBaseToken.mintBaseTokenAmount,
-        decimals: config.createBaseToken.baseDecimals,
-        computeUnitPriceMicroLamports: config.computeUnitPriceMicroLamports,
-      });
-    }
+  try {
+    await connection.getAccountInfo(poolKey, {
+      commitment: 'confirmed'
+    });
+    poolExisted = true
+  } catch (err) {
+    throw new Error(`Pool ${poolKey} didn't exist. Please create it first.`);
   }
 
   console.log(`- Using base token mint ${baseMint.toString()}`);
   console.log(`- Using quote token mint ${quoteMint.toString()}`);
   console.log(`- Pool key ${poolKey}`);
-
-  // If pool is not existed
-  if (!poolExisted) {
-    if (!config.dynamicAmm) {
-      throw new Error("Missing dynamicAmm configuration");
-    }
-
-    // 2. Create pool
-    await createPermissionlessDynamicPool(
-      config,
-      connection,
-      wallet,
-      baseMint,
-      quoteMint,
-    );
-  } else {
-    console.log(">>> Pool is already existed. Skip creating new pool.");
-  }
 
   if (!config.m3m3) {
     throw new Error("Missing M3M3 configuration");

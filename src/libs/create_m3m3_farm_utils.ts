@@ -31,7 +31,9 @@ export async function create_m3m3_farm(
 
   // 1. Create m3m3 farm
   try {
-    const m3m3_farm = await StakeForFee.create(connection, poolKey);
+    await connection.getAccountInfo(m3m3_vault_pubkey, {
+      commitment: 'confirmed',
+    });
 
     console.log(`>>> M3M3 farm is already existed. Skip creating new farm.`);
   } catch (err) {
