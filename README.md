@@ -7,7 +7,7 @@ We need [bun](https://bun.sh/) to run the scripts, install it via [bun installat
 Then install the dependencies by running the command `bun install` 
 
 ## Configuration
-There are a various of config file that can be found at `config` directory that we need to carefully take a look first. It contains all the configurations required to run the scripts.
+There are various config file that can be found at `config` directory that we need to carefully take a look first. It contains all the configurations required to run the scripts.
 Also we need to provide the keypair for the payer wallet in `keypair.json` file. 
 
 ### General configuration
@@ -35,7 +35,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `quoteAmount`: Quote token amount.
 - `tradeFeeNumerator`: Trade fee numerator, with fee denominator is set to 100_000.
 - `activationType`: To activate pool trading base on `slot` or `timestamp`.
-- `activationPoint`: To activate pool trading at a point, either slot valut or timestamp value base on `activationType`.
+- `activationPoint`: To activate pool trading at a point, either slot value or timestamp value base on `activationType`.
 - `hasAlphaVault`: Whether alpha vault is enabled or not for this pool.
 
 ### DLMM configuration
@@ -43,7 +43,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `feeBps`: Fee bps for DLMM pool.
 - `initialPrice`: Initial pool price.
 - `activationType`: To activate pool trading base on `slot` or `timestamp`.
-- `activationPoint`: To activate pool trading at a point, either slot valut or timestamp value base on `activationType`.
+- `activationPoint`: To activate pool trading at a point, either slot value or timestamp value base on `activationType`.
 - `priceRounding`: Should be `up` or `down`.
 - `hasAlphaVault`: Whether alpha vault is enabled or not for this pool.
 
@@ -52,24 +52,24 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 ### Alpha Vault configuration
 - `poolType`: `dynamic` or `dlmm` pool type.
 - `alphaVaultType`: Alpha Vault type, could be `fcfs` or `prorata`
-- `depositingPoint`: Absolute value that, the slot or timestamp that allows deposit depend on the pool activation type.
-- `startVestingPoint`: Absolute value, the slot or timestamp that start vesting depend on the pool activation type. 
-- `endVestingPoint`: Absolute value, the slot or timestamp that end vesting depend on the pool activation type.  
+- `depositingPoint`: Absolute value that, the slot or timestamp that allows deposit depending on the pool activation type.
+- `startVestingPoint`: Absolute value, the slot or timestamp that start vesting depending on the pool activation type. 
+- `endVestingPoint`: Absolute value, the slot or timestamp that end vesting depending on the pool activation type.  
 - `maxDepositCap`: Maximum deposit cap.
 - `individualDepositingCap`: Individual deposit cap.
-- `escrowFee`: Fee to create stake escrow account.
+- `escrowFee`: Fee to create staking escrow account.
 - `whitelistMode`: `permissionless` or `permission_with_merkle_proof` or `permission_with_authority`.
 
 ### Prorata configuration
-- `depositingPoint`: Absolute value that, the slot or timestamp that allows deposit depend on the pool activation type.
-- `startVestingPoint`: Absolute value, the slot or timestamp that start vesting depend on the pool activation type. 
-- `endVestingPoint`: Absolute value, the slot or timestamp that end vesting depend on the pool activation type.  
+- `depositingPoint`: Absolute value that, the slot or timestamp that allows deposit depending on the pool activation type.
+- `startVestingPoint`: Absolute value, the slot or timestamp that start vesting depending on the pool activation type. 
+- `endVestingPoint`: Absolute value, the slot or timestamp that end vesting depending on the pool activation type.  
 - `maxBuyingCap`: Maximum buying cap.
-- `escrowFee`: Fee to create stake escrow account.
+- `escrowFee`: Fee to create staking escrow account.
 - `whitelistMode`: `permissionless` or `permission_with_merkle_proof` or `permission_with_authority`.
 
 ## Testings
-First, run the localnet
+First, start the localnet
 ```bash
 bun run start-test-validator
 ```
@@ -77,24 +77,24 @@ bun run start-test-validator
 Then run the test: `bun test`
 
 ## Run the scripts
-Run the script with config file specified in the CLI, some examples:
+Run the script with the specified config file in the CLI, some examples:
 
-** Create dynamic AMM pool**
+** Create a dynamic AMM pool**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool.json
 ```
 
-** Create dynamic AMM pool with new token mint**
+** Create a dynamic AMM pool with new token mint**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool_with_new_token.json
 ```
 
-** Create new DLMM pool**
+** Create a new DLMM pool**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dlmm_pool.json
 ```
 
-** Create new DLMM pool with alpha vault**
+** Create a new DLMM pool with alpha vault**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dlmm_pool_with_fcfs_alpha_vault.json
 ```
