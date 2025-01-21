@@ -235,7 +235,7 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
           type: "number",
         },
         secondsToFullUnlock: {
-          type: "string",
+          type: "number",
         },
         startFeeDistributeTimestamp: {
           type: "number"
