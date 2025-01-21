@@ -68,6 +68,12 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `escrowFee`: Fee to create stake escrow account.
 - `whitelistMode`: `permissionless` or `permission_with_merkle_proof` or `permission_with_authority`.
 
+### Create M3M3 configuration
+- `topListLength`: Length of the top list.
+- `unstakeLockDurationSecs`: Duration need wait before withdraw. Starting from the unstack action timestamp.
+- `secondsToFullUnlock`:  Time required for locked claim fee to be fully dripped.
+- `startFeeDistributeTimestamp`: When the fee start distributes. 
+
 ## Testings
 First, run the localnet
 ```bash
@@ -116,6 +122,12 @@ bun run src/seed_liquidity_single_bin.ts --config ./config/seed_liquidity_single
 ** Seed liquidity for DLMM pool with LFG strategy**
 ```bash
 bun run src/seed_liquidity_lfg.ts --config ./config/seed_liquidity_lfg.json
+```
+
+** Create M3M3 farm**
+This script requires you to create the token mint and the pool first.
+```bash
+bun run src/create_m3m3_farm.ts --config ./config/create_m3m3_farm.json
 ```
 
 ## After deployment
