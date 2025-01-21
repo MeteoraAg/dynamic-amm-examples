@@ -1,4 +1,5 @@
 import AlphaVault, {
+  ALPHA_VAULT_TREASURY_ID,
   CustomizableFcfsVaultParams,
   CustomizableProrataVaultParams,
   IDL,
@@ -8,6 +9,7 @@ import AlphaVault, {
   WalletDepositCap,
 } from "@meteora-ag/alpha-vault";
 import {
+  Cluster,
   ComputeBudgetProgram,
   Connection,
   Keypair,
@@ -22,6 +24,7 @@ import {
   getAlphaVaultWhitelistMode,
   getAmountInLamports,
   handleSendTxs,
+  modifyComputeUnitPriceIx,
   runSimulateTransaction,
 } from "./utils";
 import {
@@ -79,6 +82,15 @@ export async function createFcfsAlphaVault(
     `- Using whitelistMode ${params.whitelistMode}. In value ${whitelistMode}`,
   );
 
+  let alphaVaultProgramId = opts?.alphaVaultProgramId ?? new PublicKey(ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"]);
+
+  let cluster = "mainnet-beta";
+  if (alphaVaultProgramId.toString() === ALPHA_VAULT_PROGRAM_IDS["localhost"]) {
+    cluster = "localhost";
+  } else if (alphaVaultProgramId.toString() == ALPHA_VAULT_TREASURY_ID["devnet"]) {
+    cluster = "devnet";
+  }
+
   const initAlphaVaultTx = (await AlphaVault.createCustomizableFcfsVault(
     connection,
     {
@@ -96,9 +108,11 @@ export async function createFcfsAlphaVault(
     },
     wallet.publicKey,
     {
-
-    },
+      cluster
+    }
   )) as Transaction;
+
+  modifyComputeUnitPriceIx(initAlphaVaultTx, computeUnitPriceMicroLamports);
 
   if (dryRun) {
     console.log(`\n> Simulating init alpha vault tx...`);
@@ -158,7 +172,16 @@ export async function createProrataAlphaVault(
     `- Using whitelistMode ${params.whitelistMode}. In value ${whitelistMode}`,
   );
 
-  const initAlphaVaultTx = (await createCustomizableProrataVault(
+  let alphaVaultProgramId = opts?.alphaVaultProgramId ?? new PublicKey(ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"]);
+
+  let cluster = "mainnet-beta";
+  if (alphaVaultProgramId.toString() === ALPHA_VAULT_PROGRAM_IDS["localhost"]) {
+    cluster = "localhost";
+  } else if (alphaVaultProgramId.toString() == ALPHA_VAULT_TREASURY_ID["devnet"]) {
+    cluster = "devnet";
+  }
+
+  const initAlphaVaultTx = (await AlphaVault.createCustomizableProrataVault(
     connection,
     {
       quoteMint,
@@ -173,9 +196,12 @@ export async function createProrataAlphaVault(
       whitelistMode,
     },
     wallet.publicKey,
-    computeUnitPriceMicroLamports,
-    opts,
+    {
+      cluster
+    }
   )) as Transaction;
+
+  modifyComputeUnitPriceIx(initAlphaVaultTx, computeUnitPriceMicroLamports);
 
   if (dryRun) {
     console.log(`\n> Simulating init alpha vault tx...`);
@@ -287,155 +313,6 @@ export async function createPermissionedAlphaVaultWithAuthority(
     "create stake escrow accounts",
   );
 }
-
-// async function createCustomizableFcfsVault(
-//   connection: Connection,
-//   vaultParam: CustomizableFcfsVaultParams,
-//   owner: PublicKey,
-//   computeUnitPriceMicroLamports: number,
-//   opts?: {
-//     alphaVaultProgramId: PublicKey;
-//   },
-// ) {
-//   const alphaVaultProgramId =
-//     opts?.alphaVaultProgramId ||
-//     new PublicKey(ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"]);
-//   const {
-//     poolAddress,
-//     poolType,
-//     baseMint,
-//     quoteMint,
-//     depositingPoint,
-//     startVestingPoint,
-//     endVestingPoint,
-//     maxDepositingCap,
-//     individualDepositingCap,
-//     escrowFee,
-//     whitelistMode,
-//   } = vaultParam;
-
-//   const [alphaVaultPubkey] = deriveAlphaVault(
-//     owner,
-//     poolAddress,
-//     alphaVaultProgramId,
-//   );
-
-//   const provider = new AnchorProvider(
-//     connection,
-//     {} as any,
-//     AnchorProvider.defaultOptions(),
-//   );
-//   const program = new Program(IDL, alphaVaultProgramId, provider);
-
-//   const createTx = await program.methods
-//     .initializeFcfsVault({
-//       poolType,
-//       baseMint,
-//       quoteMint,
-//       depositingPoint,
-//       startVestingPoint,
-//       endVestingPoint,
-//       maxDepositingCap,
-//       individualDepositingCap,
-//       escrowFee,
-//       whitelistMode,
-//     })
-//     .accounts({
-//       base: owner,
-//       vault: alphaVaultPubkey,
-//       pool: poolAddress,
-//       funder: owner,
-//       program: alphaVaultProgramId,
-//       systemProgram: SystemProgram.programId,
-//     })
-//     .transaction();
-
-//   const setPriorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
-//     microLamports: computeUnitPriceMicroLamports,
-//   });
-//   createTx.add(setPriorityFeeIx);
-
-//   const { blockhash, lastValidBlockHeight } =
-//     await connection.getLatestBlockhash("confirmed");
-//   return new Transaction({
-//     blockhash,
-//     lastValidBlockHeight,
-//     feePayer: owner,
-//   }).add(createTx);
-// }
-
-// async function createCustomizableProrataVault(
-//   connection: Connection,
-//   vaultParam: CustomizableProrataVaultParams,
-//   owner: PublicKey,
-//   computeUnitPriceMicroLamports: number,
-//   opts?: {
-//     alphaVaultProgramId: PublicKey;
-//   },
-// ) {
-//   const alphaVaultProgramId =
-//     opts?.alphaVaultProgramId ||
-//     new PublicKey(ALPHA_VAULT_PROGRAM_IDS["mainnet-beta"]);
-//   const {
-//     poolAddress,
-//     poolType,
-//     baseMint,
-//     quoteMint,
-//     depositingPoint,
-//     startVestingPoint,
-//     endVestingPoint,
-//     maxBuyingCap,
-//     escrowFee,
-//     whitelistMode,
-//   } = vaultParam;
-
-//   const [alphaVaultPubkey] = deriveAlphaVault(
-//     owner,
-//     poolAddress,
-//     alphaVaultProgramId,
-//   );
-
-//   const provider = new AnchorProvider(
-//     connection,
-//     {} as any,
-//     AnchorProvider.defaultOptions(),
-//   );
-//   const program = new Program(IDL, alphaVaultProgramId, provider);
-
-//   const createTx = await program.methods
-//     .initializeProrataVault({
-//       poolType,
-//       baseMint,
-//       quoteMint,
-//       depositingPoint,
-//       startVestingPoint,
-//       endVestingPoint,
-//       maxBuyingCap,
-//       escrowFee,
-//       whitelistMode,
-//     })
-//     .accounts({
-//       base: owner,
-//       vault: alphaVaultPubkey,
-//       pool: poolAddress,
-//       funder: owner,
-//       program: alphaVaultProgramId,
-//       systemProgram: SystemProgram.programId,
-//     })
-//     .transaction();
-//   const setPriorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
-//     microLamports: computeUnitPriceMicroLamports,
-//   });
-//   createTx.add(setPriorityFeeIx);
-
-//   const { blockhash, lastValidBlockHeight } =
-//     await connection.getLatestBlockhash("confirmed");
-//   return new Transaction({
-//     blockhash,
-//     lastValidBlockHeight,
-//     feePayer: owner,
-//   }).add(createTx);
-// }
 
 // Derive alpha vault public key
 export function deriveAlphaVault(
