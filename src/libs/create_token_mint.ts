@@ -73,6 +73,7 @@ async function createAndMintToken(
     mintDecimals,
     computeUnitPriceMicroLamports,
   );
+  console.log(`Created token mint ${mint}`);
 
   const walletTokenATA = await getOrCreateAssociatedTokenAccount(
     connection,
@@ -94,6 +95,7 @@ async function createAndMintToken(
       commitment: DEFAULT_COMMITMENT_LEVEL,
     },
   );
+  console.log(`Minted ${mint} to wallet`);
 
   return mint;
 }

@@ -51,13 +51,11 @@ async function main() {
     ammProgram.programId,
   );
 
-  let poolExisted = false;
-  try {
-    await connection.getAccountInfo(poolKey, {
-      commitment: 'confirmed'
-    });
-    poolExisted = true
-  } catch (err) {
+  const poolAccount = await connection.getAccountInfo(poolKey, {
+    commitment: 'confirmed'
+  });
+
+  if (!poolAccount) {
     throw new Error(`Pool ${poolKey} didn't exist. Please create it first.`);
   }
 
@@ -77,6 +75,7 @@ async function main() {
     baseMint,
     config.m3m3,
     config.dryRun,
+    config.computeUnitPriceMicroLamports
   );
 
   const pool = await AmmImpl.create(connection, poolKey);
@@ -88,5 +87,8 @@ async function main() {
     wallet.payer,
     10_000,
     config.dryRun,
+    config.computeUnitPriceMicroLamports
   );
 }
+
+main();

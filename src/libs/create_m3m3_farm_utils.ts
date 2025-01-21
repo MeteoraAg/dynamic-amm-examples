@@ -8,9 +8,9 @@ import { M3m3Config, MeteoraConfig } from "./config";
 import { M3M3_PROGRAM_IDS } from "./constants";
 import StakeForFee, { deriveFeeVault } from "@meteora-ag/m3m3";
 import { BN } from "@coral-xyz/anchor";
-import { runSimulateTransaction } from "./utils";
+import { modifyComputeUnitPriceIx, runSimulateTransaction } from "./utils";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-import AmmImpl from "@mercurial-finance/dynamic-amm-sdk";
+import AmmImpl, { VaultIdl } from "@mercurial-finance/dynamic-amm-sdk";
 import Decimal from "decimal.js";
 
 export async function create_m3m3_farm(
@@ -20,64 +20,70 @@ export async function create_m3m3_farm(
   stakeMint: PublicKey,
   config: M3m3Config,
   dryRun: boolean,
+  computeUnitPriceMicroLamports: number,
   opts?: {
-    m3m3_program_id: PublicKey;
+    m3m3ProgramId: PublicKey;
   },
 ): Promise<void> {
-  const m3m3_program_id =
-    opts?.m3m3_program_id ?? new PublicKey(M3M3_PROGRAM_IDS["mainnet-beta"]);
-  const m3m3_vault_pubkey = deriveFeeVault(poolKey, m3m3_program_id);
-  console.log(`- M3M3 fee vault ${m3m3_vault_pubkey}`);
+  const m3m3ProgramId =
+    opts?.m3m3ProgramId ?? new PublicKey(M3M3_PROGRAM_IDS["mainnet-beta"]);
+  const m3m3VaultPubkey = deriveFeeVault(poolKey, m3m3ProgramId);
+  console.log(`- M3M3 fee vault ${m3m3VaultPubkey}`);
 
   // 1. Create m3m3 farm
-  try {
-    await connection.getAccountInfo(m3m3_vault_pubkey, {
-      commitment: 'confirmed',
-    });
+  const m3m3VaultAccount = await connection.getAccountInfo(m3m3VaultPubkey, {
+    commitment: 'confirmed',
+  });
 
+  if (m3m3VaultAccount) {
     console.log(`>>> M3M3 farm is already existed. Skip creating new farm.`);
-  } catch (err) {
-    console.log(`>> Creating M3M3 fee farm...`);
-    const topListLength = config.topListLength;
-    const unstakeLockDuration = new BN(config.unstakeLockDurationSecs);
-    const secondsToFullUnlock = new BN(config.secondsToFullUnlock);
-    const startFeeDistributeTimestamp = new BN(
-      config.startFeeDistributeTimestamp,
+    return;
+  }
+
+  console.log(`>> Creating M3M3 fee farm...`);
+  const topListLength = config.topListLength;
+  const unstakeLockDuration = new BN(config.unstakeLockDurationSecs);
+  const secondsToFullUnlock = new BN(config.secondsToFullUnlock);
+  const startFeeDistributeTimestamp = new BN(
+    config.startFeeDistributeTimestamp,
+  );
+
+  console.log(`- Using topListLength: ${topListLength}`);
+  console.log(`- Using unstakeLockDuration ${unstakeLockDuration}`);
+  console.log(`- Using secondsToFullUnlock ${secondsToFullUnlock}`);
+  console.log(`- Using startFeeDistributeTimestamp ${startFeeDistributeTimestamp}`);
+
+  // m3m3 farm didn't exist
+  const createTx = await StakeForFee.createFeeVault(
+    connection,
+    poolKey,
+    stakeMint,
+    payer.publicKey,
+    {
+      topListLength,
+      unstakeLockDuration,
+      secondsToFullUnlock,
+      startFeeDistributeTimestamp,
+    },
+  );
+  modifyComputeUnitPriceIx(createTx, computeUnitPriceMicroLamports);
+
+  if (dryRun) {
+    console.log(`> Simulating create m3m3 farm tx...`);
+    await runSimulateTransaction(connection, [payer], payer.publicKey, [
+      createTx,
+    ]);
+  } else {
+    console.log(`>> Sending create m3m3 farm transaction...`);
+    const txHash = await sendAndConfirmTransaction(connection, createTx, [
+      payer,
+    ]).catch((err) => {
+      console.error(err);
+      throw err;
+    });
+    console.log(
+      `>>> M3M3 farm initialized successfully with tx hash: ${txHash}`,
     );
-
-    console.log(`- Using top list length`);
-
-    // m3m3 farm didn't exist
-    const createTx = await StakeForFee.createFeeVault(
-      connection,
-      poolKey,
-      stakeMint,
-      payer.publicKey,
-      {
-        topListLength,
-        unstakeLockDuration,
-        secondsToFullUnlock,
-        startFeeDistributeTimestamp,
-      },
-    );
-
-    if (dryRun) {
-      console.log(`> Simulating create m3m3 farm tx...`);
-      await runSimulateTransaction(connection, [payer], payer.publicKey, [
-        createTx,
-      ]);
-    } else {
-      console.log(`>> Sending create m3m3 farm transaction...`);
-      const txHash = await sendAndConfirmTransaction(connection, createTx, [
-        payer,
-      ]).catch((err) => {
-        console.error(err);
-        throw err;
-      });
-      console.log(
-        `>>> M3M3 farm initialized successfully with tx hash: ${txHash}`,
-      );
-    }
   }
 }
 
@@ -88,13 +94,14 @@ export async function lockLiquidityToFeeVault(
   payer: Keypair,
   lockBps: number,
   dryRun: boolean,
+  computeUnitPriceMicroLamports: number,
   opts?: {
-    m3m3_program_id: PublicKey;
+    m3m3ProgramId: PublicKey;
   },
 ) {
-  const m3m3_program_id =
-    opts?.m3m3_program_id ?? new PublicKey(M3M3_PROGRAM_IDS["mainnet-beta"]);
-  const feeVaultKey = deriveFeeVault(poolKey, m3m3_program_id);
+  const m3m3ProgramId =
+    opts?.m3m3ProgramId ?? new PublicKey(M3M3_PROGRAM_IDS["mainnet-beta"]);
+  const feeVaultKey = deriveFeeVault(poolKey, m3m3ProgramId);
 
   const poolLpAta = getAssociatedTokenAddressSync(
     pool.poolState.lpMint,
@@ -118,6 +125,8 @@ export async function lockLiquidityToFeeVault(
       },
     },
   );
+
+  modifyComputeUnitPriceIx(lockTx, computeUnitPriceMicroLamports);
 
   if (dryRun) {
     console.log(`> Simulating lock liquidity to fee farm tx...`);
