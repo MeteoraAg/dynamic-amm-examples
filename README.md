@@ -125,7 +125,7 @@ bun run src/seed_liquidity_lfg.ts --config ./config/seed_liquidity_lfg.json
 ```
 
 ** Create M3M3 farm**
-This script requires you to create the token mint and the pool first.
+This script requires you to create the token mint and the pool first. The script already had the logic to lock 100% the liquidity.
 ```bash
 bun run src/create_m3m3_farm.ts --config ./config/create_m3m3_farm.json
 ```
