@@ -77,18 +77,6 @@ async function main() {
     config.dryRun,
     config.computeUnitPriceMicroLamports
   );
-
-  const pool = await AmmImpl.create(connection, poolKey);
-  // 4. Lock LP to m3m3 vault
-  await lockLiquidityToFeeVault(
-    connection,
-    poolKey,
-    pool,
-    wallet.payer,
-    10_000,
-    config.dryRun,
-    config.computeUnitPriceMicroLamports
-  );
 }
 
 main();

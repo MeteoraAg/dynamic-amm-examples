@@ -18,5 +18,13 @@
     "unstakeLockDurationSecs": 25200,
     "secondsToFullUnlock": 86400,
     "startFeeDistributeTimestamp": 1737590400
+  },
+  "lockLiquidity": {
+    "allocations": [
+      {
+        "percentage": 100,
+        "address": "D2Yt1jtjjk6cPiwYKs6krtbjfjjYiQmYWbFtTrgL2WR2"
+      }
+    ]
   }
 }
