@@ -12,6 +12,7 @@ import {
   parseConfigFromCli,
   LockLiquidityAllocation,
   modifyComputeUnitPriceIx,
+  M3M3_PROGRAM_IDS,
 } from ".";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { BN } from "bn.js";
@@ -22,6 +23,7 @@ import {
   createProgram,
   getAssociatedTokenAccount,
 } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import { deriveFeeVault } from "@meteora-ag/m3m3";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -55,8 +57,12 @@ async function main() {
     quoteMint,
     createProgram(connection).ammProgram.programId,
   );
+  console.log(`- Pool address: ${poolKey}`);
 
-  console.log(`\n> Pool address: ${poolKey}`);
+  const m3m3ProgramId =
+    new PublicKey(M3M3_PROGRAM_IDS["mainnet-beta"]);
+  const m3m3VaultPubkey = deriveFeeVault(poolKey, m3m3ProgramId);
+  console.log(`- M3M3 fee vault ${m3m3VaultPubkey}`);
 
   if (!config.lockLiquidity) {
     throw new Error("Missing lockLiquidity configuration");
@@ -73,12 +79,19 @@ async function main() {
   const payerPoolLpBalance = (
     await provider.connection.getTokenAccountBalance(payerPoolLp)
   ).value.amount;
-  console.log("> payerPoolLpBalance %s", payerPoolLpBalance.toString());
+  console.log("- payerPoolLpBalance %s", payerPoolLpBalance.toString());
 
   const allocationByAmounts = fromAllocationsToAmount(
     new BN(payerPoolLpBalance),
     config.lockLiquidity.allocations,
   );
+
+  // validate allocations should contains m3m3 fee farm address
+  const allocationContainsFeeFarmAddress = config.lockLiquidity.allocations.some(allocation => new PublicKey(allocation.address) === m3m3VaultPubkey);
+  if (!allocationContainsFeeFarmAddress) {
+    throw new Error("Lock liquidity allocations does not contain M3M3 fee farm address");
+  }
+
   const pool = await AmmImpl.create(connection, poolKey);
 
   for (const allocation of allocationByAmounts) {

@@ -23,3 +23,7 @@ export const ALPHA_VAULT_PROGRAM_IDS = {
 };
 
 export const MAX_INSTRUCTIONS_PER_STAKE_ESCROW_ACCOUNTS_CREATED = 8;
+
+export const M3M3_PROGRAM_IDS = {
+  "mainnet-beta": "FEESngU3neckdwib9X3KWqdL7Mjmqk9XNp3uh5JbP4KP",
+};

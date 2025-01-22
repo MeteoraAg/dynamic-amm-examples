@@ -2,7 +2,6 @@ import {
   extraConfigValidation,
   parseCliArguments,
   safeParseJsonFromFile,
-  validate_config,
 } from "./utils";
 import Ajv, { JSONSchemaType } from "ajv";
 
@@ -225,6 +224,25 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         "seedTokenXToPositionOwner",
       ],
     },
+    m3m3: {
+      type: "object",
+      nullable: true,
+      properties: {
+        topListLength: {
+          type: "number",
+        },
+        unstakeLockDurationSecs: {
+          type: "number",
+        },
+        secondsToFullUnlock: {
+          type: "number",
+        },
+        startFeeDistributeTimestamp: {
+          type: "number"
+        }
+      },
+      required: ["topListLength", "unstakeLockDurationSecs", "secondsToFullUnlock", "startFeeDistributeTimestamp"],
+    }
   },
   required: [
     "rpcUrl",
@@ -250,6 +268,7 @@ export interface MeteoraConfig {
   lockLiquidity: LockLiquidityConfig | null;
   lfgSeedLiquidity: LfgSeedLiquidityConfig | null;
   singleBinSeedLiquidity: SingleBinSeedLiquidityConfig | null;
+  m3m3: M3m3Config | null;
 }
 
 export interface CreateBaseMintConfig {
@@ -344,6 +363,13 @@ export interface SingleBinSeedLiquidityConfig {
   feeOwner: string;
   lockReleasePoint: number;
   seedTokenXToPositionOwner: boolean;
+}
+
+export interface M3m3Config {
+  topListLength: number;
+  unstakeLockDurationSecs: number;
+  secondsToFullUnlock: number;
+  startFeeDistributeTimestamp: number;
 }
 
 export enum ActivationTypeConfig {
