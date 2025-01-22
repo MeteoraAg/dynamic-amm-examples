@@ -72,7 +72,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `topListLength`: Length of the top list.
 - `unstakeLockDurationSecs`: Duration need wait before withdraw. Starting from the unstack action timestamp.
 - `secondsToFullUnlock`:  Time required for locked claim fee to be fully dripped.
-- `startFeeDistributeTimestamp`: When the fee start distributes. 
+- `startFeeDistributeTimestamp`: When the fee start distributes. The timestamp should be 48h after pool activate to accumulate more rewards to attract stakers as in [M3M3 reminder](https://docs.meteora.ag/for-memecoins/m3m3#important-reminder)
 
 ## Testings
 First, run the localnet
