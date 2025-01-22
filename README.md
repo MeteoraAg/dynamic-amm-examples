@@ -126,13 +126,14 @@ bun run src/seed_liquidity_lfg.ts --config ./config/seed_liquidity_lfg.json
 
 ** Create M3M3 farm**
 This script requires you to create the token mint and the pool first.
-```bash
-bun run src/create_m3m3_farm.ts --config ./config/create_m3m3_farm.json
-```
-
-After running the script to create M3M3 farm, get the fee farm address and paste it into the config file to lock the liquidity. The address in the allocation is the fee farm address.
+After that you need to lock the liquidity before creating the M3M3 farm. The addresses in the allocations should contains the fee farm address.
 ```bash
 bun run src/lock_liquidity.ts --config ./config/create_m3m3_farm.json
+```
+
+Create the M3M3 fee farm
+```bash
+bun run src/create_m3m3_farm.ts --config ./config/create_m3m3_farm.json
 ```
 
 ## After deployment
