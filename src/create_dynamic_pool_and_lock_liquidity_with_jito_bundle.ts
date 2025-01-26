@@ -22,7 +22,6 @@ async function main() {
   const connection = new Connection(config.rpcUrl, DEFAULT_COMMITMENT_LEVEL);
   const wallet = new Wallet(keypair);
 
-
   if (!config.baseMint) {
     throw new Error("Missing baseMint in configuration");
   }
