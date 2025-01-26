@@ -2,6 +2,8 @@ import {
   Connection,
   Keypair,
   PublicKey,
+  Transaction,
+  TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
 
@@ -17,6 +19,25 @@ const getRandomeTipAccountAddress = async (
     return new PublicKey(account.value[Math.floor(Math.random() * account.value.length)]);
   }
   throw new Error("Failed to get tip accounts");
+};
+
+export const convertToVersionedTransaction = (tx: Transaction, signers: Keypair[]) => {
+  // Convert the Transaction to a Message
+  const message = tx.compileMessage(); // Non-versioned message
+
+  // Convert the Message to MessageV0
+  const messageV0 = new TransactionMessage({
+      payerKey: tx.feePayer,
+      recentBlockhash: message.recentBlockhash,
+      instructions: tx.instructions,
+  }).compileToV0Message();
+
+  // Create the VersionedTransaction
+  const versionedTransaction = new VersionedTransaction(messageV0);
+
+  // Sign the VersionedTransaction
+  versionedTransaction.sign(signers);
+  return versionedTransaction;
 };
 
 export const bundleAndSendTransactions = async (
