@@ -285,6 +285,7 @@ export interface MeteoraConfig {
   lfgSeedLiquidity: LfgSeedLiquidityConfig | null;
   singleBinSeedLiquidity: SingleBinSeedLiquidityConfig | null;
   m3m3: M3m3Config | null;
+  tipAmount: number | null;
 }
 
 export interface CreateBaseMintConfig {

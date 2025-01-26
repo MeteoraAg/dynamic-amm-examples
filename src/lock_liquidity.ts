@@ -22,6 +22,7 @@ import {
   createProgram,
   getAssociatedTokenAccount,
 } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import { fromAllocationsToAmount } from "./libs/lock_liquidity_utils";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -45,7 +46,6 @@ async function main() {
   }
   const baseMint = new PublicKey(config.baseMint);
   let quoteMint = getQuoteMint(config.quoteSymbol);
-  const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
 
   console.log(`- Using base token mint ${baseMint.toString()}`);
   console.log(`- Using quote token mint ${quoteMint.toString()}`);
@@ -107,48 +107,6 @@ async function main() {
       );
     }
   }
-}
-
-type AllocationByAmount = {
-  address: PublicKey;
-  amount: BN;
-  percentage: number;
-};
-
-function fromAllocationsToAmount(
-  lpAmount: BN,
-  allocations: LockLiquidityAllocation[],
-): AllocationByAmount[] {
-  const sumPercentage = allocations.reduce(
-    (partialSum, a) => partialSum + a.percentage,
-    0,
-  );
-  if (sumPercentage === 0) {
-    throw Error("sumPercentage is zero");
-  } else if (sumPercentage > 100) {
-    throw Error("sumPercentage is greater than 100");
-  }
-
-  let amounts: AllocationByAmount[] = [];
-  let sum = new BN(0);
-  for (let i = 0; i < allocations.length - 1; i++) {
-    const amount = lpAmount
-      .mul(new BN(allocations[i].percentage))
-      .div(new BN(sumPercentage));
-    sum = sum.add(amount);
-    amounts.push({
-      address: new PublicKey(allocations[i].address),
-      amount,
-      percentage: allocations[i].percentage,
-    });
-  }
-  // the last wallet get remaining amount
-  amounts.push({
-    address: new PublicKey(allocations[allocations.length - 1].address),
-    amount: lpAmount.sub(sum),
-    percentage: allocations[allocations.length - 1].percentage,
-  });
-  return amounts;
 }
 
 main();

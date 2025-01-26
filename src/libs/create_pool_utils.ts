@@ -2,6 +2,7 @@ import {
   Cluster,
   Connection,
   PublicKey,
+  Transaction,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import {
@@ -29,6 +30,7 @@ import {
   createProgram,
 } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
 import { getMint } from "@solana/spl-token";
+import { VersionedTransaction } from "@solana/web3.js";
 
 export async function createPermissionlessDynamicPool(
   config: MeteoraConfig,
@@ -128,6 +130,77 @@ export async function createPermissionlessDynamicPool(
       `>>> Pool initialized successfully with tx hash: ${initPoolTxHash}`,
     );
   }
+}
+
+export async function createPermissionlessDynamicPoolTx(
+  config: MeteoraConfig,
+  connection: Connection,
+  wallet: Wallet,
+  baseMint: PublicKey,
+  quoteMint: PublicKey,
+  opts?: {
+    cluster?: Cluster;
+    programId?: PublicKey;
+  },
+): Promise<Transaction> {
+  console.log("\n> Create Permissionless Dynamic AMM pool transaction...");
+
+  const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
+  const baseMintAccount = await getMint(connection, baseMint);
+  const baseDecimals = baseMintAccount.decimals;
+
+  const baseAmount = getAmountInLamports(
+    config.dynamicAmm.baseAmount,
+    baseDecimals,
+  );
+  const quoteAmount = getAmountInLamports(
+    config.dynamicAmm.quoteAmount,
+    quoteDecimals,
+  );
+
+  console.log(
+    `- Using token A amount ${config.dynamicAmm.baseAmount}, in lamports = ${baseAmount}`,
+  );
+  console.log(
+    `- Using token B amount ${config.dynamicAmm.quoteAmount}, in lamports = ${quoteAmount}`,
+  );
+
+  const activationType = getDynamicAmmActivationType(
+    config.dynamicAmm.activationType,
+  );
+
+  const customizeParam: CustomizableParams = {
+    tradeFeeNumerator: config.dynamicAmm.tradeFeeNumerator,
+    activationType: activationType,
+    activationPoint: config.dynamicAmm.activationPoint
+      ? new BN(config.dynamicAmm.activationPoint)
+      : null,
+    hasAlphaVault: config.dynamicAmm.hasAlphaVault,
+    padding: Array(90).fill(0),
+  };
+  console.log(
+    `- Using tradeFeeNumerator = ${customizeParam.tradeFeeNumerator}`,
+  );
+  console.log(`- Using activationType = ${config.dynamicAmm.activationType}`);
+  console.log(`- Using activationPoint = ${customizeParam.activationPoint}`);
+  console.log(`- Using hasAlphaVault = ${customizeParam.hasAlphaVault}`);
+
+  const initPoolTx =
+    await AmmImpl.createCustomizablePermissionlessConstantProductPool(
+      connection,
+      wallet.publicKey,
+      baseMint,
+      quoteMint,
+      baseAmount,
+      quoteAmount,
+      customizeParam,
+      {
+        cluster: opts?.cluster,
+        programId: opts?.programId.toString(),
+      },
+    );
+
+  return initPoolTx;
 }
 
 export async function createPermissionlessDlmmPool(
