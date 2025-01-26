@@ -11,7 +11,7 @@ import { searcher, bundle } from "jito-ts";
 import { DEFAULT_COMMITMENT_LEVEL } from "./constants";
 import { BundleResult } from "jito-ts/dist/gen/block-engine/bundle";
 
-const getRandomeTipAccountAddress = async (
+const getRandomTipAccountAddress = async (
   searcherClient: searcher.SearcherClient,
 ) => {
   const account = await searcherClient.getTipAccounts();
@@ -60,7 +60,7 @@ export const bundleAndSendTransactions = async (
   }
 
   // Get a random tip account address
-  const tipAccount = await getRandomeTipAccountAddress(searcherClient);
+  const tipAccount = await getRandomTipAccountAddress(searcherClient);
   console.log("tip account:", tipAccount);
 
   const jitoBundle = new bundle.Bundle(transactions, transactions.length + 1);
@@ -88,7 +88,7 @@ export const sendBundle = async (
     const connection = new Connection(rpcUrl, DEFAULT_COMMITMENT_LEVEL);
     const blockHash = await connection.getLatestBlockhash();
     // Get a random tip account address
-    const tipAccount = await getRandomeTipAccountAddress(searcherClient);
+    const tipAccount = await getRandomTipAccountAddress(searcherClient);
     console.log("tip account:", tipAccount);
     bundle.addTipTx(keypair, tipAmount, tipAccount, blockHash.blockhash);
     if (onResult) {
