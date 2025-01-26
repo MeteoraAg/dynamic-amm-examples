@@ -85,6 +85,11 @@ Then run the test: `bun test`
 ## Run the scripts
 Run the script with config file specified in the CLI, some examples:
 
+** Create new token with metadata**
+```bash
+bun run src/create_token.ts --config ./config/create_token.json
+```
+
 ** Create dynamic AMM pool**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool.json

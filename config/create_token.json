@@ -1,0 +1,16 @@
+{
+  "rpcUrl": "https://api.mainnet-beta.solana.com",
+  "dryRun": false,
+  "keypairFilePath": "keypair.json",
+  "computeUnitPriceMicroLamports": 100000,
+  "quoteSymbol": "SOL",
+  "createBaseToken": {
+    "mintBaseTokenAmount": 10000000,
+    "baseDecimals": 6,
+    "tokenMetadata": {
+      "name": "Test token",
+      "symbol": "TEST",
+      "uri": "https://static.jup.ag/jup/metadata.json"
+    }
+  }
+}

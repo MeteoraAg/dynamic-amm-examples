@@ -30,6 +30,22 @@ const CONFIG_SCHEMA: JSONSchemaType<MeteoraConfig> = {
         baseDecimals: {
           type: "number",
         },
+        tokenMetadata: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+            },
+            symbol: {
+              type: "string",
+            },
+            uri: {
+              type: "string",
+            },
+          },
+          required: ["name", "symbol", "uri"],
+          additionalProperties: false,
+        }
       },
       required: ["mintBaseTokenAmount", "baseDecimals"],
       additionalProperties: false,
@@ -274,6 +290,13 @@ export interface MeteoraConfig {
 export interface CreateBaseMintConfig {
   mintBaseTokenAmount: number | string;
   baseDecimals: number;
+  tokenMetadata: TokenMetadataConfig | null;
+}
+
+export interface TokenMetadataConfig {
+  name: String;
+  symbol: String;
+  uri: String;
 }
 
 export interface DynamicAmmConfig {
