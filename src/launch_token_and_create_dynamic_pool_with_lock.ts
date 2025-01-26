@@ -1,5 +1,5 @@
 import { Wallet } from "@coral-xyz/anchor";
-import { ComputeBudgetProgram, Connection, PublicKey } from "@solana/web3.js";
+import { ComputeBudgetProgram, Connection, PublicKey, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
 import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, createPermissionlessDlmmPool, createPermissionlessDynamicPool, createTokenMint, getAmountInLamports, getQuoteDecimals, getQuoteMint, parseConfigFromCli, safeParseKeypairFromFile } from ".";
 import { mplTokenMetadata, createV1, TokenStandard, createFungible, mintV1 } from "@metaplex-foundation/mpl-token-metadata";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
@@ -11,7 +11,7 @@ import {
 } from "@metaplex-foundation/umi-web3js-adapters";
 import { base58, generateSigner, keypairIdentity } from "@metaplex-foundation/umi";
 import AmmImpl from "@mercurial-finance/dynamic-amm-sdk";
-import { getMint } from "@solana/spl-token";
+import { AuthorityType, createSetAuthorityInstruction, getMint } from "@solana/spl-token";
 import { bundle } from "jito-ts";
 import { convertToVersionedTransaction, sendBundle } from "./libs/jito_bundle";
 
@@ -80,6 +80,38 @@ async function main() {
 
   console.log(`>>> Created token mint and token metadata successfully with tx hash ${base58.deserialize(signature)[0]}`);
 
+  const baseMint = new PublicKey(mint.publicKey);
+  // Revoke mint and freeze authority
+  const currentAuthority = wallet.publicKey;
+
+  let mintAuthIx = createSetAuthorityInstruction(
+    baseMint,
+    currentAuthority,
+    AuthorityType.MintTokens,
+    null
+  );
+
+  let freezeAuthIx = createSetAuthorityInstruction(
+    baseMint,
+    currentAuthority,
+    AuthorityType.FreezeAccount,
+    null
+  );
+
+  const addPriorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
+    microLamports: config.computeUnitPriceMicroLamports,
+  });
+  const revokeAuthTx = new Transaction().add(mintAuthIx).add(freezeAuthIx).add(addPriorityFeeIx);
+  const revokeAuthTxHash = await sendAndConfirmTransaction(
+    connection,
+    revokeAuthTx,
+    [wallet.payer],
+    {
+      commitment: DEFAULT_COMMITMENT_LEVEL
+    },
+  );
+  console.log(`>>> Revoked mint and freeze authority with txHash ${revokeAuthTxHash}`);
+
   // Create pool
   if (!config.dynamicAmm) {
     throw new Error("Missing dynamicAmm configuration");
@@ -89,7 +121,6 @@ async function main() {
     throw new Error("Missing tipAmount in configuration");
   }
 
-  let baseMint = new PublicKey(mint);
   let quoteMint = getQuoteMint(config.quoteSymbol);
 
   console.log(`- Using base token mint ${baseMint.toString()}`);
