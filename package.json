@@ -26,7 +26,8 @@
     "@types/jest": "^29.5.14",
     "ajv": "^8.17.1",
     "bn.js": "^5.2.1",
-    "decimal.js": "^10.4.3"
+    "decimal.js": "^10.4.3",
+    "jito-ts": "^4.2.0"
   },
   "author": "",
   "license": "ISC",
