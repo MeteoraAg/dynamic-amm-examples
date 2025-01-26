@@ -54,3 +54,41 @@ export const bundleAndSendTransactions = async (
   }
 };
 
+export const sendBundle = async (
+    bundle: bundle.Bundle,
+    searcherUrl: string,
+    keypair: Keypair,
+    rpcUrl: string,
+    dryRun: boolean,
+    tipAmount: number = 1000,
+    onResult?: (result: BundleResult) => void
+) => {
+    const searcherClient = searcher.searcherClient(searcherUrl);
+    const connection = new Connection(rpcUrl, DEFAULT_COMMITMENT_LEVEL);
+    const blockHash = await connection.getLatestBlockhash();
+    // Get a random tip account address
+    const tipAccount = await getRandomeTipAccountAddress(searcherClient);
+    console.log("tip account:", tipAccount);
+    bundle.addTipTx(keypair, tipAmount, tipAccount, blockHash.blockhash);
+    if (onResult) {
+        searcherClient.onBundleResult(onResult, (e) => {
+            throw e;
+        });
+    }
+    if (dryRun) {
+        if ((connection as any).simulateBundle) {
+            const resp = await (connection as any).simulateBundle(bundle);
+            console.log("resp:", resp);
+        } else {
+            throw new Error("simulateBundle not supported");
+        }
+    } else {
+        try {
+            const resp = await searcherClient.sendBundle(bundle);
+            console.log("resp:", resp);
+        } catch (e) {
+            console.error("error sending bundle:", e);
+        }
+    }
+};
+
