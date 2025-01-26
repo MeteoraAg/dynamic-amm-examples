@@ -1,16 +1,16 @@
 import { Wallet } from "@coral-xyz/anchor";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { ComputeBudgetProgram, Connection, PublicKey } from "@solana/web3.js";
 import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, createPermissionlessDlmmPool, createPermissionlessDynamicPool, createTokenMint, getQuoteMint, parseConfigFromCli, safeParseKeypairFromFile } from ".";
 import { createTokenMetadata } from "./libs/create_token_metadata";
 import { mplTokenMetadata, createV1, TokenStandard, createFungible, mintV1 } from "@metaplex-foundation/mpl-token-metadata";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { mplToolbox } from "@metaplex-foundation/mpl-toolbox";
+import { mplToolbox, setComputeUnitPrice } from "@metaplex-foundation/mpl-toolbox";
 import {
   fromWeb3JsKeypair,
   fromWeb3JsPublicKey,
   toWeb3JsPublicKey,
 } from "@metaplex-foundation/umi-web3js-adapters";
-import { generateSigner, keypairIdentity } from "@metaplex-foundation/umi";
+import { base58, generateSigner, keypairIdentity } from "@metaplex-foundation/umi";
 
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
@@ -69,9 +69,13 @@ async function main() {
     }),
   );
 
-  const txHash = await builder.sendAndConfirm(umi, { confirm: { commitment: DEFAULT_COMMITMENT_LEVEL } });
+  builder = builder.prepend(setComputeUnitPrice(umi, {
+    microLamports: config.computeUnitPriceMicroLamports
+  }));
 
-  console.log(`>>> Created token mint and token metadata successfully with tx hash ${txHash}`);
+  const { signature } = await builder.sendAndConfirm(umi, { confirm: { commitment: DEFAULT_COMMITMENT_LEVEL } });
+
+  console.log(`>>> Created token mint and token metadata successfully with tx hash ${base58.deserialize(signature)[0]}`);
 }
 
 main();
