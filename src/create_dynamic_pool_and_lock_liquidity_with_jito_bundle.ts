@@ -5,7 +5,6 @@ import { convertToVersionedTransaction, sendBundle } from "./libs/jito_bundle";
 import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, createPermissionlessDynamicPoolTx, createTokenMint, getAmountInLamports, getQuoteDecimals, getQuoteMint, parseConfigFromCli, safeParseKeypairFromFile } from ".";
 import { Wallet } from "@coral-xyz/anchor";
 import { Connection, PublicKey } from "@solana/web3.js";
-import { createLockLiquidityTxs } from "./libs/lock_liquidity_utils";
 import { getMint } from "@solana/spl-token";
 import sqrt from "bn-sqrt";
 import AmmImpl from "@mercurial-finance/dynamic-amm-sdk";
