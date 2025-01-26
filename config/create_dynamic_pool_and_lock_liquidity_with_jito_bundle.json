@@ -1,0 +1,25 @@
+{
+  "rpcUrl": "https://api.mainnet-beta.solana.com",
+  "dryRun": false,
+  "keypairFilePath": "keypair.json",
+  "computeUnitPriceMicroLamports": 100000,
+  "baseMint": "5tcbCGTn6P9fJaEe6dRu4vLdQun5Qp7u85Addk2Mi9Rh",
+  "quoteSymbol": "SOL",
+  "tipAmount": 10000,
+  "dynamicAmm": {
+    "baseAmount": "100000",
+    "quoteAmount": "0.001",
+    "tradeFeeNumerator": 2500,
+    "activationType": "timestamp",
+    "activationPoint": null,
+    "hasAlphaVault": false
+  },
+  "lockLiquidity": {
+    "allocations": [
+      {
+        "percentage": 100,
+        "address": "ETp2wTykSe3iGYzPCn6upP8NVB7a1pe6WTZidGNJH7KC"
+      }
+    ]
+  }
+}

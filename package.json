@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
-    "@mercurial-finance/dynamic-amm-sdk": "^1.1.19",
+    "@mercurial-finance/dynamic-amm-sdk": "^1.1.23",
     "@metaplex-foundation/mpl-token-metadata": "^3.3.0",
     "@metaplex-foundation/mpl-toolbox": "^0.9.4",
     "@metaplex-foundation/umi": "^1.0.0",
@@ -25,6 +25,7 @@
     "@solana/web3.js": "^1.95.8",
     "@types/jest": "^29.5.14",
     "ajv": "^8.17.1",
+    "bn-sqrt": "^1.0.0",
     "bn.js": "^5.2.1",
     "decimal.js": "^10.4.3",
     "jito-ts": "^4.2.0"

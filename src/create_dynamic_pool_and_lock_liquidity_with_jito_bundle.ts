@@ -2,10 +2,13 @@
 import { bundle } from "jito-ts";
 
 import { convertToVersionedTransaction, sendBundle } from "./libs/jito_bundle";
-import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, createPermissionlessDynamicPoolTx, createTokenMint, getQuoteMint, parseConfigFromCli, safeParseKeypairFromFile } from ".";
+import { DEFAULT_COMMITMENT_LEVEL, MeteoraConfig, createPermissionlessDynamicPoolTx, createTokenMint, getAmountInLamports, getQuoteDecimals, getQuoteMint, parseConfigFromCli, safeParseKeypairFromFile } from ".";
 import { Wallet } from "@coral-xyz/anchor";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { createLockLiquidityTxs } from "./libs/lock_liquidity_utils";
+import { getMint } from "@solana/spl-token";
+import sqrt from "bn-sqrt";
+import AmmImpl from "@mercurial-finance/dynamic-amm-sdk";
 async function main() {
   let config: MeteoraConfig = parseConfigFromCli();
 
@@ -20,8 +23,6 @@ async function main() {
   const connection = new Connection(config.rpcUrl, DEFAULT_COMMITMENT_LEVEL);
   const wallet = new Wallet(keypair);
 
-  let baseMint: PublicKey;
-  let quoteMint = getQuoteMint(config.quoteSymbol);
 
   if (!config.baseMint) {
     throw new Error("Missing baseMint in configuration");
@@ -39,32 +40,44 @@ async function main() {
     throw new Error("Missing tipAmount in configuration");
   }
 
+  let baseMint = new PublicKey(config.baseMint);
+  let quoteMint = getQuoteMint(config.quoteSymbol);
+
   console.log(`- Using base token mint ${baseMint.toString()}`);
   console.log(`- Using quote token mint ${quoteMint.toString()}`);
 
-  const createPoolTx = await createPermissionlessDynamicPoolTx(
-    config,
-    connection,
-    wallet,
-    baseMint,
-    quoteMint,
+  const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
+  const baseMintAccount = await getMint(connection, baseMint);
+  const baseDecimals = baseMintAccount.decimals;
+
+  const baseAmount = getAmountInLamports(
+    config.dynamicAmm.baseAmount,
+    baseDecimals,
+  );
+  const quoteAmount = getAmountInLamports(
+    config.dynamicAmm.quoteAmount,
+    quoteDecimals,
   );
 
-  const lockLiquidityTxs = await createLockLiquidityTxs(
+  const CONFIG_ADDRESS = new PublicKey('GnfMQ8oPzq84oK4PxTjhC1aUEMrLLasDfF9LsmW46U7j');
+  const txs = await AmmImpl.createPermissionlessConstantProductMemecoinPoolWithConfig(
     connection,
-    wallet,
+    wallet.publicKey,
     baseMint,
     quoteMint,
-    config.lockLiquidity,
+    baseAmount,
+    quoteAmount,
+    CONFIG_ADDRESS,
+    {
+      isMinted: true
+    },
+    {
+      lockLiquidity: true
+    }
   );
-
-  if (lockLiquidityTxs.length > 3) {
-    throw new Error("Only support up to 3 lockLiquidity tx");
-  }
 
   const jitoBundle = new bundle.Bundle([], 5); // init with 0 txs, expecting 3 to be added (+1 for the tip)
-  jitoBundle.addTransactions(convertToVersionedTransaction(createPoolTx, [wallet.payer]));
-  for (const tx of lockLiquidityTxs) {
+  for (const tx of txs) {
     jitoBundle.addTransactions(convertToVersionedTransaction(tx, [wallet.payer]));
   }
   const bundleTx = await sendBundle(jitoBundle, "mainnet.block-engine.jito.wtf", wallet.payer, config.rpcUrl, config.dryRun, config.tipAmount); // optionally add another arg to process result (res) => void
