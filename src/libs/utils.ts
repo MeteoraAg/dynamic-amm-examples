@@ -57,6 +57,14 @@ export function extraConfigValidation(config: MeteoraConfig) {
     );
   }
 
+  if (config.dlmm && config.dlmm.hasAlphaVault) {
+    if (!config.quoteSymbol && !config.quoteMint) {
+      throw new Error(
+        "Either quoteSymbol or quoteMint must be provided for DLMM",
+      );
+    }
+  }
+
   if (config.alphaVault) {
     if (
       config.alphaVault.alphaVaultType != "fcfs" &&
@@ -114,7 +122,15 @@ export function getDecimalizedAmount(amountLamport: BN, decimals: number): BN {
   return amountLamport / new BN(10 ** decimals);
 }
 
-export function getQuoteMint(quoteSymbol: string): PublicKey {
+export function getQuoteMint(quoteSymbol?: string, quoteMint?: string): PublicKey {
+  if (!quoteSymbol && !quoteMint) {
+    throw new Error(`Either quoteSymbol or quoteMint must be provided`);
+  }
+
+  if (quoteMint) {
+    return new PublicKey(quoteMint);
+  }
+
   if (quoteSymbol.toLowerCase() == "sol") {
     return new PublicKey(SOL_TOKEN_MINT);
   } else if (quoteSymbol.toLowerCase() == "usdc") {

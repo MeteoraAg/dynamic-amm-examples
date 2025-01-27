@@ -46,7 +46,7 @@ async function main() {
     throw new Error("Missing baseMint in configuration");
   }
   const baseMint = new PublicKey(config.baseMint);
-  let quoteMint = getQuoteMint(config.quoteSymbol);
+  let quoteMint = getQuoteMint(config.quoteSymbol, config.quoteMint);
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
 
   console.log(`- Using base token mint ${baseMint.toString()}`);

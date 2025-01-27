@@ -42,7 +42,7 @@ async function main() {
   const baseMintAccount = await getMint(connection, baseMint);
   const baseDecimals = baseMintAccount.decimals;
 
-  let quoteMint = getQuoteMint(config.quoteSymbol);
+  let quoteMint = getQuoteMint(config.quoteSymbol, config.quoteMint);
   const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
 
   console.log(`- Using base token mint ${baseMint.toString()}`);
