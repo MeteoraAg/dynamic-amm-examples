@@ -35,7 +35,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `quoteAmount`: Quote token amount.
 - `tradeFeeNumerator`: Trade fee numerator, with fee denominator is set to 100_000.
 - `activationType`: To activate pool trading base on `slot` or `timestamp`.
-- `activationPoint`: To activate pool trading at a point, either slot vault or timestamp value base on `activationType`.
+- `activationPoint`: To activate pool trading at a point, either slot valut or timestamp value base on `activationType`.
 - `hasAlphaVault`: Whether alpha vault is enabled or not for this pool.
 
 ### DLMM configuration
@@ -43,7 +43,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `feeBps`: Fee bps for DLMM pool.
 - `initialPrice`: Initial pool price.
 - `activationType`: To activate pool trading base on `slot` or `timestamp`.
-- `activationPoint`: To activate pool trading at a point, either slot vault or timestamp value base on `activationType`.
+- `activationPoint`: To activate pool trading at a point, either slot valut or timestamp value base on `activationType`.
 - `priceRounding`: Should be `up` or `down`.
 - `hasAlphaVault`: Whether alpha vault is enabled or not for this pool.
 
