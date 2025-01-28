@@ -59,7 +59,7 @@ export function extraConfigValidation(config: MeteoraConfig) {
   }
 
   if (config.dlmm && config.dlmm.hasAlphaVault) {
-    if (!config.quoteSymbol && !config.quoteMint) {
+    if (config.quoteSymbol == null && config.quoteMint == null) {
       throw new Error(
         "Either quoteSymbol or quoteMint must be provided for DLMM",
       );
@@ -124,7 +124,7 @@ export function getDecimalizedAmount(amountLamport: BN, decimals: number): BN {
 }
 
 export function getQuoteMint(quoteSymbol?: string, quoteMint?: string): PublicKey {
-  if (!quoteSymbol && !quoteMint) {
+  if (quoteSymbol == null && quoteMint == null) {
     throw new Error(`Either quoteSymbol or quoteMint must be provided`);
   }
 
@@ -142,7 +142,7 @@ export function getQuoteMint(quoteSymbol?: string, quoteMint?: string): PublicKe
 }
 
 export async function getQuoteDecimals(connection: Connection, quoteSymbol?: string, quoteMint?: string): Promise<number> {
-  if (!quoteSymbol && !quoteMint) {
+  if (quoteSymbol == null && quoteMint == null) {
     throw new Error(`Either quoteSymbol or quoteMint must be provided`);
   }
   if (quoteMint) {

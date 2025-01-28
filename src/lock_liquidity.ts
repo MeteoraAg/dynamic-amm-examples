@@ -45,7 +45,7 @@ async function main() {
   }
   const baseMint = new PublicKey(config.baseMint);
   let quoteMint = getQuoteMint(config.quoteSymbol, config.quoteMint);
-  const quoteDecimals = getQuoteDecimals(connection, config.quoteSymbol, config.quoteMint);
+  const quoteDecimals = await getQuoteDecimals(connection, config.quoteSymbol, config.quoteMint);
 
   console.log(`- Using base token mint ${baseMint.toString()}`);
   console.log(`- Using quote token mint ${quoteMint.toString()}`);

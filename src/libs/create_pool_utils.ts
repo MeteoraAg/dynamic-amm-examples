@@ -46,7 +46,7 @@ export async function createPermissionlessDynamicPool(
   }
   console.log("\n> Initializing Permissionless Dynamic AMM pool...");
 
-  const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
+  const quoteDecimals = await getQuoteDecimals(connection, config.quoteSymbol, config.quoteMint);
   const baseMintAccount = await getMint(connection, baseMint);
   const baseDecimals = baseMintAccount.decimals;
 

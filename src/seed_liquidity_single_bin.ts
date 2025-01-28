@@ -4,7 +4,6 @@ import {
   MeteoraConfig,
   getAmountInLamports,
   getQuoteMint,
-  getQuoteDecimals,
   safeParseKeypairFromFile,
   parseConfigFromCli,
   seedLiquiditySingleBin,
@@ -43,7 +42,6 @@ async function main() {
   const baseDecimals = baseMintAccount.decimals;
 
   let quoteMint = getQuoteMint(config.quoteSymbol, config.quoteMint);
-  const quoteDecimals = getQuoteDecimals(config.quoteSymbol);
 
   console.log(`- Using base token mint ${baseMint.toString()}`);
   console.log(`- Using quote token mint ${quoteMint.toString()}`);
