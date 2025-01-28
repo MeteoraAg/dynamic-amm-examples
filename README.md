@@ -18,7 +18,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `createBaseToken`: Configuration to create base token.
 - `baseMint`: Base token address if the `createBaseToken` field is not set. 
 - `quoteSymbol`: Quote token symbol, only `SOL` or `USDC` is supported.
-- `quoteMint`: Quote token mint, in case user want to create DLMM launch pool without alpha vault. Make sure to set `dlmm.hasAlphaVault` to `false` when using the `quoteMint` field. 
+- `quoteMint`: Quote token mint, in case the user wants to create a DLMM launch pool with a token other than SOL or USDC.
 - `dynamicAmm`: Dynamic AMM pool configuration.
 - `dlmm`: DLMM pool configuration.
 - `alphaVault`: Fcfs or Prorata Alpha Vault configuration.

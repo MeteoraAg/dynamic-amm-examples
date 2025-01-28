@@ -127,6 +127,9 @@ export function getQuoteMint(quoteSymbol?: string, quoteMint?: string): PublicKe
   if (quoteSymbol == null && quoteMint == null) {
     throw new Error(`Either quoteSymbol or quoteMint must be provided`);
   }
+  if (quoteSymbol && quoteMint) {
+    throw new Error(`Cannot provide quoteSymbol and quoteMint at the same time`);
+  }
 
   if (quoteMint) {
     return new PublicKey(quoteMint);
