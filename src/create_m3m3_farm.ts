@@ -9,7 +9,6 @@ import { DEFAULT_COMMITMENT_LEVEL, M3M3_PROGRAM_IDS } from "./libs/constants";
 import {
   safeParseKeypairFromFile,
   getQuoteMint,
-  getQuoteDecimals,
   runSimulateTransaction,
 } from "./libs/utils";
 import { createTokenMint } from "./libs/create_token_mint";

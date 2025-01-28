@@ -34,6 +34,7 @@ import {
   PriceRoundingConfig,
   WhitelistModeConfig,
 } from "..";
+import { getMint } from "@solana/spl-token";
 
 export const DEFAULT_ADD_LIQUIDITY_CU = 800_000;
 
@@ -140,7 +141,15 @@ export function getQuoteMint(quoteSymbol?: string, quoteMint?: string): PublicKe
   }
 }
 
-export function getQuoteDecimals(quoteSymbol: string): number {
+export async function getQuoteDecimals(connection: Connection, quoteSymbol?: string, quoteMint?: string): Promise<number> {
+  if (!quoteSymbol && !quoteMint) {
+    throw new Error(`Either quoteSymbol or quoteMint must be provided`);
+  }
+  if (quoteMint) {
+    const mintAccount = await getMint(connection, new PublicKey(quoteMint));
+    const decimals = mintAccount.decimals;
+    return decimals;
+  }
   if (quoteSymbol.toLowerCase() == "sol") {
     return SOL_TOKEN_DECIMALS;
   } else if (quoteSymbol.toLowerCase() == "usdc") {

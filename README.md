@@ -101,6 +101,11 @@ bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool_with_new_to
 bun run src/create_pool.ts --config ./config/create_dlmm_pool.json
 ```
 
+** Create new DLMM pool without strict quote token**
+```bash
+bun run src/create_pool.ts --config ./config/create_dlmm_pool_without_strict_quote_token.json
+```
+
 ** Create new DLMM pool with alpha vault**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dlmm_pool_with_fcfs_alpha_vault.json
