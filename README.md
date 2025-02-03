@@ -18,6 +18,7 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 - `createBaseToken`: Configuration to create base token.
 - `baseMint`: Base token address if the `createBaseToken` field is not set. 
 - `quoteSymbol`: Quote token symbol, only `SOL` or `USDC` is supported.
+- `quoteMint`: Quote token mint, in case the user wants to create a DLMM launch pool with a token other than SOL or USDC.
 - `dynamicAmm`: Dynamic AMM pool configuration.
 - `dlmm`: DLMM pool configuration.
 - `alphaVault`: Fcfs or Prorata Alpha Vault configuration.
@@ -98,6 +99,11 @@ bun run src/create_pool.ts --config ./config/create_dynamic_amm_pool_with_new_to
 ** Create new DLMM pool**
 ```bash
 bun run src/create_pool.ts --config ./config/create_dlmm_pool.json
+```
+
+** Create new DLMM pool without strict quote token**
+```bash
+bun run src/create_pool.ts --config ./config/create_dlmm_pool_without_strict_quote_token.json
 ```
 
 ** Create new DLMM pool with alpha vault**
