@@ -50,6 +50,29 @@ Also we need to provide the keypair for the payer wallet in `keypair.json` file.
 
 **NOTICE**: There is only one DLMM pool that can be created with the same base and quote tokens, using the instruction `initializeCustomizablePermissionlessLbPair`. So if users are using that instruction to create a new DLMM pool with the same base and quote tokens, but with different parameters, then the transaction will be failed.
 
+### DLMM Seed Liquidity Single Bin configuration
+- `price`: Price to add liquidity.
+- `priceRounding`: Should be `up` or `down`.
+- `seedAmount`: Number of liquidity base token to add.
+- `basePositionKeypairFilepath`: Keypair file path for the base position.
+- `operatorKeypairFilepath`: Keypair file path for the operator.
+- `positionOwner`: Public key of the position owner.
+- `feeOwner`: Publick key of the fee owner.
+- `lockReleasePoint`: Timestamp that depositor can withdraw the liquidity from the position.
+- `seedTokenXToPositionOwner`: Flag to indicate that whether the script should automatically send 1 lamport of token X to position owner to proof ownership.
+
+### DLMM Seed Liquidity LFG configuration
+- `minPrice`: Min price range to add liquidity.
+- `maxPrice`: Max price range to add liquidity.
+- `seedAmount`: Number of liquidity base token to add.
+- `curvature`: Determines how liquidity is distributed across the price range.
+- `basePositionKeypairFilepath`: Keypair file path for the base position.
+- `operatorKeypairFilepath`: Keypair file path for the operator.
+- `positionOwner`: Public key of the position owner.
+- `feeOwner`: Publick key of the fee owner.
+- `lockReleasePoint`: Timestamp that depositor can withdraw the liquidity from the position.
+- `seedTokenXToPositionOwner`: Flag to indicate that whether the script should automatically send 1 lamport of token X to position owner to proof ownership.
+
 ### Alpha Vault configuration
 - `poolType`: `dynamic` or `dlmm` pool type.
 - `alphaVaultType`: Alpha Vault type, could be `fcfs` or `prorata`
