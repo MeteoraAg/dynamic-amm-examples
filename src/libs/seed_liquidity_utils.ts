@@ -562,7 +562,7 @@ export async function createSeedLiquidityLfgInstructions(
   poolAddress: PublicKey,
   payer: PublicKey,
   base: PublicKey,
-  lockReleasePoint: PublicKey,
+  lockReleasePoint: BN,
   seedAmount: BN,
   curvature: number,
   minPricePerLamport: BN,
